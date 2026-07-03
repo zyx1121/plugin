@@ -3,7 +3,7 @@
   "owner": { "name": "zyx1121", "url": "https://github.com/zyx1121" },
   "metadata": {
     "description": "zyx — unified Claude Code plugin: engine (scriptorium offices), skills, hooks, agents, MCP.",
-    "version": "0.2.3"
+    "version": "0.2.4"
   },
   "plugins": [
     {
