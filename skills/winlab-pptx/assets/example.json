@@ -1,0 +1,68 @@
+{
+  "slides": [
+    {
+      "layout": "cover",
+      "title": "A Sensory Layer for AI Agent",
+      "date": "2026/6/15",
+      "author": "詹詠翔"
+    },
+    {
+      "layout": "outline",
+      "title": "Outline",
+      "current": 3,
+      "items": ["Motivation", "Agent Sense", "Demo", "Architecture", "Hearing", "Seeing", "Agent Integration", "Future Work"]
+    },
+    {
+      "layout": "content",
+      "title": "Hearing Pipeline",
+      "bullets": [
+        {"text": "System Audio Stream:", "level": 0},
+        {"text": "Captures system audio in real time", "level": 1},
+        {"text": "ASR:", "level": 0},
+        {"text": "Transcribe speech to text on device with Apple SpeechTranscriber", "level": 1},
+        {"text": "Run zh-TW and en-US recognizers in parallel on the same audio", "level": 1},
+        {"text": "Language Router:", "level": 0},
+        {"text": "Selects the active language using confidence scores", "level": 1},
+        {"text": "Transcript Post-Processor:", "level": 0},
+        {"text": "Fixes punctuation and recognition errors with a small model", "level": 1}
+      ]
+    },
+    {
+      "layout": "diagram",
+      "title": "Agent Sense Architecture",
+      "cols": 7,
+      "rows": 7,
+      "note": "ASR: Automatic Speech Recognition",
+      "boxes": [
+        {"id": "audio", "text": "System Audio\nStream", "col": 0, "row": 1},
+        {"id": "zh", "text": "zh-TW ASR", "col": 1, "row": 0},
+        {"id": "en", "text": "en-US ASR", "col": 1, "row": 2},
+        {"id": "router", "text": "Language\nRouter", "col": 2, "row": 1},
+        {"id": "post", "text": "Transcript\nPost-Processor", "col": 3, "row": 1},
+        {"id": "store", "text": "Transcript\nStore", "col": 4, "row": 1, "w_cm": 4.0, "kind": "store"},
+        {"id": "ax", "text": "Apple Accessibility API\nUI Element Selection", "col": 1, "row": 4, "w_cm": 6.0},
+        {"id": "region", "text": "Screen Region Selection", "col": 1, "row": 5, "w_cm": 6.0},
+        {"id": "visual", "text": "Visual Context\n(text / image)", "col": 3, "row": 5, "w_cm": 4.0},
+        {"id": "prompt", "text": "Agent Init Prompt\n(context paths and usage rules)", "col": 3, "row": 6, "w_cm": 8.0},
+        {"id": "agent", "text": "Agent\n(Codex)", "col": 5, "row": 4, "w_cm": 4.5, "kind": "external"}
+      ],
+      "zones": [
+        {"label": "Hearing", "boxes": ["audio", "zh", "en", "router", "post", "store"]},
+        {"label": "Seeing", "boxes": ["ax", "region", "visual"]}
+      ],
+      "edges": [
+        {"from": "audio", "to": "zh", "kind": "async"},
+        {"from": "audio", "to": "en", "kind": "async"},
+        {"from": "zh", "to": "router"},
+        {"from": "en", "to": "router"},
+        {"from": "router", "to": "post"},
+        {"from": "post", "to": "store"},
+        {"from": "ax", "to": "visual"},
+        {"from": "region", "to": "visual"},
+        {"from": "store", "to": "agent"},
+        {"from": "visual", "to": "agent"},
+        {"from": "prompt", "to": "agent", "kind": "dep"}
+      ]
+    }
+  ]
+}

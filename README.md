@@ -40,6 +40,12 @@ bump + `claude plugin update`. Installing directly off GitHub
 (`claude plugin marketplace add zyx1121/plugin`) also works, at the cost of
 that live-hook-edit convenience.
 
+The bundled `utils` MCP server (`mcp/utils-launcher.sh`) requires
+[`zyx1121/utils`](https://github.com/zyx1121/utils) checked out at `~/utils`
+with `bun` available. On a machine without either (e.g. a minimal agent
+runtime), the launcher exits immediately and the server simply doesn't
+register — no install step is required to skip it.
+
 ## Privacy / observability
 
 The engine is local-first and writes observation data into your private
@@ -73,8 +79,10 @@ falls back to the current branch on the first remote; non-git instances no-op.
 | `armarium/` | Armarium | persistence · sync · index · path map | `paths.py` · `memory-sync.sh` · `gen_memory_index.py` |
 | `scribe/` | Scribe | observe signal → author new memory/skills | `events.py` (session/skill/method-route/delegation-ratio) · `observe.py` (scripts) |
 | `corrector/` | Corrector | calibrate · consolidate existing (propose-only) | `skill_review.py` · `skills/dreaming` |
-| `skills/` | — | engine skills | `method` · `dreaming` |
+| `skills/` | — | engine skills + capability skills | engine: `method` · `dreaming` · `authoring` · `scriptorium-init`; capability: `pve` · `macos-dev` · `nextjs-dev` · `winlab-pptx` · `paper-revise` · `post` · `review` |
+| `agents/` | — | worker fleet (subagent definitions) | `developer` · `surveyor` · `reviewer` · `planner` · `utils-promoter` (contract: [`docs/agents-contract.md`](docs/agents-contract.md)) |
 | `hooks/` | — | wires offices to Claude Code lifecycle | `hooks.json` · `notify.py` |
+| `mcp/` | — | bundled MCP servers | `utils-launcher.sh` (exposes `~/utils` script atoms; no-ops if `~/utils` is absent) |
 | `bin/` | — | instance setup helpers | |
 
 ## Lineage
