@@ -1,5 +1,5 @@
 # __APP__ — macOS menubar app. No Xcode: SwiftPM builds the binary, this Makefile
-# assembles the .app bundle and codesigns. Standard: ~/.kilo/skills/macos-dev.
+# assembles the .app bundle and codesigns. Standard: ~/plugin/skills/macos-dev.
 APP_NAME     := __APP__
 BUNDLE_ID    := __BUNDLE_ID__
 BIN_PATH     := .build/release/$(APP_NAME)
