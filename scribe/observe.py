@@ -168,9 +168,8 @@ def _build_mcp_record(base: dict, event: dict) -> dict | None:
         atom = _resolve_atom(suffix)
         params = _redact_params(event.get("tool_input") or {})
         # `script` mirrors `atom` (null when atom is null) so
-        # tool_review.aggregate() / otel_sync.collect_utils_usage() — both
-        # keyed on the Bash-path's `script` field — pick up MCP usage with
-        # zero changes on their end.
+        # tool_review.aggregate() — keyed on the Bash-path's `script` field —
+        # picks up MCP usage with zero changes on its end.
         record = {**base, "kind": "utils-usage", "transport": "mcp",
                   "tool": suffix, "atom": atom, "script": atom, "params": params}
 
