@@ -1,6 +1,6 @@
 ---
 name: keel
-description: "Operate keel — Loki's git-driven LXC orchestrator on PVE (the deploy platform; Vercel-like CD to systemd-in-LXC) — deploy / rollback / logs / provision / destroy services the front-door way. Use when deploying a service to the homelab, binding a repo for auto-deploy, checking why a deploy failed, or decommissioning a service. Triggers on 'keel', 'deploy 到 lab', '部署服務', '開新服務', 'bind repo', 'rollback', '服務掛了看 log', 'destroy service', '下架服務'. NOT for raw VM/CT lifecycle or gateway routes without a service — 那是 zyx:pve."
+description: "Operate keel — Loki's git-driven LXC orchestrator on PVE (Vercel-like CD, the only deploy platform) — deploy / rollback / logs / provision / destroy the front-door way. Use when deploying a service to the homelab, binding a repo for auto-deploy, debugging a failed deploy, or decommissioning a service. Triggers on 'keel', 'deploy 到 lab', '部署服務', '開新服務', 'rollback', '服務 log', '下架服務'. NOT raw VM/CT or gateway routes — 那是 zyx:pve."
 ---
 
 # keel — git-driven LXC orchestrator
