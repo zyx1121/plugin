@@ -320,7 +320,7 @@ class OtlpPayloadTest(unittest.TestCase):
         rl = payload["resourceLogs"]
         self.assertEqual(len(rl), 1)
         res_attrs = {a["key"]: a["value"] for a in rl[0]["resource"]["attributes"]}
-        self.assertEqual(res_attrs["service.name"]["stringValue"], "scriptorium")
+        self.assertEqual(res_attrs["service.name"]["stringValue"], "zyx")
         self.assertEqual(res_attrs["service.namespace"]["stringValue"], "claude-code")
         scope_logs = rl[0]["scopeLogs"]
         self.assertEqual(scope_logs[0]["scope"]["name"], "otel_sync")

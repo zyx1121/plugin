@@ -191,7 +191,7 @@ def _otlp_payload(records: list[dict], runtime: str) -> dict:
             {
                 "resource": {
                     "attributes": [
-                        _attr("service.name", "scriptorium"),
+                        _attr("service.name", "zyx"),
                         _attr("service.namespace", runtime),
                     ]
                 },
