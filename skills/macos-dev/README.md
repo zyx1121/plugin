@@ -26,4 +26,4 @@ MCP 對應 `mcp__utils__mac_app_new`。
 
 ## 維護
 
-本體在 `~/.kilo/skills/macos-dev/`,symlink 進 `~/.claude/skills/`(改這邊即生效)。改 `SKILL.md` 的 `description` 守 [`../AGENTS.md`](../AGENTS.md) 文法;**改完 push kilo repo**,否則下次 sync 蓋掉。
+本體在 `~/plugin/skills/macos-dev/`(`zyx1121/plugin` repo,version-pinned cache 部署,非 symlink)。改 `SKILL.md` 的 `description` 守 [`../AGENTS.md`](../AGENTS.md) 文法;**改完 bump `.claude-plugin/plugin.json` + `marketplace.json` version、push、開 PR**,merge 後跑 `claude plugin update zyx@zyx` 才生效(local-clone marketplace 下 hook/script 改動 `git pull` 即生效,但 skill 內容改動仍是 version-pinned,一定要 bump 版本)。

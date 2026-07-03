@@ -9,7 +9,7 @@ Atomic operations against the PVE host and the edge gateway through SSH aliases.
 
 **Inside a CC/Codex session, call the `mcp__utils__pve_*` tools directly** (`pve_list`, `pve_status`, `pve_start`, `pve_stop`, `pve_destroy`, `pve_clone`, `pve_create_ct`, `pve_forward`, `pve_dns`, `pve_caddy`) — typed params, no shell quoting. Destructive/confirm-gated ones (`pve_stop`, `pve_destroy`, `pve_clone`, `pve_create_ct`, `dns`/`caddy` remove or shrinking add) require `yes: true` since there's no TTY to confirm over MCP; omitting it fails closed instead of hanging. `pve_ssh` has no MCP tool (its subprocess inherits stdio, which the MCP executor forbids) — always use the CLI form below for it. The CLI examples below stay the reference for SSH sessions, scripts, and Noir.
 
-> **Real infrastructure (host IPs, SSH port, VMID range, subnet, VM list) lives in `~/.claude/DEVICES.md` (private dotfiles).** This skill documents the command shape only. SSH aliases (`pve`, `gateway`, plus one per VM) are the source of truth — `utils pve` refuses to operate without them.
+> **Real infrastructure (host IPs, SSH port, VMID range, subnet, VM list) lives in the instance memory `reference_devices_inventory`** (grep `~/.kilo/memory/MEMORY-COLD.md` for the fetch path — it's a cold-index entry, not always-loaded). This skill documents the command shape only. SSH aliases (`pve`, `gateway`, plus one per VM) are the source of truth — `utils pve` refuses to operate without them.
 
 ## Read commands
 
@@ -65,9 +65,9 @@ utils pve caddy --action list                                # per-block detail:
 
   State the assignment in one glance-able line ("parser → VMID 42 / IP 10.10.10.42 / SSH 50042"); don't break it into separate questions. Only override when the user explicitly names a different value.
 
-## When to consult DEVICES.md
+## When to consult the devices inventory
 
-If the user asks about a *specific* host or VM by role ("the auth VM", "the AFC machine", "what IP is the gateway?"), read `~/.claude/DEVICES.md` — it has the live mapping. This skill stays infrastructure-agnostic on purpose.
+If the user asks about a *specific* host or VM by role ("the auth VM", "the AFC machine", "what IP is the gateway?"), grep `~/.kilo/memory/MEMORY-COLD.md` for `reference_devices_inventory` and fetch that memory — it has the live mapping. This skill stays infrastructure-agnostic on purpose.
 
 ## Common patterns
 

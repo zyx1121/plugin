@@ -193,7 +193,7 @@ For `none` answers, record `"action":"dismissed"` so the same cluster doesn't re
 
 # Section 2 — Static review
 
-Static linter for SKILL.md files under `~/.kilo/skills/` (Loki's kilo source repo; `~/.claude/skills/` symlinks into it). Catches issues you'd otherwise only discover when a skill fails to trigger or shows up half-broken mid-conversation.
+Static linter for SKILL.md files under `~/plugin/skills/` (the `zyx1121/plugin` repo — source of truth for Loki's personal skills; version-pinned cache deploy via `claude plugin install`/`update`, not a symlink). Catches issues you'd otherwise only discover when a skill fails to trigger or shows up half-broken mid-conversation.
 
 ## What it checks
 
@@ -214,11 +214,12 @@ Static linter for SKILL.md files under `~/.kilo/skills/` (Loki's kilo source rep
 ### 1. Run the linter
 
 ```bash
-utils skill-lint                    # defaults to ~/.kilo/skills/ (kilo source repo)
-utils skill-lint ~/.claude/skills   # the deployed symlinks — resolves to the same files
+utils skill-lint ~/plugin/skills    # zyx plugin repo — source of truth for Loki's personal skills
 utils skill-lint --verbose          # also list clean skills
 utils skill-lint -r                 # recurse (off by default to skip sync artifacts)
 ```
+
+(The tool's bare default arg is still `~/.kilo/skills/`, a holdover from before the P2 migration — that dir is now empty. Always pass `~/plugin/skills` explicitly.)
 
 ### 2. Read the output
 
@@ -232,12 +233,12 @@ The table groups by skill with all its issues. The footer shows scan total / wit
 - `description-long` — trim; pick the highest-signal trigger phrases, drop redundant restatement
 - `description-format` — normalize to `skills/AGENTS.md` grammar: double-quote the whole scalar, single-quote trigger strings, ASCII-comma delimiter, strip any workflow/架構 into the body. Preserve full-width punctuation in Chinese prose.
 - `name-mismatch` — pick one (usually directory name wins) and align both
-- `stale` — open the skill, ask the user "still useful?" — freshen mtime by editing, or archive (move out of `~/.kilo/skills/`)
+- `stale` — open the skill, ask the user "still useful?" — freshen mtime by editing, or archive (PR against `zyx1121/plugin` removing the skill dir + bump `.claude-plugin/plugin.json`/`marketplace.json` version)
 - `empty-body` — write actual instructions or delete
 
 ### 4. Apply fixes
 
-Edit skill files directly. Use [[feedback-personal-skills-repo]] reminder — `~/.kilo/skills/` is the source repo (the kilo repo), push to GitHub after editing or the next sync wipes the changes.
+Edit skill files directly in `~/plugin/skills/` (a local clone of `zyx1121/plugin`, the source of truth). Commit, bump `.claude-plugin/plugin.json` + `marketplace.json` version, push, open a PR — after merge, `claude plugin update zyx@zyx` is what actually lands the change in a running session (a local-clone marketplace picks up hook/script edits on `git pull` alone, but skill content is version-pinned per the plugin's install model).
 
 After fixes, re-run `utils skill-lint` to confirm zero issues for the skills you touched.
 
@@ -257,7 +258,7 @@ utils skill-usage --json       # for piping / jq
 
 ## Three findings → three actions
 
-1. **Dormant / never-used** (the `dormant` list — a personal skill >90d old or never fired) → **archive/merge candidate.** Sanity-check first: a rarely-fired skill (one whose trigger is a rare-but-legit event) can be correct-but-rare, not dead. Genuinely dead → move it out of `~/.kilo/skills/`.
+1. **Dormant / never-used** (the `dormant` list — a personal skill >90d old or never fired) → **archive/merge candidate.** Sanity-check first: a rarely-fired skill (one whose trigger is a rare-but-legit event) can be correct-but-rare, not dead. Genuinely dead → PR against `zyx1121/plugin` removing the skill dir + bump version.
 2. **High frequency + a Section-2 `description-short`/`description-format` hit** → description too generic or drifting → **tighten it** (cross-link Section 2). High use means a mis-route here costs the most.
 3. **Frequent + low launch-ok%** → the skill is getting interrupted/rejected often → body or trigger is off. ⚠️ `ok%` is **launch success only** (the Skill tool fired vs was interrupted), NOT end-to-end success — treat it as a weak smell, not proof.
 
