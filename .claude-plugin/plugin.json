@@ -1,0 +1,9 @@
+{
+  "name": "zyx",
+  "description": "Unified Claude Code plugin. Engine (Armarium/Scribe/Corrector, migrated from scriptorium) persists, self-authors, and self-reviews a Canon-defined instance; plus skills, hooks, and agents. Bring your own instance, or run `/scriptorium-init` to set one up.",
+  "version": "0.1.0",
+  "author": {
+    "name": "zyx1121",
+    "url": "https://github.com/zyx1121"
+  }
+}
