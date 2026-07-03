@@ -1,7 +1,7 @@
 # zyx
 
 A unified **Claude Code** plugin: one namespace (`zyx:*`) for engine, skills,
-hooks, agents, and MCP instead of scattering capability across separate
+hooks, and agents instead of scattering capability across separate
 plugin repos.
 
 Claude Code gives you skills, hooks, and memory — but passive ones. The
@@ -24,10 +24,10 @@ root-relative `source`). Check with `claude --version`; `claude update` if neede
 
 ```bash
 # clone to a fixed local path
-git clone https://github.com/zyx1121/plugin.git ~/.zyx-plugin
+git clone https://github.com/zyx1121/plugin.git ~/plugin
 
 # add as a local marketplace, then install
-claude plugin marketplace add ~/.zyx-plugin
+claude plugin marketplace add ~/plugin
 claude plugin install zyx@zyx
 
 # point at an instance, or scaffold and bind a fresh one
@@ -40,11 +40,15 @@ bump + `claude plugin update`. Installing directly off GitHub
 (`claude plugin marketplace add zyx1121/plugin`) also works, at the cost of
 that live-hook-edit convenience.
 
-The bundled `utils` MCP server (`mcp/utils-launcher.sh`) requires
-[`zyx1121/utils`](https://github.com/zyx1121/utils) checked out at `~/utils`
-with `bun` available. On a machine without either (e.g. a minimal agent
-runtime), the launcher exits immediately and the server simply doesn't
-register — no install step is required to skip it.
+The `utils` MCP server is deliberately **not** bundled here (see
+ADR-0001 amendment — plugin-provided MCP tools get renamed into the plugin
+namespace, breaking every `mcp__utils__*` reference). On machines with
+[`zyx1121/utils`](https://github.com/zyx1121/utils) at `~/utils`, register it
+user-scope instead:
+
+```bash
+claude mcp add utils -- bun run ~/utils/mcp/server.ts
+```
 
 ## Privacy / observability
 
@@ -82,7 +86,6 @@ falls back to the current branch on the first remote; non-git instances no-op.
 | `skills/` | — | engine skills + capability skills | engine: `method` · `dreaming` · `authoring` · `scriptorium-init`; capability: `pve` · `macos-dev` · `nextjs-dev` · `winlab-pptx` · `paper-revise` · `post` · `review` |
 | `agents/` | — | worker fleet (subagent definitions) | `developer` · `surveyor` · `reviewer` · `planner` · `utils-promoter` (contract: [`docs/agents-contract.md`](docs/agents-contract.md)) |
 | `hooks/` | — | wires offices to Claude Code lifecycle | `hooks.json` · `notify.py` |
-| `mcp/` | — | bundled MCP servers | `utils-launcher.sh` (exposes `~/utils` script atoms; no-ops if `~/utils` is absent) |
 | `bin/` | — | instance setup helpers | |
 
 ## Lineage

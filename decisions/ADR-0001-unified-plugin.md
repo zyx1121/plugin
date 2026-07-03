@@ -57,3 +57,31 @@ stay live; only skills are pinned).
 install — unaffected now, alignment is a follow-up. P2 must double-check no
 `pve`-convention/machine content leaks into the public layer beyond a
 placeholder; P3 needs interactive verification (tool discovery, auth).
+
+## Amendment (2026-07-03): P3 reversed — utils MCP stays user-scope
+
+P3 (bundling the utils MCP via plugin `.mcp.json`) shipped in 0.2.0 and was
+reverted in 0.2.1. Verified live: plugin-provided MCP tools get an
+uncontrollable namespaced identity (`mcp__plugin_zyx_utils__<tool>` instead
+of `mcp__utils__<tool>`). Converging on that name would force a rename across
+everything that hardcodes the `mcp__utils__` pattern (scribe observe, hook
+matchers, instance memory), while the only machine that would benefit from
+plugin distribution (Noir) has no `~/utils` at all — the launcher's fail-fast
+branch was its only behavior there. Negative net value.
+
+Verdict: the utils MCP server remains a **user-scope** registration
+(`claude mcp add utils -- bun run ~/utils/mcp/server.ts`), documented in the
+README install section. Plugin `.mcp.json` stays reserved for servers whose
+tool names are born inside the plugin namespace.
+
+Also recorded from P2 evidence: the plugin agent loader treats every `.md`
+under `agents/` as an agent definition (a phantom `README` agent appeared in
+`claude plugin details`), so the worker contract lives at
+`docs/agents-contract.md`. Migrated capability loads under the plugin
+namespace: skills as `zyx:<skill>`, agents as `zyx:<agent>`.
+
+Noir alignment update: recon showed Noir actually installs the engine via
+the CC marketplace (`~/.claude/plugins/marketplaces/scriptorium`), not a
+bare path — `deploy/install.sh`'s bare-path fallbacks never fired. Alignment
+= repeat the Mac cutover there (clone `~/plugin`, local marketplace add,
+install `zyx@zyx`, uninstall old scriptorium).

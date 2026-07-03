@@ -1,7 +1,0 @@
-{
-  "mcpServers": {
-    "utils": {
-      "command": "${CLAUDE_PLUGIN_ROOT}/mcp/utils-launcher.sh"
-    }
-  }
-}
