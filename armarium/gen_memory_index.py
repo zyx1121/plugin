@@ -7,8 +7,8 @@ MEMORY.md / MEMORY-COLD.md are BUILD ARTIFACTS — never hand-edit them; edit th
 memory file's frontmatter and rerun. Invoked by memory-sync.sh (pre-commit) and
 the dreaming skill.
 
-Tiering — Claude Code only auto-loads the first ~24.4KB of MEMORY.md; a flat,
-unbounded index silently truncates past that. So the index is split in two:
+Tiering — Claude Code only auto-loads the first ~24.4KB (bytes) of MEMORY.md; a
+flat, unbounded index silently truncates past that. So the index is split in two:
   - MEMORY.md      (hot)  — user/project/feedback/其他, budget-capped, always loaded.
   - MEMORY-COLD.md (cold) — type=reference or status=archived entries, plus any
                              hot entries evicted for budget. Grep/Read on demand.
@@ -21,13 +21,15 @@ Index row (aligned with Claude Code's own memory writer — slug appears exactly
 Hot sort: type priority user > project > feedback > 其他, alphabetical by filename
 within each type. Cold sort: reference block (alphabetical) then archived block
 (alphabetical); an entry that is both goes to the reference block. Budget: once
-the assembled hot text exceeds HOT_BUDGET_CHARS (Python len(), i.e. characters,
-not bytes), entries are evicted from the feedback tier's alphabetical tail into
-a `## overflow from hot` section at the top of MEMORY-COLD.md until back under
-budget (falls back to the 其他 tier if feedback is exhausted; user/project are
-never evicted). When that happens MEMORY.md gets a trailing `[INDEX-OVERFLOW]`
-marker line and a stderr warning is printed — fail loud, but exit code stays 0
-(memory-sync.sh is a fail-open hook and must not be blocked by this).
+the assembled hot text exceeds HOT_BUDGET_BYTES (UTF-8 encoded byte length — CC's
+cutoff is a byte count, and CJK text runs ~3 bytes/char so a char-based budget
+undercounts and never fires), entries are evicted from the feedback tier's
+alphabetical tail into a `## overflow from hot` section at the top of
+MEMORY-COLD.md until back under budget (falls back to the 其他 tier if feedback
+is exhausted; user/project are never evicted). When that happens MEMORY.md gets
+a trailing `[INDEX-OVERFLOW]` marker line and a stderr warning is printed — fail
+loud, but exit code stays 0 (memory-sync.sh is a fail-open hook and must not be
+blocked by this).
 
 Lint — surfaced for the dreaming skill's 規範對齊 (convention-alignment) step,
 never auto-mutates (mutating hand-written memory stays human/dreaming-gated):
@@ -64,8 +66,8 @@ VALID_TYPES = ("feedback", "project", "reference", "user")
 
 GENERATED_NAMES = ("MEMORY.md", "MEMORY-COLD.md")   # never ingest our own build output as an entry
 HOT_TYPE_PRIORITY = {"user": 0, "project": 1, "feedback": 2}   # unlisted/unknown type = 其他 (3)
-HOT_BUDGET_CHARS = 23_000        # headroom under Claude Code's ~24.4KB always-load cutoff
-DESC_WARN_CHARS = 160
+HOT_BUDGET_BYTES = 24_000        # headroom under Claude Code's ~24,986-byte always-load cutoff
+DESC_WARN_CHARS = 160            # per-description author-facing hint, not a CC load limit — stays chars
 COLD_HEADER = "# MEMORY-COLD — reference / archived 冷索引(按需 grep / Read,不會自動載入)"
 
 
@@ -203,14 +205,14 @@ def build_rows(mem_dirs, index_dir=None) -> tuple[list[str], dict[str, list[str]
     return [e["row"] for e in entries], warn
 
 
-def build_index(mem_dirs, index_dir=None, budget: int = HOT_BUDGET_CHARS):
+def build_index(mem_dirs, index_dir=None, budget: int = HOT_BUDGET_BYTES):
     """The tiered pipeline the CLI writes: hot (MEMORY.md) + cold (MEMORY-COLD.md).
 
     reference-type or status=archived entries go straight to cold; everything else
     is hot, sorted by type priority (user > project > feedback > 其他) then filename.
-    If the assembled hot text exceeds `budget` characters, entries are evicted from
-    the feedback tier's alphabetical tail into a cold `## overflow from hot` section
-    until back under budget.
+    If the assembled hot text's UTF-8 byte length exceeds `budget`, entries are
+    evicted from the feedback tier's alphabetical tail into a cold `## overflow
+    from hot` section until back under budget.
 
     Returns (hot_text, cold_text, warn, hot_count, cold_count, overflow_count) — cold_count
     includes overflow_count (both land in cold_text), so hot_count + cold_count always equals
@@ -249,7 +251,7 @@ def build_index(mem_dirs, index_dir=None, budget: int = HOT_BUDGET_CHARS):
         return None                                     # only user/project left — stop, don't evict those
 
     overflow: list[dict] = []
-    while len(_render_hot(overflow)) > budget:
+    while len(_render_hot(overflow).encode("utf-8")) > budget:
         victim = _evict_one()
         if victim is None:
             break
@@ -257,7 +259,7 @@ def build_index(mem_dirs, index_dir=None, budget: int = HOT_BUDGET_CHARS):
     overflow.sort(key=lambda e: e["name"])
 
     if overflow:
-        print(f"gen-memory-index: WARN hot index exceeded {budget} chars — moved {len(overflow)} "
+        print(f"gen-memory-index: WARN hot index exceeded {budget} bytes — moved {len(overflow)} "
               f"entrie(s) to MEMORY-COLD.md (## overflow from hot)", file=sys.stderr)
 
     hot_text = _render_hot(overflow)

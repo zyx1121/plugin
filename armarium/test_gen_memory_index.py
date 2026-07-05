@@ -195,7 +195,9 @@ class TieringTest(unittest.TestCase):
 
 
 class BudgetOverflowTest(unittest.TestCase):
-    """Item 5 — hot budget: overflow evicts the feedback tail into COLD, marks both files."""
+    """Item 5 — hot budget: overflow evicts the feedback tail into COLD, marks both files.
+    budget is a UTF-8 BYTE count (not Python len()/chars) — see BudgetIsBytesNotCharsTest
+    for the CJK regression this distinction exists to catch."""
 
     def test_overflow_evicts_feedback_tail_and_marks_index(self):
         with TemporaryDirectory() as d:
@@ -205,7 +207,7 @@ class BudgetOverflowTest(unittest.TestCase):
                 _write(mem / f"feedback_{i:02d}.md", title=f"F{i:02d}", description=long_desc, type="feedback")
             hot, cold, warn, hot_n, cold_n, overflow_n = gmi.build_index(mem, budget=5_000)
             self.assertGreater(overflow_n, 0)
-            self.assertLessEqual(len(hot), 5_000)
+            self.assertLessEqual(len(hot.encode("utf-8")), 5_000)
             self.assertEqual(hot_n + cold_n, 60)                          # zero entries lost
             self.assertTrue(hot.rstrip("\n").splitlines()[-1].startswith("> [INDEX-OVERFLOW]"))
             self.assertIn(f"[INDEX-OVERFLOW] {overflow_n} entries moved to MEMORY-COLD.md", hot)
@@ -230,6 +232,46 @@ class BudgetOverflowTest(unittest.TestCase):
             self.assertEqual(overflow_n, 0)
             self.assertNotIn("INDEX-OVERFLOW", hot)
             self.assertNotIn("overflow from hot", cold)
+
+
+class BudgetIsBytesNotCharsTest(unittest.TestCase):
+    """Regression for the CC-truncation bug: Claude Code's MEMORY.md always-load cutoff
+    is a UTF-8 BYTE count (~24.4KB), but CJK text runs ~3 bytes/char — so a char-count
+    budget (`len(_render_hot(overflow))`, no `.encode()`) massively undercounts CJK-heavy
+    hot indexes and never fires eviction even though the real byte cutoff is blown.
+
+    This constructs a hot index whose assembled CHARACTER count is under budget but whose
+    UTF-8 BYTE count is over budget — the exact shape that let 15 real feedback entries
+    silently vanish from MEMORY.md in production. Under the old (reverted-to, char-based)
+    check this test fails: overflow_n == 0 and hot bytes stay far above budget. Under the
+    fixed byte-based check it passes."""
+
+    BUDGET = 5_000
+    CJK_DESC = "測試中文記憶內容需要足夠長度才能觸發位元組層級的預算裁切機制無視字元計數"  # 36 chars, 108 bytes
+    N_ENTRIES = 45
+
+    def _make_entries(self, mem: Path) -> None:
+        for i in range(self.N_ENTRIES):
+            _write(mem / f"feedback_{i:02d}.md", title=f"F{i:02d}", description=self.CJK_DESC, type="feedback")
+
+    def test_cjk_hot_text_is_under_char_budget_but_over_byte_budget(self):
+        """Precondition the regression depends on: without this gap there'd be nothing
+        for a char-vs-byte budget distinction to catch."""
+        with TemporaryDirectory() as d:
+            mem = Path(d)
+            self._make_entries(mem)
+            hot_full, *_ = gmi.build_index(mem, budget=10**9)   # effectively unlimited -> no eviction
+            self.assertLess(len(hot_full), self.BUDGET)                     # chars: looks fine (old code's blind spot)
+            self.assertGreater(len(hot_full.encode("utf-8")), self.BUDGET)  # bytes: actually over
+
+    def test_byte_based_budget_evicts_cjk_overflow(self):
+        with TemporaryDirectory() as d:
+            mem = Path(d)
+            self._make_entries(mem)
+            hot, cold, warn, hot_n, cold_n, overflow_n = gmi.build_index(mem, budget=self.BUDGET)
+            self.assertGreater(overflow_n, 0)                                # would be 0 under char-based budget
+            self.assertLessEqual(len(hot.encode("utf-8")), self.BUDGET)
+            self.assertEqual(hot_n + cold_n, self.N_ENTRIES)                 # zero entries lost
 
 
 class DescLintWarningTest(unittest.TestCase):
