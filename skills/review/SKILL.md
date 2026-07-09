@@ -276,7 +276,7 @@ Every action taken (archive / description-edit / eval) → append to `reviewed.j
 echo '{"ts":"<now>","cluster_key":"skill-effectiveness:<skill>:<finding>","kind":"skill-effectiveness","action":"<archived|retuned|eval-passed>"}' >> ~/.kilo/data/reviewed.jsonl
 ```
 
-The `cluster_key` makes a recurring drift re-surface until it's actually fixed — this is the step that turns "surfaced a problem" into "closed it." Don't auto-archive or auto-edit; surface + recommend, human decides (same bar as Sections 1–2).
+The `cluster_key` makes a recurring drift re-surface until it's actually fixed — this is the step that turns "surfaced a problem" into "closed it." Since 2026-07-09 the agent acts on findings autonomously (archive / retune / edit, git as the safety net, report what was done) — see memory `feedback_kilo_growth_is_agents_job`; surfacing without acting is only for cases lacking verified evidence.
 
 ## Caveats
 
