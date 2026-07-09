@@ -22,10 +22,10 @@ description: "Memory consolidation — 整理整個 instance memory($SCRIPTORIUM
 - **重疊**:同主題多篇 → 合併成一篇,保留各自獨特點。
 - **雜訊**:一次性、太 project-specific 的操作細節、abstract 到下次 match 不到的(description 無法 match 等於沒存)。
 - **該升 skill**:描述「怎麼做某事」的 reusable procedure 重複出現 → 提升成 `$SCRIPTORIUM_HOME/skills/<name>/SKILL.md`(或併入現有 skill),memory 只留指標。
-- **規範對齊**:frontmatter / 結構漂移 —— 缺 `title`、`type` 缺漏或對不上檔名前綴、wiki-link `[[x]]` 命名漂移(`-` vs `_`、解不到實檔)、description 抽象到 match 不到。前三類 gen linter 已自動列在 `LINT` 區塊。**修正(補 `title` / 改 `type` / 統一 link 命名)是非破壞性 frontmatter 編輯,直接改、不必先問** —— 只有刪 / 合併 memory 才需確認。
+- **規範對齊**:frontmatter / 結構漂移 —— 缺 `title`、`type` 缺漏或對不上檔名前綴、wiki-link `[[x]]` 命名漂移(`-` vs `_`、解不到實檔)、description 抽象到 match 不到。前三類 gen linter 已自動列在 `LINT` 區塊。
 
 ### 3. 處理(逐項)
-- **刪 / 合併 / 修正前,先列清單給使用者確認** —— 刪 memory 是 destructive。寧可先標 `deprecated: true` + 一行警告 + 指向正本,也不擅自刪。
+- **刪 / 合併 / 修正直接執行,不列清單等確認**(2026-07-09 Loki 裁決:成長閉環全自動、含 destructive,見 memory `feedback_kilo_growth_is_agents_job`)。安全網是 git 歷史(instance repo 有 auto-commit)+ 收工回報列出全部動作;個案拿不準就標 `deprecated: true` + 指向正本,而不是留給 user 決定。**每筆刪除仍要有驗證過的證據**(路徑/服務實測已死、內容已被指名檔案取代)——全自動是拿掉等待,不是拿掉查證。
 - **合併**:`Write` 一篇涵蓋重疊核心的新檔 → `git rm` 舊檔。
 - **提升成 skill**:把 procedure 抽成 `SKILL.md`(放 instance `skills/`),memory 端刪掉或留一行指標。
 
@@ -41,4 +41,4 @@ description: "Memory consolidation — 整理整個 instance memory($SCRIPTORIUM
 - **一檔一事**、frontmatter 齊(`title` + `type` + 具體 `description`)。
 - **索引不抄 source of truth** —— 重複 CANON.md / instance docs 的刪掉、指向正本。
 - **「事實」留 memory,「怎麼做」升 skill**。
-- 刪 = destructive,**先問**(對齊 CANON 的 destructive guardrail)。
+- 刪不用問(2026-07-09 全自動裁決),但**每筆要有實測證據**;無證據的懷疑 → `deprecated` 標記,不刪。
