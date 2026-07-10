@@ -13,8 +13,6 @@ Edit code → `make bundle` → `open .app` → verify with `pgrep` / `osascript
 utils mac-app new <Name>          # stamp template/ 骨架(Package/Makefile/Info.plist/Swift/CI/icon/LICENSE)+ 產 zyx icon + git init
 ```
 
-MCP 對應 `mcp__utils__mac_app_new`(同參數,CC/Codex session 內優先用)。
-
 它套用 house 設計系統([`CHARTER.md`](CHARTER.md))。本檔是 **機制參考**(TCC / NSPanel / 簽名 / 公證);`CHARTER.md` 是 **identity + 慣例決策**;骨架本體在 `template/`。
 
 藍本三隻:[Cappuccino](https://github.com/zyx1121/Cappuccino)(純選單列)、[cursormon](https://github.com/zyx1121/cursormon)(NSPanel 桌寵)、[quickvm](https://github.com/zyx1121/quickvm)(選單列 + 嵌入 helper);早期參考 [zyx1121/shake](https://github.com/zyx1121/shake)。
