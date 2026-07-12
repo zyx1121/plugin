@@ -1,7 +1,7 @@
 {
   "name": "zyx",
-  "description": "Unified Claude Code plugin. Engine (Armarium/Scribe/Corrector, migrated from scriptorium) persists, self-authors, and self-reviews a Canon-defined instance; plus skills, hooks, agents, and MCP. Bring your own instance, or run `/scriptorium-init` to set one up.",
-  "version": "0.2.7",
+  "description": "Unified Claude Code plugin: zyx skills (procedures + domain knowledge) and the worker-agent fleet, one namespace. Engine retired in 0.3.0 (ADR-0003).",
+  "version": "0.3.0",
   "author": {
     "name": "zyx1121",
     "url": "https://github.com/zyx1121"

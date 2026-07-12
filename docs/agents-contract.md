@@ -44,6 +44,6 @@ handoff:      下一步建議(可選)
 - **守紅線**:close the loop(聲稱完成前驗證+貼證據)、fact-driven(歸因前先驗)、exhaust(放棄前走完)。
 - **高風險自做**:auth / 權限 / migration / 對外 / destructive 不由 worker 拍板,回 `issues` 標 `需 lead 決策`。
 
-## roadmap
+## 載入方式
 
-這層現在靠 instance 的 `bin/setup.sh` symlink 進 Claude Code(`~/.claude/agents/`)。**正升格成 scriptorium 第四類手稿** —— Armarium 接管 binding、Scribe 從 signal 創 agent、Corrector `agent_review` 校訂品質。屆時 fleet 跟 skill/memory 一樣自我演化。見 plan `unified-imagining-spindle`。
+fleet 由本 plugin 的 `agents/` 直接載入(`zyx:<agent>` namespace),無另外 binding。維護 = 直接改 agent `.md` + PR。(自我演化管線已隨 engine 退役,見 `decisions/ADR-0003-retire-engine.md`。)

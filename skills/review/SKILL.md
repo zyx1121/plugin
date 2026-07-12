@@ -28,13 +28,13 @@ When Section 1 finds a `missed-atom` hit (agent dropped to raw API in a domain `
 
 # Section 1 — Usage review
 
-> **Mostly superseded by the scriptorium engine (plugin 0.5.0+).** The tool self-loop now lives in the engine: `scribe/tool_author.py` clusters repeated ad-hoc scripts into new-tool candidates, `corrector/tool_review.py` reviews failing/hot tools — both propose to `staged/`, applied via the `utils-promoter` agent. Run `/authoring` (tool authoring) + `tool_review` for those. This section is now the **manual fallback** (engine absent) + the **home of `missed-atom`**, which the engine does not cover.
+> **Note (2026-07-12):** the scriptorium engine and its observation hooks were retired (see `decisions/ADR-0003-retire-engine.md`). `observations.jsonl` and the events log are **no longer appended to** — this section and the usage half of §3 operate on the historical log only. `~/.claude.json` skillUsage (§3) is written by Claude Code itself and stays live; §2 static lint is unaffected.
 
 Three kinds of candidates come out of the log:
 
-1. **New script candidates** — repeated `write-script` / `script-run` patterns. → *now `scribe/tool_author.py` (engine); fallback only.*
-2. **Existing script issues** — `utils-usage` failures. → *now `corrector/tool_review.py` (engine); fallback only.*
-3. **Missed-atom hits** — single `script-run` records that drop to a raw API for a domain `utils` already covers (e.g. `osascript tell application "Keynote"` when `utils keynote` exists). Even count=1 counts here — the signal is "agent skipped a known atom", not repetition. **← engine has no equivalent; this is now §1's main reason to run.**
+1. **New script candidates** — repeated `write-script` / `script-run` patterns.
+2. **Existing script issues** — `utils-usage` failures.
+3. **Missed-atom hits** — single `script-run` records that drop to a raw API for a domain `utils` already covers (e.g. `osascript tell application "Keynote"` when `utils keynote` exists). Even count=1 counts here — the signal is "agent skipped a known atom", not repetition.
 
 ## Schema
 

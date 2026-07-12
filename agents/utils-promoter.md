@@ -1,6 +1,6 @@
 ---
 name: utils-promoter
-description: Use proactively to APPLY an adopted tool candidate into the toolbox — from scriptorium's scribe/tool_author (a row in staged/tool-author.jsonl, adopted via /authoring) or a /utils:review surfaced candidate (new script or fix to existing). This is the apply layer of the tool self-loop (engine proposes, this writes + ships). Writes a self-contained PEP 723 script at scripts/<name>.py in zyx1121/utils, adds an MCP manifest under mcp/manifests/ when the atom will see agent use, opens a PR, reports the URL. Also triggers when user says "promote this candidate", "add this to utils", "open a utils PR for X".
+description: Use proactively to APPLY an adopted tool candidate into the toolbox — a /utils:review surfaced candidate (new script or fix to existing) or a candidate the user hands over directly. Writes a self-contained PEP 723 script at scripts/<name>.py in zyx1121/utils, optionally exposes it as a native MCP tool (mcp/src/tools/) when the atom will see agent use, opens a PR, reports the URL. Also triggers when user says "promote this candidate", "add this to utils", "open a utils PR for X".
 tools: Read, Edit, Write, Bash, Grep, Glob
 model: sonnet
 color: green
