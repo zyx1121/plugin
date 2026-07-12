@@ -28,14 +28,15 @@ install registry aligned. Installing directly off GitHub
 (`claude plugin marketplace add zyx1121/plugin`) also works, at the cost of
 that live-edit convenience.
 
-The `utils` MCP server is deliberately **not** bundled here (see ADR-0001
-amendment — plugin-provided MCP tools get renamed into the plugin
-namespace, breaking every `mcp__utils__*` reference). On machines with
-[`zyx1121/utils`](https://github.com/zyx1121/utils) at `~/utils`, register it
-user-scope instead:
+The `utils` MCP toolbox lives in-repo under [`utils/`](utils/) (absorbed
+from `zyx1121/utils` — see ADR-0004), but its server is deliberately **not**
+bundled via plugin `.mcp.json` (see ADR-0001 amendment, re-verified in
+ADR-0004 — plugin-provided MCP tools get renamed into the plugin namespace,
+breaking every `mcp__utils__*` reference). Register it user-scope instead:
 
 ```bash
-claude mcp add utils -- bun run ~/utils/mcp/src/server.ts
+cd ~/plugin/utils/mcp && bun install
+claude mcp add utils -- bun run ~/plugin/utils/mcp/src/server.ts
 ```
 
 ## Layout
@@ -44,9 +45,12 @@ claude mcp add utils -- bun run ~/utils/mcp/src/server.ts
 |-----|------|--------|
 | `skills/` | procedures + domain knowledge | `method` · `pve` · `keel` · `macos-dev` · `nextjs-dev` · `winlab-pptx` · `paper-revise` · `post` · `review` · `a2a` |
 | `agents/` | worker fleet (subagent definitions) | `developer` · `surveyor` · `reviewer` · `planner` · `utils-promoter` (contract: [`docs/agents-contract.md`](docs/agents-contract.md)) |
+| `utils/` | MCP toolbox (user-scope server + script atoms) | `mcp/` server · `scripts/` atoms · own ADR trail in `utils/decisions/` |
 | `decisions/` | ADR trail | |
 
 ## Lineage
 
 Migrated from [`zyx1121/scriptorium`](https://github.com/zyx1121/scriptorium)@`c12e49334aedaae4598e08b3c2a89c6e02ad16d2`;
 engine retired in 0.3.0 (last complete engine state: `45e89ae` / 0.2.7).
+`utils/` absorbed from [`zyx1121/utils`](https://github.com/zyx1121/utils)@`7d5d12e`
+in 0.4.0 (full history in the archived source repo).
