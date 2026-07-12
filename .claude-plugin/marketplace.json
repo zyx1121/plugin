@@ -1,15 +1,18 @@
 {
   "name": "zyx",
-  "owner": { "name": "zyx1121", "url": "https://github.com/zyx1121" },
+  "owner": {
+    "name": "zyx1121",
+    "url": "https://github.com/zyx1121"
+  },
   "metadata": {
-    "description": "zyx — unified Claude Code plugin: engine (scriptorium offices), skills, hooks, agents, MCP.",
-    "version": "0.2.4"
+    "description": "zyx — unified Claude Code plugin: skills + worker agents, one namespace.",
+    "version": "0.3.0"
   },
   "plugins": [
     {
       "name": "zyx",
       "source": ".",
-      "description": "Armarium (persistence) / Scribe (authoring) / Corrector (review) over a Canon-defined instance. Install, then run `/scriptorium-init` to scaffold and bind an instance.",
+      "description": "zyx skills (procedures + domain knowledge) and the worker-agent fleet. Engine retired in 0.3.0 (ADR-0003).",
       "category": "agent"
     }
   ]

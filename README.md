@@ -1,21 +1,11 @@
 # zyx
 
-A unified **Claude Code** plugin: one namespace (`zyx:*`) for engine, skills,
-hooks, and agents instead of scattering capability across separate
-plugin repos.
+A unified **Claude Code** plugin: one namespace (`zyx:*`) for skills and
+worker agents instead of scattering capability across separate plugin repos.
 
-Claude Code gives you skills, hooks, and memory — but passive ones. The
-engine tending them here follows the **scriptorium** office architecture:
-four offices (Armarium, Scribe, Corrector, plus the `method` skill router)
-make skills/hooks/memory **grow, sync across devices, and review themselves**
-while keeping one agent identity across Claude Code installations. See
-[`docs/CHARTER.md`](docs/CHARTER.md).
-
-## Engine vs instance
-
-This repo is the **engine** (public, no personal content). Your agent's
-**instance** — `CANON.md`, `memory/`, your skills — lives in *your own*
-private repo, located via `SCRIPTORIUM_HOME`.
+> The scriptorium self-evolution engine (Armarium / Scribe / Corrector
+> offices + lifecycle hooks) lived here from 0.1.0 to 0.2.7 and was retired
+> in 0.3.0 — see [`decisions/ADR-0003-retire-engine.md`](decisions/ADR-0003-retire-engine.md).
 
 ## Install
 
@@ -29,65 +19,34 @@ git clone https://github.com/zyx1121/plugin.git ~/plugin
 # add as a local marketplace, then install
 claude plugin marketplace add ~/plugin
 claude plugin install zyx@zyx
-
-# point at an instance, or scaffold and bind a fresh one
-/scriptorium-init ~/my-agent
 ```
 
-Local clone + local marketplace lets hook/script changes take effect on a
-`git pull` (no reinstall); skill changes still need a plugin.json version
-bump + `claude plugin update`. Installing directly off GitHub
+With a local (`directory`-type) marketplace, skill and agent edits are
+served live from the clone — `git pull` is enough (see ADR-0001, 2026-07-12
+amendment). Run `claude plugin update zyx@zyx` after merging to keep the
+install registry aligned. Installing directly off GitHub
 (`claude plugin marketplace add zyx1121/plugin`) also works, at the cost of
-that live-hook-edit convenience.
+that live-edit convenience.
 
-The `utils` MCP server is deliberately **not** bundled here (see
-ADR-0001 amendment — plugin-provided MCP tools get renamed into the plugin
+The `utils` MCP server is deliberately **not** bundled here (see ADR-0001
+amendment — plugin-provided MCP tools get renamed into the plugin
 namespace, breaking every `mcp__utils__*` reference). On machines with
 [`zyx1121/utils`](https://github.com/zyx1121/utils) at `~/utils`, register it
 user-scope instead:
 
 ```bash
-claude mcp add utils -- bun run ~/utils/mcp/server.ts
+claude mcp add utils -- bun run ~/utils/mcp/src/server.ts
 ```
-
-## Privacy / observability
-
-The engine is local-first and writes observation data into your private
-instance under `SCRIPTORIUM_HOME/data/`. The event hook records Claude Code
-lifecycle and Skill/Agent metadata + per-session delegation posture; the
-script observer records non-noise script writes/runs so repeated patterns
-can become candidate skills. For script writes it stores the path, a short
-content hash, and up to the first 4096 characters as `content_preview`.
-
-To disable both event and script observation on a machine, create
-`~/.claude/scriptorium.local.md` with frontmatter:
-
-```markdown
----
-observe: off
----
-```
-
-On macOS, a Stop hook (`hooks/notify.py`) posts a system notification when
-Claude Code finishes responding; other platforms no-op. Disable it with
-`notify: off` in the same frontmatter.
-
-Memory sync (`armarium/memory-sync.sh`) only commits `memory/` changes in your
-instance repo. It uses the configured git upstream when available, otherwise it
-falls back to the current branch on the first remote; non-git instances no-op.
 
 ## Layout
 
-| Dir | Office | Role | Pieces |
-|-----|--------|------|--------|
-| `armarium/` | Armarium | persistence · sync · index · path map | `paths.py` · `memory-sync.sh` · `gen_memory_index.py` |
-| `scribe/` | Scribe | observe signal → author new memory/skills | `events.py` (session/skill/method-route/delegation-ratio) · `observe.py` (scripts) |
-| `corrector/` | Corrector | calibrate · consolidate existing (propose-only) | `skill_review.py` · `skills/dreaming` |
-| `skills/` | — | engine skills + capability skills | engine: `method` · `dreaming` · `authoring` · `scriptorium-init`; capability: `pve` · `macos-dev` · `nextjs-dev` · `winlab-pptx` · `paper-revise` · `post` · `review` |
-| `agents/` | — | worker fleet (subagent definitions) | `developer` · `surveyor` · `reviewer` · `planner` · `utils-promoter` (contract: [`docs/agents-contract.md`](docs/agents-contract.md)) |
-| `hooks/` | — | wires offices to Claude Code lifecycle | `hooks.json` · `notify.py` |
-| `bin/` | — | instance setup helpers | |
+| Dir | Role | Pieces |
+|-----|------|--------|
+| `skills/` | procedures + domain knowledge | `method` · `pve` · `keel` · `macos-dev` · `nextjs-dev` · `winlab-pptx` · `paper-revise` · `post` · `review` · `a2a` |
+| `agents/` | worker fleet (subagent definitions) | `developer` · `surveyor` · `reviewer` · `planner` · `utils-promoter` (contract: [`docs/agents-contract.md`](docs/agents-contract.md)) |
+| `decisions/` | ADR trail | |
 
 ## Lineage
 
-Migrated from [`zyx1121/scriptorium`](https://github.com/zyx1121/scriptorium)@`c12e49334aedaae4598e08b3c2a89c6e02ad16d2`.
+Migrated from [`zyx1121/scriptorium`](https://github.com/zyx1121/scriptorium)@`c12e49334aedaae4598e08b3c2a89c6e02ad16d2`;
+engine retired in 0.3.0 (last complete engine state: `45e89ae` / 0.2.7).
