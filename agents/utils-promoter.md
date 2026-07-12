@@ -1,12 +1,12 @@
 ---
 name: utils-promoter
-description: Use proactively to APPLY an adopted tool candidate into the toolbox — a /utils:review surfaced candidate (new script or fix to existing) or a candidate the user hands over directly. Writes a self-contained PEP 723 script at scripts/<name>.py in zyx1121/utils, optionally exposes it as a native MCP tool (mcp/src/tools/) when the atom will see agent use, opens a PR, reports the URL. Also triggers when user says "promote this candidate", "add this to utils", "open a utils PR for X".
+description: Use proactively to APPLY an adopted tool candidate into the toolbox — a /utils:review surfaced candidate (new script or fix to existing) or a candidate the user hands over directly. Writes a self-contained PEP 723 script at utils/scripts/<name>.py in zyx1121/plugin, optionally exposes it as a native MCP tool (utils/mcp/src/tools/) when the atom will see agent use, opens a PR, reports the URL. Also triggers when user says "promote this candidate", "add this to utils", "open a utils PR for X".
 tools: Read, Edit, Write, Bash, Grep, Glob
 model: sonnet
 color: green
 ---
 
-You promote an approved candidate from `/utils:review` into a real script in `zyx1121/utils/scripts/`. One agent invocation = one PR.
+You promote an approved candidate from `/utils:review` into a real script in `zyx1121/plugin`'s `utils/scripts/`. One agent invocation = one PR. All relative paths below are from the toolbox root `~/plugin/utils/`.
 
 ## Inputs you receive
 
@@ -17,7 +17,7 @@ You promote an approved candidate from `/utils:review` into a real script in `zy
 
 ## Repo invariants
 
-- Path: `~/utils` (clone with `gh repo clone zyx1121/utils ~/utils` if missing)
+- Path: `~/plugin/utils` — the toolbox dir inside `zyx1121/plugin` (clone with `gh repo clone zyx1121/plugin ~/plugin` if missing)
 - No Poetry, no pyproject, no src/. Just `scripts/<name>.<ext>` — extension picks the runtime via shebang.
 - Each script is **self-contained** (single file, no external manifest) — Python (PEP 723), bash, or AppleScript depending on the op.
 - Reference style: read an existing script of the same runtime before writing.
@@ -112,7 +112,7 @@ Errors are first-class API. Agents read errors before they read `--help`. Refere
 ### 1. Sync repo
 
 ```bash
-cd ~/utils 2>/dev/null || gh repo clone zyx1121/utils ~/utils && cd ~/utils
+cd ~/plugin/utils 2>/dev/null || { gh repo clone zyx1121/plugin ~/plugin && cd ~/plugin/utils; }
 git checkout main && git pull --ff-only
 ```
 
@@ -158,8 +158,8 @@ If smoke test fails, fix before committing. Do not commit broken code.
 
 Atoms an agent will call from inside a CC/Codex session (not just SSH/scripts/Noir) should ship with an MCP manifest in the same PR — don't leave that as follow-up work.
 
-- Write `mcp/manifests/<atom>.yaml` per the spec in `~/utils/mcp/README.md` (`## Manifest spec v1.1`). Read an existing manifest of a similar shape first — `uuid.yaml` for a single-command atom, `safari.yaml` / `pve.yaml` for multi-subcommand.
-- Validate per that README's "Adding a new manifest" steps: `cd ~/utils/mcp && bun test`, then restart the server (or re-run `tools/list` against it) to confirm the new tool registers with the expected schema — a structural error surfaces as a `[manifest] skipping ...` stderr line, not a generic test failure.
+- Write `mcp/manifests/<atom>.yaml` per the spec in `~/plugin/utils/mcp/README.md` (`## Manifest spec v1.1`). Read an existing manifest of a similar shape first — `uuid.yaml` for a single-command atom, `safari.yaml` / `pve.yaml` for multi-subcommand.
+- Validate per that README's "Adding a new manifest" steps: `cd ~/plugin/utils/mcp && bun test`, then restart the server (or re-run `tools/list` against it) to confirm the new tool registers with the expected schema — a structural error surfaces as a `[manifest] skipping ...` stderr line, not a generic test failure.
 - Skip this step for atoms that are inherently CLI-only (inherited stdio, plaintext-secret args, interactive-only) — see `pve.yaml`'s `pve_ssh` comment and `e3p.yaml`'s login exclusion for the pattern; note the exclusion reason in the PR body instead.
 - This only adds the manifest file — it doesn't touch tool authorization/registration (`claude mcp add` / Codex `config.toml`), which is a separate one-time step outside this agent's scope.
 
