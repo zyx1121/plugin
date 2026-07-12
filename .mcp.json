@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "utils": {
+      "command": "bun",
+      "args": ["run", "${CLAUDE_PLUGIN_ROOT}/utils/mcp/src/server.ts"]
+    }
+  }
+}

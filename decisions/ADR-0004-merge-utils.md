@@ -54,3 +54,30 @@ Known debt (predates the merge, out of scope here): `skills/pve/SKILL.md`
 CLI examples and `agents/utils-promoter.md` smoke-test/manifest steps still
 describe the retired `bin/utils` dispatcher and `mcp/manifests/` layer
 (gone since utils #79; tools now live in `utils/mcp/src/tools/`).
+
+## Amendment (2026-07-12): wiring reversed — ship `.mcp.json` after all
+
+Landed hours after the merge, Loki's call: install-time auto-registration
+(the standard plugin architecture) is worth more than stable tool names.
+Point 2 above is reversed; the plugin now ships `.mcp.json` pointing at
+`${CLAUDE_PLUGIN_ROOT}/utils/mcp/src/server.ts`, and the user-scope
+registration is removed.
+
+What re-testing on the real plugin showed (CC 2.1.207):
+
+- The forced rename is real, as documented: tools surface as
+  `mcp__plugin_zyx_utils__<tool>`. All `mcp__utils__*` references in the
+  instance layer were renamed in the same motion (blast radius at the time:
+  ~9 doc/memory files, no hook matchers, no permission entries).
+- **Same-name shadowing**: with a user-scope server also named `utils`
+  registered, the plugin-provided server's tools never load — the
+  user-scope entry wins silently. This is why the original headless probe
+  looked like "plugin MCP doesn't load at all" and why both registrations
+  must never coexist.
+- With the user-scope entry removed, plugin-provided tools load fine in
+  headless (`claude -p`) sessions.
+
+Scope note: this renaming applies only where the server arrives via the
+plugin (CC on the Mac). Environments that mount the server through an
+explicit MCP config — Codex `config.toml`, Noir's `mcp-config.json` — keep
+their own registration and the plain `mcp__utils__*` names.
