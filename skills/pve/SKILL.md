@@ -65,6 +65,28 @@ utils pve caddy --action list                                # per-block detail:
 
   State the assignment in one glance-able line ("parser → VMID 42 / IP 10.10.10.42 / SSH 50042"); don't break it into separate questions. Only override when the user explicitly names a different value.
 
+## Field lessons (hard-won — check here before debugging)
+
+Each of these cost a real outage or a wasted debugging round. Deeper context lives in the instance memory (grep the memory index for the keyword).
+
+- **`pct shutdown` exit code is unreliable on unprivileged LXC.** It can exit 1 with `container did not stop` while the container finishes halting moments later. Never chain `pct shutdown X && pct start Y` — the false failure short-circuits and leaves both guests stopped. Poll `pct status` until `stopped`, or use a hard `pct stop` when graceful shutdown isn't required (`utils pve stop` already does the hard variant).
+- **A VM can't reach the lab's own public IP (hairpin NAT).** A spoke VM curling a public hostname that resolves to the lab IP times out. It's not the spoke firewall — the ingress DNAT only matches the WAN interface. Fix once at the boundary with a NAT reflection rule (`iptables -t nat -A PREROUTING -i <internal-bridge> -d <lab-public-ip>/32 -p tcp --dport 443 -j DNAT --to <gateway-internal-ip>:443`), persisted via netfilter-persistent (`iptables-restore --test` first). Port 443 is already reflected on this host; add other ports the same way. Don't fall back to per-hostname split-horizon DNS.
+- **Fresh Debian 13 CTs boot with a dead journald** (`status=243/CREDENTIALS`; every `journalctl -u X` says `-- No entries --` even though the service runs). Root cause: trixie's `ImportCredential=journal.*` can't be set up in an unprivileged mount namespace. Run this as a fixed provisioning step right after `create-ct`:
+
+  ```bash
+  sudo mkdir -p /etc/systemd/system/systemd-journald.service.d
+  printf '[Service]\nImportCredential=\n' | sudo tee /etc/systemd/system/systemd-journald.service.d/override.conf
+  sudo systemctl daemon-reload && sudo systemctl restart systemd-journald
+  ```
+
+  Services already running before the fix need a `systemctl restart` to start landing in the journal.
+- **Templates are live state on the host, not in git.** The VM clone source (`UTILS_PVE_TEMPLATE`) carries a cloud-init vendor snippet (apt mirror + 4G swap + swappiness 10 + qemu-guest-agent) — inspect with `qm config <vmid>`. The CT default template gets its apt mirror patched in code post-create. The two mirror mechanisms are different — don't fix one by editing the other.
+- **Swap traps.** VMs default to 4G swap via the snippet. Kubernetes/k3s nodes must stay swapless — kubelet's `fail-swap-on` is only checked at startup, so `swapon` today means the node dies on its next restart unless `fail-swap-on=false` is set first. LXC swappiness is host-level only: `sysctl vm.swappiness` inside any CT silently edits the **host** value, and `/etc/sysctl.d` inside the CT is inert.
+- **No Docker inside LXC.** Install services natively in the CT (the gateway's Caddy + dnsmasq is the model) or run Docker inside a VM. Stateful / multi-container stacks (Postgres, docker-compose) always get a VM.
+- **Off-network access:** the SSH aliases go through public-IP port forwards, so away from a network that can reach the lab IP they all time out. Bring up Tailscale and jump through the PVE host (`ssh -J`); addresses live in the devices-inventory memory.
+- **`caddy` add/validate rejects with `API token '' appears invalid`:** the gateway env file isn't being loaded into the scratch validate — check `UTILS_PVE_GATEWAY_ENV` points at the gateway's `.env` (the atom sources it so `{env.*}` in `tls dns` blocks resolve). Don't hand-edit the Caddyfile over this.
+- **The gateway CT has no `curl`.** Verify routes from your own machine or another guest, not from the gateway itself.
+
 ## When to consult the devices inventory
 
 If the user asks about a *specific* host or VM by role ("the auth VM", "the AFC machine", "what IP is the gateway?"), grep `~/.kilo/memory/MEMORY-COLD.md` for `reference_devices_inventory` and fetch that memory — it has the live mapping. This skill stays infrastructure-agnostic on purpose.
