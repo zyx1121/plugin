@@ -26,7 +26,8 @@ Deploy per machine: `git clone` to a fixed local path, then
 `claude plugin marketplace add <local-path>` (not the GitHub URL) so hook/
 script edits land on `git pull` without reinstall. Skills still need a
 `plugin.json` version bump + `claude plugin update` (Claude Code
-constraint); any skill content change bumps `version`.
+constraint); any skill content change bumps `version`. *(Superseded — see
+Amendment 2026-07-12: skills now load live from the source directory too.)*
 
 Scope: P0 (scaffold) + P1 (scriptorium migration) here. P2 (kilo
 skills/agents) and P3 (utils MCP) are later phases, not blocked on this.
@@ -36,7 +37,8 @@ skills/agents) and P3 (utils MCP) are later phases, not blocked on this.
 - Local marketplaces work: `marketplace add <local-clone-path>` resolves
   like a GitHub source. Hooks are live (next fire, no reinstall); skills are
   version-pinned (`SKILL.md` edits invisible until `plugin.json.version`
-  bumps + `claude plugin update`).
+  bumps + `claude plugin update`). *(Version-pinning superseded — see
+  Amendment 2026-07-12.)*
 - Marketplace `name` is a global key — same-name registration silently
   overwrites; confirmed `zyx` was free (existing local marketplaces:
   `claude-plugins-official`, `openai-codex`, `scriptorium`).
@@ -51,7 +53,8 @@ the office architecture carry over unchanged — kilo/Noir keep working by
 only repointing their marketplace source.
 
 **-** Skill iteration now needs a mandatory version bump per change (hooks
-stay live; only skills are pinned).
+stay live; only skills are pinned). *(Superseded — see Amendment
+2026-07-12; the bump is now registry hygiene, not a visibility gate.)*
 
 **Deferred**: Noir (PVE) references the engine by a bare path, not a plugin
 install — unaffected now, alignment is a follow-up. P2 must double-check no
@@ -85,3 +88,20 @@ the CC marketplace (`~/.claude/plugins/marketplaces/scriptorium`), not a
 bare path — `deploy/install.sh`'s bare-path fallbacks never fired. Alignment
 = repeat the Mac cutover there (clone `~/plugin`, local marketplace add,
 install `zyx@zyx`, uninstall old scriptorium).
+
+## Amendment (2026-07-12): skills load live from directory marketplaces
+
+Re-verified on Claude Code 2.1.207: for a `directory`-type marketplace the
+registry's `installLocation` is the source path itself (`~/plugin`), and
+skill resolution follows it — a Skill invocation reported its base directory
+as `/Users/loki/plugin/skills/method` while the installed cache still sat at
+0.2.5. `SKILL.md` edits are therefore visible immediately after `git pull`,
+same as hooks; the version-pinning observed on CC 2.1.198 (2026-07-03) no
+longer applies.
+
+What remains true: `claude plugin update zyx@zyx` (the bare plugin name is
+rejected — use `name@marketplace`) copies the current source into
+`cache/zyx/zyx/<version>/` and refreshes `installed_plugins.json`
+(version + `gitCommitSha`). Run it after merging so the registry reflects
+reality, but it no longer gates skill visibility. Old cache version
+directories accumulate and are safe to delete.
