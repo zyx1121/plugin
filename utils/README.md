@@ -18,16 +18,12 @@ exposes only active agent-facing domains:
 calendar e3p mail md2slide pdf pve reminders safari screenshot ubereats
 ```
 
-Registration stays **user-scope** — deliberately not the plugin's `.mcp.json`,
-which would rename every tool into the plugin namespace (ADR-0004).
+Claude Code registration is automatic: the plugin's `.mcp.json` serves this
+server, and tools appear as `mcp__plugin_zyx_utils__<tool>` (ADR-0004
+amendment). Don't also register it user-scope — a same-named user-scope
+entry shadows the plugin one.
 
-Claude Code:
-
-```bash
-claude mcp add utils -- bun run ~/plugin/utils/mcp/src/server.ts
-```
-
-Codex:
+Codex (no plugin support) registers it explicitly:
 
 ```toml
 [mcp_servers.utils]

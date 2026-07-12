@@ -29,14 +29,15 @@ install registry aligned. Installing directly off GitHub
 that live-edit convenience.
 
 The `utils` MCP toolbox lives in-repo under [`utils/`](utils/) (absorbed
-from `zyx1121/utils` — see ADR-0004), but its server is deliberately **not**
-bundled via plugin `.mcp.json` (see ADR-0001 amendment, re-verified in
-ADR-0004 — plugin-provided MCP tools get renamed into the plugin namespace,
-breaking every `mcp__utils__*` reference). Register it user-scope instead:
+from `zyx1121/utils` — see ADR-0004) and is served by the plugin's
+`.mcp.json` — installing the plugin registers the server, no separate
+`claude mcp add` step. Tools carry the plugin namespace:
+`mcp__plugin_zyx_utils__<tool>` (see ADR-0004 amendment; do **not** also
+register the server user-scope — a same-named user-scope entry shadows the
+plugin one). First run resolves server deps via bun; to warm them up front:
 
 ```bash
 cd ~/plugin/utils/mcp && bun install
-claude mcp add utils -- bun run ~/plugin/utils/mcp/src/server.ts
 ```
 
 ## Layout
