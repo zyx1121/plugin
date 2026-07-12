@@ -44,8 +44,8 @@ cd ~/plugin/utils/mcp && bun install
 
 | Dir | Role | Pieces |
 |-----|------|--------|
-| `skills/` | procedures + domain knowledge | `method` · `pve` · `macos-dev` · `nextjs-dev` · `winlab-pptx` · `paper-revise` · `setup-review` |
-| `agents/` | worker fleet (subagent definitions) | `developer` · `surveyor` · `reviewer` · `planner` · `utils-promoter` (contract: [`docs/agents-contract.md`](docs/agents-contract.md)) |
+| `skills/` | procedures + domain knowledge | `pve` · `macos-dev` · `nextjs-dev` · `winlab-pptx` · `paper-revise` · `setup-review` |
+| `agents/` | worker fleet (subagent definitions) | `developer` · `surveyor` · `reviewer` · `planner` · `utils-promoter` (each embeds its own report contract) |
 | `utils/` | MCP toolbox (user-scope server + script atoms) | `mcp/` server · `scripts/` atoms · own ADR trail in `utils/decisions/` |
 | `decisions/` | ADR trail | |
 
