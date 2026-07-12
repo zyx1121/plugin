@@ -1,9 +1,9 @@
 ---
-name: review
-description: "Review what's drifting in Loki's agent setup — runtime (utils observation log) and static (SKILL.md files). Surfaces new script candidates, fix candidates for failing atoms, missed-atom hits (agent skipped a known atom), and lint issues across personal skills. Use when the user runs `/review`, asks 'any new utils candidates?', 'lint my skills', 'what should utils learn next?', 'review my agent setup'."
+name: setup-review
+description: "Review what's drifting in Loki's agent setup — runtime (utils observation log) and static (SKILL.md files). Surfaces new script candidates, fix candidates for failing atoms, missed-atom hits (agent skipped a known atom), and lint issues across personal skills. Use when the user runs `/setup-review` (formerly `/review`), asks 'any new utils candidates?', 'lint my skills', 'what should utils learn next?', 'review my agent setup'."
 ---
 
-# /review — find what's drifting in the agent setup
+# /setup-review — find what's drifting in the agent setup
 
 Three layers, one entry point:
 
@@ -18,7 +18,7 @@ They share a frame: *observe what the agent is actually doing, find the gap, pro
 - "lint my skills" / "any stale SKILL.md" → only Section 2
 - "new utils candidates" / "review my log" → only Section 1
 - "which skills get used" / "dormant skills" / "skill usage" → only Section 3
-- bare `/review` or unclear → run all three
+- bare `/setup-review` or unclear → run all three
 
 ## Cross-link between sections
 
