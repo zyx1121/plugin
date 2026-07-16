@@ -15,6 +15,7 @@ Atomic operations against the PVE host and the edge gateway through SSH aliases.
 
 ```bash
 utils pve list                     # all guests: QEMU VMs + LXC containers + status (table on TTY, JSON in pipes)
+utils pve status                   # no name: node (uptime/load/mem/swap/disk) + all guests in one call
 utils pve status <name>            # config + state for one guest
 utils pve ssh <name> [cmd]         # SSH via alias; refuses if alias missing
 ```
@@ -115,8 +116,8 @@ utils pve caddy parser.zyx.tw 10.10.10.42:8080   # HTTPS termination + reverse p
 **Quick survey:**
 
 ```bash
-utils pve list
-utils pve status parser
+utils pve status                   # node health + all guests in one call
+utils pve status parser            # drill into one guest
 utils pve dns --action list
 utils pve caddy --action list
 ```

@@ -147,6 +147,53 @@ def list_guests() -> list[dict]:
             + parse_pct_list(ssh_run(PVE_HOST, "pct", "list")))
 
 
+# Single ssh round-trip: uptime, loadavg, the 4 meminfo fields we care about,
+# then the root filesystem's size/used in bytes. `awk -F'[: ]+'` collapses the
+# "Key:      value kB" spacing in /proc/meminfo down to "Key value".
+_NODE_STATUS_SH = r"""
+cat /proc/uptime
+cat /proc/loadavg
+awk -F'[: ]+' '/^(MemTotal|MemAvailable|SwapTotal|SwapFree):/{print $1, $2}' /proc/meminfo
+df -B1 --output=size,used / | tail -n1
+"""
+
+
+def node_status() -> dict:
+    """Node-level status — uptime, load, mem, swap, disk — via one ssh call."""
+    out = ssh_run(PVE_HOST, "bash", "-c", _NODE_STATUS_SH)
+    lines = [l for l in out.splitlines() if l.strip()]
+    if len(lines) != 7:
+        fail(
+            "couldn't parse node status",
+            why=f"expected 7 lines (uptime, loadavg, 4 meminfo fields, disk), got {len(lines)}",
+            hint="run `ssh pve 'cat /proc/uptime /proc/loadavg /proc/meminfo; df -B1 /'` to inspect",
+        )
+
+    uptime_s = int(float(lines[0].split()[0]))
+    load1, load5, load15 = (float(x) for x in lines[1].split()[:3])
+
+    mem: dict[str, int] = {}
+    for line in lines[2:6]:
+        key, val = line.split()
+        mem[key] = int(val)
+
+    disk_total_b, disk_used_b = (int(x) for x in lines[6].split())
+
+    return {
+        "uptime_s": uptime_s,
+        "load1": load1,
+        "load5": load5,
+        "load15": load15,
+        "mem_total_mb": round(mem["MemTotal"] / 1024),
+        "mem_used_mb": round((mem["MemTotal"] - mem["MemAvailable"]) / 1024),
+        "mem_avail_mb": round(mem["MemAvailable"] / 1024),
+        "swap_total_mb": round(mem["SwapTotal"] / 1024),
+        "swap_used_mb": round((mem["SwapTotal"] - mem["SwapFree"]) / 1024),
+        "disk_total_gb": round(disk_total_b / 1024 ** 3, 1),
+        "disk_used_gb": round(disk_used_b / 1024 ** 3, 1),
+    }
+
+
 def find_guest(name_or_id: str) -> dict:
     """Find a VM or LXC by name/VMID. Returns dict with `type` = qm | lxc."""
     for g in list_guests():
@@ -460,29 +507,53 @@ def _remove_ssh_alias(name: str) -> dict:
 
 
 # ── list ────────────────────────────────────────────────────────
+def _guests_table(guests: list[dict]) -> Table:
+    t = Table(show_header=True, header_style="bold")
+    t.add_column("VMID")
+    t.add_column("Name")
+    t.add_column("Type")
+    t.add_column("Status")
+    t.add_column("Mem")
+    for v in guests:
+        style = "green" if v["status"] == "running" else "dim"
+        mem = f"{v['mem_mb']}MB" if v.get("mem_mb") else "-"
+        t.add_row(str(v["vmid"]), v["name"], v["type"], v["status"], mem, style=style)
+    return t
+
+
 @app.command("list", help="List all guests on the PVE host — QEMU VMs + LXC containers.")
 def list_vms() -> None:
     guests = list_guests()
 
     def human(data, _meta):
-        t = Table(show_header=True, header_style="bold")
-        t.add_column("VMID")
-        t.add_column("Name")
-        t.add_column("Type")
-        t.add_column("Status")
-        t.add_column("Mem")
-        for v in data:
-            style = "green" if v["status"] == "running" else "dim"
-            mem = f"{v['mem_mb']}MB" if v.get("mem_mb") else "-"
-            t.add_row(str(v["vmid"]), v["name"], v["type"], v["status"], mem, style=style)
-        console.print(t)
+        console.print(_guests_table(data))
 
     emit(guests, {"count": len(guests), "host": PVE_HOST}, human=human)
 
 
 # ── status ──────────────────────────────────────────────────────
-@app.command(help="Show config + status for a VM or container by name or VMID.")
-def status(name: str = typer.Argument(..., help="VM/CT name or VMID")) -> None:
+@app.command(help="Show config + status for a VM/CT by name or VMID; omit name for node + all guests overview.")
+def status(name: Optional[str] = typer.Argument(None, help="VM/CT name or VMID; omit for node + all guests overview")) -> None:
+    if name is None:
+        node = node_status()
+        guests = list_guests()
+
+        def human(data, _meta):
+            n = data["node"]
+            console.print(
+                f"[bold]{PVE_HOST}[/]  up {n['uptime_s']}s  "
+                f"load {n['load1']}/{n['load5']}/{n['load15']}"
+            )
+            console.print(
+                f"  mem  {n['mem_used_mb']}/{n['mem_total_mb']}MB used "
+                f"({n['mem_avail_mb']}MB avail)  swap {n['swap_used_mb']}/{n['swap_total_mb']}MB"
+            )
+            console.print(f"  disk {n['disk_used_gb']}/{n['disk_total_gb']}GB used")
+            console.print(_guests_table(data["guests"]))
+
+        emit({"node": node, "guests": guests}, {"host": PVE_HOST, "count": len(guests)}, human=human)
+        return
+
     vm = find_guest(name)
     cli = "pct" if vm["type"] == "lxc" else "qm"
     config_out = ssh_run(PVE_HOST, cli, "config", str(vm["vmid"]))
