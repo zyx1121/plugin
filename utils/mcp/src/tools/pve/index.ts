@@ -11,7 +11,7 @@ const confirm = z.literal(true).describe("Required explicit confirmation.");
 
 export const pveTools: ToolboxTool[] = [
   scriptTool({ name: "pve_list_guests", description: "List PVE VMs and LXC containers.", inputSchema: {}, script, envelope, timeoutMs, buildArgs: () => ["list"] }),
-  scriptTool({ name: "pve_get_status", description: "Show config and status for one PVE guest.", inputSchema: { name }, script, envelope, timeoutMs, buildArgs: (input) => ["status", input.name] }),
+  scriptTool({ name: "pve_get_status", description: "Overall PVE status (node uptime/mem/disk + all guests) when name omitted; config and status for one guest when name given.", inputSchema: { name: name.optional() }, script, envelope, timeoutMs, buildArgs: (input) => (input.name ? ["status", input.name] : ["status"]) }),
   scriptTool({ name: "pve_start_guest", description: "Start a stopped VM or LXC container.", inputSchema: { name }, script, envelope, timeoutMs, buildArgs: (input) => ["start", input.name] }),
   scriptTool({ name: "pve_stop_guest", description: "Force-stop a running VM/container. Destructive; pass yes=true to confirm.", inputSchema: { name, yes }, script, envelope, timeoutMs, buildArgs: (input) => { const argv = ["stop", input.name]; pushFlag(argv, "--yes", input.yes); return argv; } }),
   scriptTool({ name: "pve_destroy_guest", description: "Permanently destroy a VM/container and cascade cleanup. Irreversible; pass yes=true to confirm.", inputSchema: { name, yes }, script, envelope, timeoutMs, buildArgs: (input) => { const argv = ["destroy", input.name]; pushFlag(argv, "--yes", input.yes); return argv; } }),
