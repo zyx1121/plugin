@@ -1,6 +1,6 @@
 ---
 name: macos-dev
-description: "Develop, design, sign, and ship a macOS Swift app from the terminal — SwiftPM + a hand-rolled Makefile bundle + Apple Development codesign, no Xcode; aligned to Apple HIG + macOS 26 Liquid Glass. Triggers on 'build a mac app', '做 mac app', 'menubar app', 'wrap swift binary into .app', 'codesign mac app', 'TCC / screen recording permission', 'LSUIElement menubar-only', 'NSPanel overlay', 'CGEventTap', 'ScreenCaptureKit', 'Liquid Glass', 'macOS app design / HIG', '怎麼不開 xcode 寫 mac app'. Skip for Xcode IDE features, provisioning profiles, or Mac App Store."
+description: "Develop, design, sign, and ship a macOS Swift app from the terminal — SwiftPM + Makefile bundle + codesign, no Xcode; aligned to HIG + Liquid Glass. Triggers on 'build a mac app', '做 mac app', 'menubar app', 'wrap swift binary into .app', 'codesign mac app', 'TCC / screen recording permission', 'LSUIElement menubar-only', 'NSPanel overlay', 'CGEventTap', 'ScreenCaptureKit', 'Liquid Glass', '怎麼不開 xcode 寫 mac app'. Skip for Xcode IDE features, provisioning profiles, or Mac App Store."
 ---
 
 # /macos-dev — develop macOS apps from the terminal

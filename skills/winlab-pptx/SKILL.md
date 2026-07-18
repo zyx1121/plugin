@@ -1,6 +1,6 @@
 ---
 name: winlab-pptx
-description: "Loki 的唯一簡報 skill — 產 .pptx(NOT .key)涵蓋兩類 deck:報告(lab talk / pitch / demo,英文高密度)與教學(錄課 / 線上課程 / MOOC,中文低密度)。引擎 = python-pptx 把 JSON spec 填進 WinLab 母片(template-first),含原生 block+line 架構圖。涵蓋內容規範(cover / outline / claim 標題 / L0–L3 bullet / 敘事連貫 / speaker notes)+ pptx 落地 + 自我檢查。Triggers on '做簡報', '做投影片', 'slide deck', 'presentation', 'powerpoint', 'pptx', '實驗室簡報', 'lab talk', 'winlab slides', 'pptx 架構圖', '錄課', '教學投影片', '線上課程投影片', '磨課師', 'MOOC', 'review 我的投影片', 'outline 一下', 'rewrite this deck'. NOT Markdown 成果報告 / 手冊 / runbook — 那是 project-docs."
+description: "Loki 的唯一簡報 skill — 產 .pptx(NOT .key)涵蓋兩類 deck:報告(lab talk / pitch / demo,英文高密度)與教學(錄課 / 線上課程 / MOOC,中文低密度)。Triggers on '做簡報', '做投影片', 'slide deck', 'presentation', 'powerpoint', 'pptx', '實驗室簡報', 'lab talk', 'winlab slides', 'pptx 架構圖', '錄課', '教學投影片', '線上課程投影片', '磨課師', 'MOOC', 'review 我的投影片', 'outline 一下', 'rewrite this deck'. NOT Markdown 成果報告 / 手冊 / runbook — 那是 project-docs."
 ---
 
 # WinLab pptx — Loki 的唯一簡報 skill
@@ -9,7 +9,7 @@ description: "Loki 的唯一簡報 skill — 產 .pptx(NOT .key)涵蓋兩類 dec
 
 這份 skill 自包含**全部**規範:怎麼把 deck 落地成 `.pptx`(tooling / 母片契約 / spec / 架構圖),以及兩類 deck 的內容規範(報告 / 教學)。沒有外部 skill 依賴。
 
-**黃金標準** = `~/Desktop/kilo-sense-talk.pptx`(老闆認可的成品,報告 deck)。pptx 落地的所有預設(layout、字型、字色、架構圖樣式)都從它抽出對齊;拿不準時 render 它來對。
+**黃金標準** = `assets/kilo-sense-talk.pptx`(老闆認可的成品,報告 deck;source 在 iCloud `Projects/sense/`)。pptx 落地的所有預設(layout、字型、字色、架構圖樣式)都從它抽出對齊;拿不準時 render 它來對。
 
 ## 先分類:報告 deck vs 教學 deck
 
@@ -117,15 +117,6 @@ description: "Loki 的唯一簡報 skill — 產 .pptx(NOT .key)涵蓋兩類 dec
 
 > **中文 deck 標點**:英文/數字後半形(`ReAct: x`、`200 行`),中文/中文標點(含 `」』）`)後全形(`小結:` → `小結：`)。builder 不自動正規化,要在 spec 寫對或用後處理腳本掃一遍(`(?<=[一-鿿」』）])[:,;!?]` → 全形)。
 
-## 敘事層(報告 / 教學共用)
-
-四條跨類技巧,疊在官方 MUST 之上(出處:2026-07 對影視解說頻道「哇薩比抓馬」三支影片逐字稿的手法分析 — 解說型創作者把理解成本壓到極低的做法,轉譯到簡報場景):
-
-1. **命名編碼設計** — 元件 / 實驗組 / baseline 的名字本身要說明行為:`lazy-wake` vs `eager-wake`,不是 `config1` / `Method A`。每次提到名字都在免費重申設計;名字定了全 deck 一致,別中途換代稱。
-2. **資訊排程** — 頁序照聽眾的認知順序,不照系統架構 / 開發時間順序。支線進不來就明講掛起:「這裡先記住有 X,§Y 會回來收」— 聽眾不該自己猜哪條線之後會回收(= forward reference 的主動版)。
-3. **資訊不裸奔** — 定義 / 公式 / spec / 架構圖 / 數據圖後面必接一句「這代表…」;圖表由講者指認特徵(「注意 t=30 這裡驟降 = hibernation 觸發」),不是放上去讓聽眾自己看。數字成對出現 — 給參照系(`8GB → 4.8GB,同機多跑一倍 agent`),不裸給百分比。
-4. **重點放事件之前** — 導遊式預告:「這頁只要記住一件事:…」「接下來注意 X」放在內容**之前**;講完才總結 = 聽眾已經用錯誤的注意力分配看完了。demo 前先說等下會看到什麼、該盯哪裡。
-
 ## 內容規範 A — 報告 deck
 
 投影片**英文**、高密度。整份 deck 是一條線,不是 random walk。
@@ -154,6 +145,8 @@ description: "Loki 的唯一簡報 skill — 產 .pptx(NOT .key)涵蓋兩類 dec
 - **Title = 這頁的 claim 或 dash 句型。** 例 `Skill — instructions Claude can load on demand`。`Background` / `Details` / `Discussion` 這種空殼分類名禁用。
 - **Body 用 nested bullets 表達層級**(多數情況);N 項並排比較用 `two-col` 或架構圖;檔案結構用 ASCII tree 塞進 bullet text。
 - 由上到下要有 narrative:claim → evidence → implication,不是 random walk。
+- **命名編碼行為**:元件 / 實驗組 / baseline 的名字本身說明行為(`lazy-wake` vs `eager-wake`),不是 `config1` / `Method A`;每次提到名字都在免費重申設計,定了全 deck 一致。
+- **資訊不裸奔**:定義 / 公式 / 架構圖 / 數據圖後必接一句「這代表…」;圖表由講者指認特徵(「注意 t=30 這裡驟降 = hibernation 觸發」),不是放上去讓聽眾自己看。數字給參照系(`8GB → 4.8GB,同機多跑一倍 agent`),不裸給百分比。
 
 #### Bullet hierarchy(L0–L3,`bullets[].level` 直接寫)
 
@@ -192,6 +185,8 @@ description: "Loki 的唯一簡報 skill — 產 .pptx(NOT .key)涵蓋兩類 dec
 - 每張內容頁的 takeaway 接到下一張的前提
 - 跨 section 前補一張 `section` divider 告訴聽眾 "now we shift to X"
 - 從 outline 順著讀,跟實際播放的 section 順序對得起來
+- **資訊排程**:頁序照聽眾的認知順序,不照系統架構 / 開發時間順序;支線進不來就明講掛起「先記住有 X,§Y 會回來收」,聽眾不猜哪條線會回收
+- **重點放事件之前**:「這頁只要記住一件事」「接下來注意 X」放在內容之前,講完才總結 = 聽眾已用錯誤的注意力分配看完;demo 前先說等下會看到什麼、該盯哪裡
 
 **old before new**(句與句、bullet 與 bullet):現在這句一定 base 在前面已經講完的東西上,聽眾的注意力永遠有落腳點。
 
@@ -301,18 +296,12 @@ edge `kind` → 線型 + 箭頭(線型 = 關係強度,正交於形狀):
 - [ ] 先確定這份是報告 / 教學,規範沒選錯
 - [ ] cover:title + 日期 `YYYY/M/D` + 中文姓名 詹詠翔
 - [ ] 內容頁 title 不是空殼分類名(`Background` / `Details`)
-- [ ] **官方 MUST**:標題唯一不重複、直接對應該頁主題;同主題跨多頁用 (1/2)(2/2)
-- [ ] **官方 MUST**:進細節 / 數字 / 結果前先給 context(背景 / 動機 / 問題)
-- [ ] **官方 MUST**:每頁 takeaway 一眼可見,沒埋進密集段落 / 表格 cell / 長 bullet 末
-- [ ] **官方 MUST**:同主題介紹 + 結論同頁,沒同內容拆頁、沒換標題重講
-- [ ] **官方 MUST**:流程 / pipeline 圖附步驟描述
+- [ ] **官方 MUST 全過**(見 §官方規範):標題唯一對題、context before detail、takeaway 一眼可見、同主題同頁、pipeline 附步驟
 - [ ] **跑過 render QA 至少一輪**,每張看過圖、無空框 / 穿線 / 超框 / placeholder 殘留
 - [ ] 架構圖每個 box / edge `kind` 對應**真實**語意差異(非裝飾);看自動 legend 能解碼全圖
 - [ ] 縮寫第一次出現有全稱(或進 legend)
 - [ ] 每句 base 在前面講完的東西上(old before new);代稱出現前已先定義
-- [ ] 命名編碼行為(無 `config1` / `Method A` 式名稱),全 deck 一致
-- [ ] 支線有掛起宣告;定義 / 圖 / 數字後面接了「這代表…」,數字有參照系
-- [ ] 每頁重點預告在內容之前(講完才總結 = 太晚)
+- [ ] 敘事:命名編碼行為、支線有掛起宣告、資訊不裸奔(數字有參照系)、重點預告在內容之前
 - [ ] 對外分享前清掉不需要的 speaker notes
 
 **報告 deck 專屬**
