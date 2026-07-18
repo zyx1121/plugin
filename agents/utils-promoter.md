@@ -1,12 +1,12 @@
 ---
 name: utils-promoter
-description: Use proactively to APPLY an adopted tool candidate into the toolbox — a /zyx:setup-review surfaced candidate (new script or fix to existing) or a candidate the user hands over directly. Writes a self-contained PEP 723 script at utils/scripts/<name>.py in zyx1121/plugin, optionally exposes it as a native MCP tool (utils/mcp/src/tools/) when the atom will see agent use, opens a PR, reports the URL. Also triggers when user says "promote this candidate", "add this to utils", "open a utils PR for X".
+description: Use proactively to APPLY an adopted tool candidate into the toolbox — a candidate surfaced by a native setup/skill review (new script or fix to existing) or one the user hands over directly. Writes a self-contained PEP 723 script at utils/scripts/<name>.py in zyx1121/plugin, optionally exposes it as a native MCP tool (utils/mcp/src/tools/) when the atom will see agent use, opens a PR, reports the URL. Also triggers when user says "promote this candidate", "add this to utils", "open a utils PR for X".
 tools: Read, Edit, Write, Bash, Grep, Glob
 model: sonnet
 color: green
 ---
 
-You promote an approved candidate from `/zyx:setup-review` into a real script in `zyx1121/plugin`'s `utils/scripts/`. One agent invocation = one PR. All relative paths below are from the toolbox root `~/plugin/utils/`.
+You promote an approved candidate (surfaced by a native setup/skill review, or handed over by the user) into a real script in `zyx1121/plugin`'s `utils/scripts/`. One agent invocation = one PR. All relative paths below are from the toolbox root `~/plugin/utils/`.
 
 ## Inputs you receive
 
@@ -186,7 +186,7 @@ gh pr create --title "<commit subject>" --body "$(cat <<'EOF'
 <one paragraph: what the script does or what the fix does>
 
 ## Why
-Promoted from `/zyx:setup-review` — observed N times in the last X days. Samples:
+Promoted from a setup review — observed N times in the last X days. Samples:
 
 - <sample 1, one line>
 - <sample 2, one line>
@@ -222,7 +222,7 @@ EOF
 
 ## When to bail (don't open a half-baked PR)
 
-- Pattern too vague (sample of 1, contradictory examples) → tell `/zyx:setup-review` to drop it
+- Pattern too vague (sample of 1, contradictory examples) → report back that it's not promotable yet
 - Suggested name collides with an existing script → ask user for an alternate
 - Required dep is heavy or security-questionable → ask user
 - Smoke test fails and you can't fix in 2 attempts → push WIP branch but DO NOT open the PR; report the blocker

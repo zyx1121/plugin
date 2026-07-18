@@ -15,7 +15,7 @@
    - ⚠️ 中文 **prose** 內的全形 `，。、：` 維持全形(正確 orthography),**不要**改半形。規範只動「`Triggers on` 之後、引號字串之間」的分隔符。
 4. **內容 = 能力句 + 觸發**(+ 必要時 pushy clause / 負 scope)。
    - **禁止把 workflow / 架構步驟塞進 description**。實測(obra/superpowers):description 一旦摘要 workflow,Claude 會「照 description 做」而跳過 skill body。步驟寫進 body。
-5. **長度按 routing 成本分層**,全部 < 1024 char。trivial slash 指令 ~120 char、貴的 intent router(method / nextjs-dev)400–600 char。`/review` 的 `description-short`(<50)/`description-long`(>500)會抓。
+5. **長度按 routing 成本分層**,全部 < 1024 char。trivial slash 指令 ~120 char、貴的 intent router(method / nextjs-dev)400–600 char。`description-short`(<50)/`description-long`(>500)是復盤時的抓取線(原生檢查,見 §改完)。
 6. **重疊 skill 互標負 scope 並指名替代**:`NOT X — 那是 <skill>`,**雙向都標**。例:journal cluster(daily / weekly / now / morning / catchup)彼此。
 
 ## 範本
@@ -26,4 +26,4 @@ description: "<能力句,em-dash gloss 開頭> — <scope>. Use when <intent>. T
 
 ## 改完
 
-`utils skill-lint ~/plugin/skills`(或 `/review` Section 2)→ 零 issue → commit + bump plugin version + push + PR。
+原生自檢(agent 直接照本檔檢查,無 linter 工具,ADR-0006):description 50–500 char 且含具體 trigger、`name:` = 目錄名、body 非空、無 workflow 漏入 description、>90 天未動的 skill 順手檢視是否還需要 → 零 issue → commit + bump plugin version + push + PR。
