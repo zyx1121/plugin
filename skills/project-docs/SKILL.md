@@ -1,11 +1,11 @@
 ---
-name: lab-docs
-description: "Loki 的實驗室 Markdown 文件 skill — wise-ntust / 實驗室專案的成果報告、簡介、設備設定手冊、操作 runbook、週報,風格抽自 mmWave-Project_M12 文件家族 + coding-gateway REPORT.md,GitHub alerts 版(非 HackMD containers)。含共用外殼、alert 語意文法、四種類型骨架、HackMD→GitHub 轉換對照。Use when 為實驗室專案寫或 review Markdown 文件,或把舊 HackMD 文件轉 GitHub 版。 Triggers on '成果報告', '寫報告', 'REPORT.md', '實驗報告', '設備手冊', '操作手冊', 'runbook', '操作流程文件', '週報', '日報', '交接文件', 'M12 風格', 'github alert'. NOT 簡報 / slides — 那是 winlab-pptx. NOT 論文 — 那是 paper-revise / academic-sentence."
+name: project-docs
+description: "Loki 的專案 Markdown 文件 skill — 成果報告、簡介、設備設定手冊、操作 runbook、週報,風格抽自 mmWave-Project_M12 文件家族 + coding-gateway REPORT.md,GitHub alerts 版(非 HackMD containers)。含共用外殼、alert 語意文法、四種類型骨架、HackMD→GitHub 轉換對照。Use when 為專案寫或 review Markdown 文件,或把舊 HackMD 文件轉 GitHub 版。Triggers on '成果報告', '寫報告', 'REPORT.md', '實驗報告', '設備手冊', '操作手冊', 'runbook', '操作流程文件', '週報', '日報', '交接文件', 'M12 風格', 'github alert'. NOT 簡報 / slides — 那是 winlab-pptx. NOT 論文 — 那是 paper-revise / academic-sentence."
 ---
 
-# lab-docs — 實驗室 Markdown 文件風格系統
+# project-docs — 專案 Markdown 文件風格系統
 
-實驗室專案文件(報告、手冊、runbook)的完整風格系統。範本來源 = `mmWave-Project_M12` 文件家族(iCloud PARA `Projects/mmWave-Project_M12/md/`,12 份);已驗證成品 = `wise-ntust/coding-gateway` `REPORT.md`。
+專案文件(報告、手冊、runbook)的完整風格系統。範本來源 = `mmWave-Project_M12` 文件家族(iCloud PARA `Projects/mmWave-Project_M12/md/`,12 份);已驗證成品 = `wise-ntust/coding-gateway` `REPORT.md`。
 
 **渲染目標 = GitHub**:alert 用 GitHub alerts(`> [!NOTE]` 等五型),架構圖用 mermaid,圖片用 repo 相對路徑。舊範本是 HackMD containers — 轉換對照見下;只有文件明確要貼回 HackMD 時才用 HackMD 語法,預設一律 GitHub。
 
