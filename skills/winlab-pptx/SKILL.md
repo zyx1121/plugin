@@ -1,6 +1,6 @@
 ---
 name: winlab-pptx
-description: "Loki 的唯一簡報 skill — 產 .pptx(NOT .key)涵蓋兩類 deck:報告(lab talk / pitch / demo,英文高密度)與教學(錄課 / 線上課程 / MOOC,中文低密度)。引擎 = python-pptx 把 JSON spec 填進 WinLab 母片(template-first),含原生 block+line 架構圖。涵蓋內容規範(cover / outline / claim 標題 / L0–L3 bullet / 敘事連貫 / speaker notes)+ pptx 落地 + 自我檢查。Triggers on '做簡報', '做投影片', 'slide deck', 'presentation', 'powerpoint', 'pptx', '實驗室簡報', 'lab talk', 'winlab slides', 'pptx 架構圖', '錄課', '教學投影片', '線上課程投影片', '磨課師', 'MOOC', 'review 我的投影片', 'outline 一下', 'rewrite this deck'. NOT Markdown 成果報告 / 手冊 / runbook — 那是 lab-docs."
+description: "Loki 的唯一簡報 skill — 產 .pptx(NOT .key)涵蓋兩類 deck:報告(lab talk / pitch / demo,英文高密度)與教學(錄課 / 線上課程 / MOOC,中文低密度)。引擎 = python-pptx 把 JSON spec 填進 WinLab 母片(template-first),含原生 block+line 架構圖。涵蓋內容規範(cover / outline / claim 標題 / L0–L3 bullet / 敘事連貫 / speaker notes)+ pptx 落地 + 自我檢查。Triggers on '做簡報', '做投影片', 'slide deck', 'presentation', 'powerpoint', 'pptx', '實驗室簡報', 'lab talk', 'winlab slides', 'pptx 架構圖', '錄課', '教學投影片', '線上課程投影片', '磨課師', 'MOOC', 'review 我的投影片', 'outline 一下', 'rewrite this deck'. NOT Markdown 成果報告 / 手冊 / runbook — 那是 project-docs."
 ---
 
 # WinLab pptx — Loki 的唯一簡報 skill
