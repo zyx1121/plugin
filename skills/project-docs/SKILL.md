@@ -1,6 +1,6 @@
 ---
 name: project-docs
-description: "Loki 的專案 Markdown 文件 skill — 成果報告、簡介、設備設定手冊、操作 runbook、週報,風格抽自 mmWave-Project_M12 文件家族 + coding-gateway REPORT.md,GitHub alerts 版(非 HackMD containers)。含共用外殼、alert 語意文法、四種類型骨架、HackMD→GitHub 轉換對照。Use when 為專案寫或 review Markdown 文件,或把舊 HackMD 文件轉 GitHub 版。Triggers on '成果報告', '寫報告', 'REPORT.md', '實驗報告', '設備手冊', '操作手冊', 'runbook', '操作流程文件', '週報', '日報', '交接文件', 'M12 風格', 'github alert'. NOT 簡報 / slides — 那是 winlab-pptx. NOT 論文 — 那是 paper-revise / academic-sentence."
+description: "Loki 的專案 Markdown 文件 skill — 成果報告、簡介、設備設定手冊、操作 runbook、週報的完整風格系統:共用外殼、alert 語意文法、四種類型骨架,GitHub alerts 版(非 HackMD containers),含 HackMD→GitHub 轉換對照。Use when 為專案寫或 review Markdown 文件,或把舊 HackMD 文件轉 GitHub 版。Triggers on '成果報告', '寫報告', 'REPORT.md', '實驗報告', '設備手冊', '操作手冊', 'runbook', '操作流程文件', '週報', '日報', '交接文件', 'github alert'. NOT 簡報 / slides — 那是 winlab-pptx. NOT 論文 — 那是 paper-revise / academic-sentence."
 ---
 
 # project-docs — 專案 Markdown 文件風格系統
