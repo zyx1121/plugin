@@ -1,6 +1,6 @@
 ---
 name: academic-sentence
-description: "Sentence-level academic writing formulas for English and Traditional Chinese — subject-verb proximity, topic/stress position, nominalization traps, active/passive voice criteria, dangling this/it references, parallelism, and Chinese topic-prominence vs subject-prominence with 余光中式歐化中文病灶. Use when writing or polishing a single sentence, not restructuring a whole paper or section. Triggers on 'SVO 語序', '這句話怎麼寫', '這句英文語序', '被動語態要不要用', '這句中文西化了', '翻譯腔', '句子太長怎麼拆', '改這句話', 'sentence structure', 'nominalization', 'topic position', 'given-new'. NOT whole-paper structure, reviewer-comment revision, or cross-section consistency — that's paper-revise. NOT slide/deck content — that's winlab-pptx."
+description: "Sentence-level academic writing formulas for English and Traditional Chinese — 語序 / topic-stress position / nominalization / passive voice / parallelism / 歐化中文病灶. Use when polishing a single sentence, not restructuring a paper. Triggers on 'SVO 語序', '這句話怎麼寫', '被動語態要不要用', '這句中文西化了', '翻譯腔', '句子太長怎麼拆', '改這句話', 'sentence structure', 'nominalization', 'topic position', 'given-new'. NOT whole-paper / reviewer-comment revision — that's paper-revise. NOT slide content — that's winlab-pptx."
 ---
 
 # academic-sentence — 中英學術句子層級寫作公式
