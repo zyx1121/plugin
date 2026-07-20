@@ -15,7 +15,7 @@
    - ⚠️ 中文 **prose** 內的全形 `，。、：` 維持全形(正確 orthography),**不要**改半形。規範只動「`Triggers on` 之後、引號字串之間」的分隔符。
 4. **內容 = 能力句 + 觸發**(+ 必要時 pushy clause / 負 scope)。
    - **禁止把 workflow / 架構步驟塞進 description**。實測(obra/superpowers):description 一旦摘要 workflow,Claude 會「照 description 做」而跳過 skill body。步驟寫進 body。
-5. **長度按 routing 成本分層**,全部 < 1024 char。trivial slash 指令 ~120 char、貴的 intent router(method / nextjs-dev)400–600 char。`description-short`(<50)/`description-long`(>500)是復盤時的抓取線(原生檢查,見 §改完)。
+5. **長度按 routing 成本分層**,全部 < 1024 char。trivial slash 指令 ~120 char、貴的 intent router(project-docs / nextjs-dev)400–600 char。`description-short`(<50)/`description-long`(>500)是復盤時的抓取線(原生檢查,見 §改完)。
 6. **重疊 skill 互標負 scope 並指名替代**:`NOT X — 那是 <skill>`,**雙向都標**。例:journal cluster(daily / weekly / now / morning / catchup)彼此。
 
 ## 範本
