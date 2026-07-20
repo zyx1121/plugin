@@ -139,29 +139,29 @@ chmod +x scripts/<name>.<ext>
 
 ### 5. Smoke test
 
-```bash
-./bin/utils <name> --help                 # help reads cleanly via dispatcher (any extension)
-./bin/utils <name> <real-arg-from-samples># actually run on real input
-```
-
-Direct invocation also works as a sanity check — shebang dispatches:
+Shebang dispatches directly — no dispatcher binary to go through:
 
 ```bash
-./scripts/<name>.<ext> --help             # uv run for .py, bash for .sh, osascript for .applescript
+./scripts/<name>.<ext> --help                  # uv run for .py, bash for .sh, osascript for .applescript
+./scripts/<name>.<ext> <real-arg-from-samples> # actually run on real input
 ```
 
 First `.py` call hits the network for deps (5-30 sec); after that it's cached. Bash and AppleScript have no per-script install step.
 
 If smoke test fails, fix before committing. Do not commit broken code.
 
-### 6. Add an MCP manifest (only if the atom will see agent use)
+### 6. Wire it into the MCP toolbox (only if the atom will see agent use)
 
-Atoms an agent will call from inside a CC/Codex session (not just SSH/scripts/Noir) should ship with an MCP manifest in the same PR — don't leave that as follow-up work.
+Atoms an agent will call from inside a CC/Codex session (not just SSH/scripts/Noir) should ship wired into the MCP server in the same PR — don't leave that as follow-up work. There is no YAML manifest layer; each domain owns native zod schemas in TypeScript (`utils/mcp/src/tools/<domain>/index.ts`), registered via the `scriptTool({ name, description, inputSchema, script, envelope, timeoutMs, buildArgs })` helper (`utils/mcp/src/core/tool.ts`).
 
-- Write `mcp/manifests/<atom>.yaml` per the spec in `~/plugin/utils/mcp/README.md` (`## Manifest spec v1.1`). Read an existing manifest of a similar shape first — `uuid.yaml` for a single-command atom, `safari.yaml` / `pve.yaml` for multi-subcommand.
-- Validate per that README's "Adding a new manifest" steps: `cd ~/plugin/utils/mcp && bun test`, then restart the server (or re-run `tools/list` against it) to confirm the new tool registers with the expected schema — a structural error surfaces as a `[manifest] skipping ...` stderr line, not a generic test failure.
-- Skip this step for atoms that are inherently CLI-only (inherited stdio, plaintext-secret args, interactive-only) — see `pve.yaml`'s `pve_ssh` comment and `e3p.yaml`'s login exclusion for the pattern; note the exclusion reason in the PR body instead.
-- This only adds the manifest file — it doesn't touch tool authorization/registration (`claude mcp add` / Codex `config.toml`), which is a separate one-time step outside this agent's scope.
+- **New domain**: create `utils/mcp/src/tools/<name>/index.ts` exporting `<name>Tools: ToolboxTool[]` — read an existing domain of similar shape first (`pve/index.ts` for multi-subcommand, `reminders/index.ts` for a small flat one). Import it into `utils/mcp/src/tools/index.ts` and spread it into `allTools`.
+- **Existing domain** (`fix-existing`, or a new verb on a live atom): add the tool to that domain's `index.ts` directly.
+- Tool naming: `domain_verb_object` (e.g. `pve_add_caddy`) — one tool per agent intent, no `action`/`mode` multiplexers. Destructive tools must say so in the description and require an explicit confirm/yes input that maps to the underlying script's `--yes`/`--confirm` flag.
+- Update `utils/mcp/tests/tool-registry.test.ts`: for a new domain, add it to the sorted domain list and the name-prefix regex; either way, bump the `toHaveLength(N)` assertion by the tool count you added.
+- Validate: `cd ~/plugin/utils/mcp && bun test && bun run typecheck` — a bad schema or duplicate name fails the registry test, not a generic crash.
+- Update `utils/mcp/README.md`: add the new tool names under "Current Tool Surface" (and "Domains" for a new domain), and bump the "N tools total" count.
+- Skip this step for atoms that are inherently CLI-only (inherited stdio, plaintext-secret args, interactive-only) — `pve.py`'s `ssh` subcommand and `e3p.py`'s `login` subcommand are both precedents with no MCP tool; note the exclusion reason in the PR body instead.
+- This only wires the tool into the toolbox source — it doesn't touch client-side registration (the plugin's `.mcp.json` auto-registers for Claude Code; Codex needs its own `config.toml` entry), which is a separate one-time step outside this agent's scope.
 
 ### 7. Commit
 
@@ -192,12 +192,12 @@ Promoted from a setup review — observed N times in the last X days. Samples:
 - <sample 2, one line>
 
 ## Smoke test
-- [x] `utils <name> --help` reads cleanly via the dispatcher
-- [x] Real input: `utils <name> <args>` → expected output
+- [x] `./scripts/<name>.<ext> --help` reads cleanly
+- [x] Real input: `./scripts/<name>.<ext> <args>` → expected output
 
-## MCP manifest
-- [x] `mcp/manifests/<atom>.yaml` added + `bun test` clean, tool registers via `tools/list`
-      (or: not added — atom is CLI-only because <reason>)
+## MCP wiring
+- [x] `utils/mcp/src/tools/<domain>/index.ts` added/updated, `bun test` + `bun run typecheck` clean
+      (or: not wired — atom is CLI-only because <reason>)
 
 ## Notes
 <anything reviewer should know — new deps, edge cases skipped, etc.>

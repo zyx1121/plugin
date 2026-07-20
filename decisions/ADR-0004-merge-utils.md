@@ -81,3 +81,14 @@ Scope note: this renaming applies only where the server arrives via the
 plugin (CC on the Mac). Environments that mount the server through an
 explicit MCP config — Codex `config.toml`, Noir's `mcp-config.json` — keep
 their own registration and the plain `mcp__utils__*` names.
+
+## Resolution (2026-07-20): known debt cleared
+
+Both items in the known-debt note above are now resolved:
+
+- `skills/pve/SKILL.md` — retired outright (ADR-0007); the drifted CLI
+  reference and MCP roster died with the file.
+- `agents/utils-promoter.md` — its smoke-test step no longer names
+  `bin/utils`, and its manifest step was rewritten to describe the actual
+  native TS wiring (`utils/mcp/src/tools/<domain>/index.ts` +
+  `scriptTool()`) in place of the retired `mcp/manifests/` YAML layer.
