@@ -1,123 +1,46 @@
 ---
 name: winlab-pptx
-description: "Loki 的唯一簡報 skill — 產 .pptx(NOT .key)涵蓋兩類 deck:報告(lab talk / pitch / demo,英文高密度)與教學(錄課 / 線上課程 / MOOC,中文低密度)。Triggers on '做簡報', '做投影片', 'slide deck', 'presentation', 'powerpoint', 'pptx', '實驗室簡報', 'lab talk', 'winlab slides', 'pptx 架構圖', '錄課', '教學投影片', '線上課程投影片', '磨課師', 'MOOC', 'review 我的投影片', 'outline 一下', 'rewrite this deck'. NOT Markdown 成果報告 / 手冊 / runbook — 那是 project-docs."
+description: "Loki 的唯一簡報 skill — 產 .pptx(NOT .key)涵蓋兩類 deck:報告 / 技術簡報(lab talk / pitch / demo,英文高密度)與教學簡報(錄課 / 線上課程 / MOOC,中文低密度)。Triggers on '做簡報', '做投影片', 'slide deck', 'presentation', 'powerpoint', 'pptx', '技術簡報', '實驗室簡報', 'lab talk', 'winlab slides', 'pptx 架構圖', '錄課', '教學簡報', '教學投影片', '線上課程投影片', '磨課師', 'MOOC', 'review 我的投影片', 'outline 一下', 'rewrite this deck'. NOT Markdown 成果報告 / 手冊 / runbook — 那是 project-docs."
 ---
 
 # WinLab pptx — Loki 的唯一簡報 skill
 
 產 **`.pptx`**(不再有 `.key` 路線)。引擎 = `python-pptx` 把內容填進 `template.pptx` 母片(template-first):**版式 / 配色 / 字型 / logo / footer 全鎖在母片裡,agent 只灌文字 + 設層級,不從零畫、不審美。** 架構圖用 pptx 原生 block+line(可編輯 shape,非嵌圖)。
 
-這份 skill 自包含**全部**規範:怎麼把 deck 落地成 `.pptx`(tooling / 母片契約 / spec / 架構圖),以及兩類 deck 的內容規範(報告 / 教學)。沒有外部 skill 依賴。
+本檔按目的分層,讀的順序 = 做的順序:**§1 先分類(目的決定規範)→ §2 共用底線(官方 MUST)→ §3A 報告 deck 專章 / §3B 教學 deck 專章(擇一)→ §4 落地引擎(兩類共用)→ §5 Self-review**。內容先於工具 — 規範定了才進落地章。沒有外部 skill 依賴。
 
 **黃金標準** = `assets/kilo-sense-talk.pptx`(老闆認可的成品,報告 deck;source 在 iCloud `Projects/sense/`)。pptx 落地的所有預設(layout、字型、字色、架構圖樣式)都從它抽出對齊;拿不準時 render 它來對。
 
-## 先分類:報告 deck vs 教學 deck
+## §1 先分類:目的 → deck 類型
 
-動手前先定這份 deck 是哪一類 —— 兩類的內容規範(密度 / 語言 / 標題 / 字級)直接衝突,選錯整份走鐘。**pptx 落地(tooling / 母片契約 / spec / 架構圖)兩類共用,內容規範分兩節。**
+動手前先定這份 deck 是哪一類 —— 兩類的內容規範(密度 / 語言 / 標題 / 字級)直接衝突,選錯整份走鐘。定了就只讀對應的專章(§3A 或 §3B);落地引擎(§4)兩類共用。
 
-| | 報告 deck | 教學 deck |
+| | 報告 deck(技術簡報) | 教學 deck(教學簡報) |
 |---|---|---|
 | 場景 | lab talk / pitch / demo / 現場報告 | 錄課 / 線上課程影片 / MOOC |
 | 語言 | 投影片**英文** | 投影片**中文**(面向學生) |
 | 密度 | **高** — nested bullets 塞滿,資訊密集 | **低** — 一片一重點、≤6 行 |
 | 標題 | claim / dash 句型 | 知識點名稱即可 |
 | 字級 | 母片鎖死(title 36 / body 24pt) | 要大(內文 ≥36 / 標題 ≤60pt)— **與母片衝突,見下** |
-| 規範節 | [§內容規範 A — 報告 deck](#內容規範-a--報告-deck) | [§內容規範 B — 教學 deck](#內容規範-b--教學-deck) |
+| 專章 | §3A | §3B |
 
-> **母片是為報告 deck 做的。** `template.pptx` 字級鎖 title 36 / body 24pt,符合報告 deck;教學 deck 要 ≥36pt 內文 + inline 關鍵詞上色,**現行母片不支援**(見 §教學 deck 的落地限制)。教學 deck 要嘛改 builder 字級常數 / 另備教學母片,要嘛 render 後進 PowerPoint 手調 —— 別假裝母片預設就對。
+> **母片是為報告 deck 做的。** `template.pptx` 字級鎖 title 36 / body 24pt,符合報告 deck;教學 deck 要 ≥36pt 內文 + inline 關鍵詞上色,**現行母片不支援**(見 §3B 的落地限制)。教學 deck 要嘛改 builder 字級常數 / 另備教學母片,要嘛 render 後進 PowerPoint 手調 —— 別假裝母片預設就對。
 
-## WinLab 官方規範(MUST · 對齊 NYCU-WinLab)
+## §2 共用底線 — WinLab 官方規範(MUST · 對齊 NYCU-WinLab)
 
 內容規範的 **source of truth = NYCU-WinLab/winlab-skills 的 `winlab-slides-guidelines`**(https://github.com/NYCU-WinLab/winlab-skills,實驗室共識,RFC 2119)。下面是它的 MUST / MUST NOT —— **兩類 deck 都必守**(bullet 密度例外,見末);報告 deck 尤其是 lab talk 的驗收底線。官方那份更新就回來對齊,別自己漂走。
 
 - **標題** — MUST 清楚表達該頁意圖、MUST **唯一不重複**、MUST 直接對應主題;同一主題跨多頁放不下時用 `(1/2)` `(2/2)`。
-- **Context before detail** — MUST 先給背景 / 動機 / 問題,再進細節 / 方法 / 數字;MUST NOT 一上來就丟實作或結果。每主題照 **situation → problem → decision → outcome** 鋪,連續 slide 因果接得上(= §報告 deck 的 old before new)。
+- **Context before detail** — MUST 先給背景 / 動機 / 問題,再進細節 / 方法 / 數字;MUST NOT 一上來就丟實作或結果。每主題照 **situation → problem → decision → outcome** 鋪,連續 slide 因果接得上(= §3A 的 old before new)。
 - **Make the point obvious** — MUST 讓每頁 takeaway 視覺 / 結構一眼可見(claim 標題 / 粗體 / 色 / callout / 頂部一句結論);MUST NOT 把結論埋進密集段落、表格 cell 或長 bullet 末。掃一眼認不出主旨 = 這頁失敗。
 - **One topic, one slide** — MUST 把同主題的「介紹 + 結論」放**同一頁**;MUST NOT 同內容拆多頁、MUST NOT 同主題換標題重講、MUST NOT 不相關主題塞一頁。目標是主題內聚,不是頁數多寡。
-- **Bullet 階層** — MUST 讓 bullet 之間的層級關係清楚(= 報告 deck 的 L0–L3,同層同類)。
+- **Bullet 階層** — MUST 讓 bullet 之間的層級關係清楚(= §3A 的 L0–L3,同層同類)。
 - **縮寫** — MUST 所有英文縮寫給全名、SHOULD 在前段 slide 就給。
-- **流程圖 / pipeline** — MUST 附步驟描述(見 §架構圖)。
+- **流程圖 / pipeline** — MUST 附步驟描述(見 §4 架構圖)。
 
 > **唯一刻意偏離官方**:官方 SHOULD「每 bullet ≤1 行」是單一通用密度;我們按 deck 類別分 —— 報告 deck 高密度 nested(撐不過一行才拆下一層)、教學 deck ≤6 行。其餘照守。
 
-## Tooling
-
-全在本 skill 目錄,`uv` 自動裝 `python-pptx`(PEP 723,免手動 pip):
-
-- **`builder.py`** — `uv run builder.py template.pptx <deck.json> <out.pptx>`,把 spec 渲染成 deck。
-- **`template.pptx`** — WinLab 母片(5 layout,見下)。
-- **`inspect_pptx.py`** / **`colors.py`** — `uv run inspect_pptx.py <template> <deck>` 抽 layout/placeholder/每頁結構;`uv run colors.py <pptx>` 抽 theme + master txStyles + 架構圖框真實字色。**換母片時先跑,再對齊 builder 常數。**
-- **`assets/example.json`** — 完整 spec 範例(封面 / outline / 內容頁 / 架構圖,含 cylinder + 分區),照抄改。
-- **render QA** — `soffice` + `pdftoppm`(都已在 PATH)。
-
-## Workflow
-
-1. **分類 + 規劃** — 先定報告 / 教學(見上),再按對應內容規範的 story arc 列頁(cover → outline → sections → 內容 → 架構圖 → future / Q&A)。
-2. **寫 spec** — 一份 `deck.json`(格式見下;照 `assets/example.json`)。
-3. **build** — `uv run builder.py template.pptx deck.json out.pptx`
-4. **render QA(必做,至少一輪 fix-verify)**:
-   ```bash
-   pkill -f soffice; soffice --headless "-env:UserInstallation=file:///tmp/osd-lo" \
-     --convert-to pdf --outdir /tmp out.pptx
-   pdftoppm -jpeg -r 110 /tmp/out.pdf /tmp/slide
-   ```
-   逐張看圖(Read 每張 jpg),**假設有問題**:框內文字空 / 重疊 / 超框、連線穿過文字、框太擠、低對比、placeholder 殘留。教學 deck 另數每張本文行數(≤6)。改 spec 重跑,直到一輪掃不出新問題。架構圖尤其要看。
-5. 交付 `out.pptx`。
-
-## 母片 layout 契約(template.pptx)
-
-`prs.slide_layouts` 名稱 + placeholder idx(idx 是 **dict key 不是位置**,已固定在 builder):
-
-| spec `layout` | 母片 layout 名 | placeholder |
-|---|---|---|
-| `cover` | `Title` | title=0, body=1(日期 `\n` 姓名) |
-| `outline` / `content` / `diagram` | `Title & Bullets` | title=0, body=1 |
-| `section` | `Section` | title=0 |
-| `photo` | `Title, Bullets & Photo` | title=0, body=1, picture=21 |
-| `two-col` | `Two Columns` | title=0, body=1(左), 21(右) |
-
-### 字型 / 字色 — 母片已鎖,spec 不用設
-
-`template.pptx` 的 master txStyles 直接寫死(= kilo-sense-talk 的真實值,`colors.py` 抽出):
-
-- **字型 `Calibri`**(title + body 都是),**覆蓋** theme 的 fontScheme(Helvetica)—— 別被 theme 騙,實際渲染是 Calibri。
-- **中文內容(教學 deck)**:Calibri 沒 CJK 字形,builder 對**每個 run 自動補 East Asian 字型**(`EA_FONT` 常數,預設 `Microsoft JhengHei`)→ 中文走 JhengHei、英文/數字仍走 Calibri,品牌不動。要換(如 Mac 上播改 `PingFang TC`)改 builder 頂部 `EA_FONT` 一個常數即可。
-- **字色標題 / 內文 `#3297FC`(亮藍)**,title 36pt / body 24pt。所有 placeholder 文字**繼承**它,builder 不另設。
-- 架構圖框內字 builder 強制**純黑**(autoshape 不繼承 body style,預設會是白字 → 白底看不到)。
-- theme 的 `accent1 = #4F81BD`(較深的藍)→ 架構圖框線 / 連線用這個。
-
-> Calibri 是微軟字體,**沒裝它的 Mac 上 LibreOffice 預覽會 fallback** 成別的無襯線 —— 但**檔案內就是 Calibri**,到有 Office 的機器(老闆那邊 / Windows)就正確。別因為 render 預覽不像就去改。
-> 要真正品牌化(WinLab 色 / logo)→ 改 `template.pptx` 的 master txStyles 顏色 + theme,builder 完全不動。
-
-## Deck spec 格式
-
-```jsonc
-{ "slides": [
-  { "layout": "cover",   "title": "...", "date": "2026/6/15", "author": "詹詠翔" },
-  { "layout": "outline", "title": "Outline", "current": 3,
-    "items": ["Motivation", "Architecture", "..."] },          // current = 高亮(粗體)第幾條
-  { "layout": "section", "title": "Hearing" },
-  { "layout": "content", "title": "Hearing Pipeline",          // title = claim,禁空殼分類名
-    "bullets": [ {"text": "System Audio Stream:", "level": 0}, // L0 句尾 `:`
-                 {"text": "Captures audio in real time", "level": 1} ] },
-  { "layout": "two-col", "title": "...", "left": [...], "right": [...] },
-  { "layout": "diagram", "title": "...", /* 見下 */ },
-  { "layout": "content", "title": "...", "bullets": [...],
-    "notes": "講者口白 → 原生 speaker notes",        // 任何 layout 都可加
-    "cite": [ {"label": "Yao et al., ReAct (2022)",  // 底部小灰字出處列
-               "url": "https://arxiv.org/abs/2210.03629"} ] }
-]}
-```
-
-`bullets[].level` = **0–3 直接寫**(pptx 存得了 paragraph level)。這是 pptx 相對 Keynote 的勝點 —— Keynote 的 L0-L3 只能進 GUI 按 Tab,**這裡程式化一次到位**。
-
-**`notes`(任何 layout 可選)** = 原生 presenter notes(`slide.notes_slide`),builder 寫進去,簡報播放時只有講者看得到。**注意**:這跟 `diagram` 的 `note`(架構圖底部 legend 附註)是兩個不同欄位,別搞混。教學/逐字講稿型 deck 用 `notes` 放整段口白。
-
-**`cite`(任何 layout 可選)** = `[{label, url}, …]`,builder 在內容框下方、頁尾上方渲染一行小灰字「來源:label｜label」,並把完整 `label: url` 自動 append 到該頁 speaker notes(投影片只露短 label,連結留給講者)。一頁建議 ≤3 條(label 短),否則灰字列會 word-wrap 擠到頁尾帶。diagram 頁底部已有 legend,不要再掛 `cite`(會撞)。
-
-> **中文 deck 標點**:英文/數字後半形(`ReAct: x`、`200 行`),中文/中文標點(含 `」』）`)後全形(`小結:` → `小結：`)。builder 不自動正規化,要在 spec 寫對或用後處理腳本掃一遍(`(?<=[一-鿿」』）])[:,;!?]` → 全形)。
-
-## 內容規範 A — 報告 deck
+## §3A 報告 deck(技術簡報)— 內容規範
 
 投影片**英文**、高密度。整份 deck 是一條線,不是 random walk。
 
@@ -214,7 +137,7 @@ description: "Loki 的唯一簡報 skill — 產 .pptx(NOT .key)涵蓋兩類 dec
 - Cover / outline / divider / 純 demo 頁可不寫;複雜論述頁建議寫
 - 對外分享前(export 給聽眾)通常清掉 — note 是給講者自己看的
 
-## 內容規範 B — 教學 deck
+## §3B 教學 deck(教學簡報)— 內容規範
 
 給**錄製課程影片**用,面向學生、搭配 6–10 分鐘短影片。規範跟報告 deck **剛好相反**:報告追資訊密度,教學追**低密度、一片一重點、好錄好懂**,且投影片**中文**。
 
@@ -230,7 +153,88 @@ description: "Loki 的唯一簡報 skill — 產 .pptx(NOT .key)涵蓋兩類 dec
 
 投影片要「一片一重點、低密度」是被**影片怎麼切**反過來驅動的:每單元影片 6–10 分鐘 = 1 個知識點 + 1–2 個小 Quiz。設計時心裡放著「這是哪支影片、哪個知識點」即可;單元切分本身不在本 skill 範圍。
 
-## 架構圖:兩條路線(先選)
+## §4 落地引擎(兩類共用)
+
+內容照專章定稿後才進這章:寫 spec → build → render QA。
+
+### Tooling
+
+全在本 skill 目錄,`uv` 自動裝 `python-pptx`(PEP 723,免手動 pip):
+
+- **`builder.py`** — `uv run builder.py template.pptx <deck.json> <out.pptx>`,把 spec 渲染成 deck。
+- **`template.pptx`** — WinLab 母片(5 layout,見下)。
+- **`inspect_pptx.py`** / **`colors.py`** — `uv run inspect_pptx.py <template> <deck>` 抽 layout/placeholder/每頁結構;`uv run colors.py <pptx>` 抽 theme + master txStyles + 架構圖框真實字色。**換母片時先跑,再對齊 builder 常數。**
+- **`assets/example.json`** — 完整 spec 範例(封面 / outline / 內容頁 / 架構圖,含 cylinder + 分區),照抄改。
+- **render QA** — `soffice` + `pdftoppm`(都已在 PATH)。
+
+### Workflow
+
+1. **分類 + 規劃** — 先定報告 / 教學(§1),再按對應專章的 story arc 列頁(cover → outline → sections → 內容 → 架構圖 → future / Q&A)。
+2. **寫 spec** — 一份 `deck.json`(格式見下;照 `assets/example.json`)。
+3. **build** — `uv run builder.py template.pptx deck.json out.pptx`
+4. **render QA(必做,至少一輪 fix-verify)**:
+   ```bash
+   pkill -f soffice; soffice --headless "-env:UserInstallation=file:///tmp/osd-lo" \
+     --convert-to pdf --outdir /tmp out.pptx
+   pdftoppm -jpeg -r 110 /tmp/out.pdf /tmp/slide
+   ```
+   逐張看圖(Read 每張 jpg),**假設有問題**:框內文字空 / 重疊 / 超框、連線穿過文字、框太擠、低對比、placeholder 殘留。教學 deck 另數每張本文行數(≤6)。改 spec 重跑,直到一輪掃不出新問題。架構圖尤其要看。
+5. 交付 `out.pptx`。
+
+### 母片 layout 契約(template.pptx)
+
+`prs.slide_layouts` 名稱 + placeholder idx(idx 是 **dict key 不是位置**,已固定在 builder):
+
+| spec `layout` | 母片 layout 名 | placeholder |
+|---|---|---|
+| `cover` | `Title` | title=0, body=1(日期 `\n` 姓名) |
+| `outline` / `content` / `diagram` | `Title & Bullets` | title=0, body=1 |
+| `section` | `Section` | title=0 |
+| `photo` | `Title, Bullets & Photo` | title=0, body=1, picture=21 |
+| `two-col` | `Two Columns` | title=0, body=1(左), 21(右) |
+
+#### 字型 / 字色 — 母片已鎖,spec 不用設
+
+`template.pptx` 的 master txStyles 直接寫死(= kilo-sense-talk 的真實值,`colors.py` 抽出):
+
+- **字型 `Calibri`**(title + body 都是),**覆蓋** theme 的 fontScheme(Helvetica)—— 別被 theme 騙,實際渲染是 Calibri。
+- **中文內容(教學 deck)**:Calibri 沒 CJK 字形,builder 對**每個 run 自動補 East Asian 字型**(`EA_FONT` 常數,預設 `Microsoft JhengHei`)→ 中文走 JhengHei、英文/數字仍走 Calibri,品牌不動。要換(如 Mac 上播改 `PingFang TC`)改 builder 頂部 `EA_FONT` 一個常數即可。
+- **字色標題 / 內文 `#3297FC`(亮藍)**,title 36pt / body 24pt。所有 placeholder 文字**繼承**它,builder 不另設。
+- 架構圖框內字 builder 強制**純黑**(autoshape 不繼承 body style,預設會是白字 → 白底看不到)。
+- theme 的 `accent1 = #4F81BD`(較深的藍)→ 架構圖框線 / 連線用這個。
+
+> Calibri 是微軟字體,**沒裝它的 Mac 上 LibreOffice 預覽會 fallback** 成別的無襯線 —— 但**檔案內就是 Calibri**,到有 Office 的機器(老闆那邊 / Windows)就正確。別因為 render 預覽不像就去改。
+> 要真正品牌化(WinLab 色 / logo)→ 改 `template.pptx` 的 master txStyles 顏色 + theme,builder 完全不動。
+
+### Deck spec 格式
+
+```jsonc
+{ "slides": [
+  { "layout": "cover",   "title": "...", "date": "2026/6/15", "author": "詹詠翔" },
+  { "layout": "outline", "title": "Outline", "current": 3,
+    "items": ["Motivation", "Architecture", "..."] },          // current = 高亮(粗體)第幾條
+  { "layout": "section", "title": "Hearing" },
+  { "layout": "content", "title": "Hearing Pipeline",          // title = claim,禁空殼分類名
+    "bullets": [ {"text": "System Audio Stream:", "level": 0}, // L0 句尾 `:`
+                 {"text": "Captures audio in real time", "level": 1} ] },
+  { "layout": "two-col", "title": "...", "left": [...], "right": [...] },
+  { "layout": "diagram", "title": "...", /* 見下 */ },
+  { "layout": "content", "title": "...", "bullets": [...],
+    "notes": "講者口白 → 原生 speaker notes",        // 任何 layout 都可加
+    "cite": [ {"label": "Yao et al., ReAct (2022)",  // 底部小灰字出處列
+               "url": "https://arxiv.org/abs/2210.03629"} ] }
+]}
+```
+
+`bullets[].level` = **0–3 直接寫**(pptx 存得了 paragraph level)。這是 pptx 相對 Keynote 的勝點 —— Keynote 的 L0-L3 只能進 GUI 按 Tab,**這裡程式化一次到位**。
+
+**`notes`(任何 layout 可選)** = 原生 presenter notes(`slide.notes_slide`),builder 寫進去,簡報播放時只有講者看得到。**注意**:這跟 `diagram` 的 `note`(架構圖底部 legend 附註)是兩個不同欄位,別搞混。教學/逐字講稿型 deck 用 `notes` 放整段口白。
+
+**`cite`(任何 layout 可選)** = `[{label, url}, …]`,builder 在內容框下方、頁尾上方渲染一行小灰字「來源:label｜label」,並把完整 `label: url` 自動 append 到該頁 speaker notes(投影片只露短 label,連結留給講者)。一頁建議 ≤3 條(label 短),否則灰字列會 word-wrap 擠到頁尾帶。diagram 頁底部已有 legend,不要再掛 `cite`(會撞)。
+
+> **中文 deck 標點**:英文/數字後半形(`ReAct: x`、`200 行`),中文/中文標點(含 `」』）`)後全形(`小結:` → `小結：`)。builder 不自動正規化,要在 spec 寫對或用後處理腳本掃一遍(`(?<=[一-鿿」』）])[:,;!?]` → 全形)。
+
+### 架構圖:兩條路線(先選)
 
 | 路線 | 引擎 | 何時用 |
 |---|---|---|
@@ -239,7 +243,7 @@ description: "Loki 的唯一簡報 skill — 產 .pptx(NOT .key)涵蓋兩類 dec
 
 D2 嵌圖 pipeline:寫 `.d2` source → `d2 --scale 3 arch.d2 arch.png`(homebrew `d2`,auto-layout + 3x 高 DPI;PNG export 走 playwright,首跑會抓 headless browser)→ 用 `photo` layout 把 PNG 塞進 picture placeholder(idx 21),或收尾用 `python-pptx` 的 `add_picture` 補一張滿版 diagram slide。**native block+line 的「python-pptx 不 auto-route / auto-layout」限制(見下「限制」)正是 D2 補的點** —— 連線自動避讓、不用手調 col/row。
 
-### 架構圖(`diagram`)— block+line grid 引擎
+#### 架構圖(`diagram`)— block+line grid 引擎
 
 ```jsonc
 { "layout": "diagram", "title": "Agent Sense Architecture",
@@ -279,7 +283,7 @@ edge `kind` → 線型 + 箭頭(線型 = 關係強度,正交於形狀):
 - **流程 / pipeline 類圖 MUST 附步驟描述**(WinLab 官方):有先後 / 時序的圖,別只有箭頭 —— 用 edge 標序號、或每個 box text / `note` 寫清楚那一步在做什麼。純拓撲圖(無時序)免。
 - **限制**:python-pptx 不 auto-route / auto-layout。連線只連水平/垂直相鄰最乾淨;要斜跨的調 box 的 col/row 讓它們相鄰。
 
-## 雷區(實測踩過)
+### 雷區(實測踩過)
 
 - **autoshape 預設字色是白的** → builder 已對框文字強制純黑(對齊標準答案);自己加 shape 記得 `font.color.rgb`。
 - **cylinder / 非矩形 kind 的連接點會略偏** —— python-pptx connect 只認矩形 4 中點(idx 0/1/2/3)。`store`/`decision` 可接受;要連線精準的關鍵節點用 `component`(矩形)。
@@ -289,14 +293,14 @@ edge `kind` → 線型 + 箭頭(線型 = 關係強度,正交於形狀):
 - **刪母片預建 slide** 要連 relationship 一起 drop(`prs.part.drop_rel`),只移 `sldIdLst` 會留 orphan part 撞名壞檔。builder 已處理。
 - **換母片** → 跑 `inspect_pptx.py` + `colors.py` 重抽 layout 名 / placeholder idx / 字色,改 builder 的 `LAYOUT`/`PH_*`。
 
-## Self-review(收尾前)
+## §5 Self-review(收尾前)
 
 **共通**
 
-- [ ] 先確定這份是報告 / 教學,規範沒選錯
+- [ ] 先確定這份是報告 / 教學,專章沒選錯
 - [ ] cover:title + 日期 `YYYY/M/D` + 中文姓名 詹詠翔
 - [ ] 內容頁 title 不是空殼分類名(`Background` / `Details`)
-- [ ] **官方 MUST 全過**(見 §官方規範):標題唯一對題、context before detail、takeaway 一眼可見、同主題同頁、pipeline 附步驟
+- [ ] **官方 MUST 全過**(§2):標題唯一對題、context before detail、takeaway 一眼可見、同主題同頁、pipeline 附步驟
 - [ ] **跑過 render QA 至少一輪**,每張看過圖、無空框 / 穿線 / 超框 / placeholder 殘留
 - [ ] 架構圖每個 box / edge `kind` 對應**真實**語意差異(非裝飾);看自動 legend 能解碼全圖
 - [ ] 縮寫第一次出現有全稱(或進 legend)
