@@ -929,6 +929,24 @@ def create_ct(
         "/etc/apt/sources.list.d/debian.sources; true",
     )
 
+    # trixie's ImportCredential=journal.* can't be set up in an unprivileged
+    # mount namespace — journald starts dead (status=243/CREDENTIALS) and every
+    # `journalctl -u X` reads empty. Clear it via drop-in; reset-failed first,
+    # because the boot-time crash loop leaves the unit start-limited and a bare
+    # restart this early gets rate-limit-rejected. No-op without systemd.
+    if unprivileged:
+        ssh_run(
+            PVE_HOST, "pct", "exec", str(new_vmid), "--",
+            "sh", "-c",
+            "command -v systemctl >/dev/null && "
+            "mkdir -p /etc/systemd/system/systemd-journald.service.d && "
+            "printf '[Service]\\nImportCredential=\\n' "
+            "> /etc/systemd/system/systemd-journald.service.d/override.conf && "
+            "systemctl daemon-reload && "
+            "systemctl reset-failed systemd-journald && "
+            "systemctl restart systemd-journald; true",
+        )
+
     if add_forward:
         ssh_run(
             PVE_HOST,
