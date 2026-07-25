@@ -5,8 +5,8 @@
     "url": "https://github.com/zyx1121"
   },
   "metadata": {
-    "description": "zyx — unified Claude Code plugin: skills + worker agents + the utils MCP toolbox, one namespace.",
-    "version": "0.14.0"
+    "description": "zyx \u2014 unified Claude Code plugin: skills + worker agents + the utils MCP toolbox, one namespace.",
+    "version": "0.15.0"
   },
   "plugins": [
     {
