@@ -7,15 +7,17 @@
 Uber Eats 過往訂單明細(誰點了什麼)+ 團購欠款帳本。零外部依賴。
 
 認證:macOS 解析 Safari binarycookies;其他機器用 --cookie-file(內含 Cookie header 那一行),
-未指定時 fallback 讀 ~/.config/ubereats/cookie.txt(push-ue-cookie.sh 推送的固定位置)。
+未指定時 fallback 讀 ~/.config/ubereats/cookie.txt。非 macOS 的 agent 機要靠這個 fallback,
+cookie 得自己從 Mac 匯出(--dump-cookie)再放過去。
 兩支內部 API:
   getPastOrdersV1            cursor 分頁枚舉(body 第一頁 {} ;之後 {"lastWorkflowUUID": 上頁最後一筆})。
   getReceiptByWorkflowUuidV1 {"contentType":"JSON","workflowUuid":<uuid>} → data.receiptData(再一層 JSON)。
 
-模式:
-  (預設)抓收據          utils ubereats [-n N | --since/--until] [--list-only] [--out DIR]
-  帳本(債務 CSV)        utils ubereats --ledger --csv-dir ~/ubereats/data [--since 2026-06-01]
-  匯出 cookie(給遠端用)  utils ubereats --dump-cookie ~/uecookie.txt
+模式(MCP tool → 本檔 flag):
+  ubereats_fetch_receipts  (預設)  [-n N | --since/--until] [--out DIR]
+  ubereats_list_orders     --list-only
+  ubereats_update_ledger   --ledger [--csv-dir DIR] [--since 2026-06-01]
+  ubereats_dump_cookie     --dump-cookie PATH
 
 ledger 只處理「你發起」的團購(別人欠你),排除你自己那份;金額=各人品項小計。
 debts.csv 以 (order_uuid, uber_name) 為鍵 upsert——既有列(含 paid 狀態)一律保留。
@@ -76,8 +78,7 @@ DEFAULT_COOKIE_FILE = os.path.expanduser("~/.config/ubereats/cookie.txt")
 
 def load_cookie_header(cookie_file):
     """--cookie-file 直接讀那一行;否則 macOS 解析 Safari binarycookies;
-    最後 fallback 到 ~/.config/ubereats/cookie.txt(push-ue-cookie.sh 推送的固定位置),
-    讓非 macOS 的 agent 機不帶參數也能跑。"""
+    最後 fallback 到 ~/.config/ubereats/cookie.txt,讓非 macOS 的 agent 機不帶參數也能跑。"""
     if cookie_file:
         hdr = open(os.path.expanduser(cookie_file), encoding="utf-8").read().strip()
         return hdr, len([x for x in hdr.split(";") if "=" in x])
@@ -87,7 +88,7 @@ def load_cookie_header(cookie_file):
         hdr = open(DEFAULT_COOKIE_FILE, encoding="utf-8").read().strip()
         return hdr, len([x for x in hdr.split(";") if "=" in x])
     sys.exit("此機無 Safari binarycookies,也沒有 ~/.config/ubereats/cookie.txt — "
-             "請用 --cookie-file 指定(在 Mac 上 `utils ubereats --dump-cookie` 匯出)")
+             "請用 --cookie-file 指定(在 Mac 上跑 ubereats_dump_cookie 匯出)")
 
 
 # ---------- API ----------
