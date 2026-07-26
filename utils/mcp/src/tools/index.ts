@@ -1,5 +1,6 @@
 import { calendarTools } from "./calendar/index.ts";
 import { e3pTools } from "./e3p/index.ts";
+import { gmapsTools } from "./gmaps/index.ts";
 import { mailTools } from "./mail/index.ts";
 import { md2slideTools } from "./md2slide/index.ts";
 import { pdfTools } from "./pdf/index.ts";
@@ -12,6 +13,7 @@ import { ubereatsTools } from "./ubereats/index.ts";
 export const allTools = [
   ...calendarTools,
   ...e3pTools,
+  ...gmapsTools,
   ...mailTools,
   ...md2slideTools,
   ...pdfTools,

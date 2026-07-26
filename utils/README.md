@@ -5,9 +5,10 @@ Loki's local MCP toolbox for agents — the `utils/` dir of
 archived `zyx1121/utils` repo (see `../decisions/ADR-0004-merge-utils.md`).
 
 `utils` exposes machine-local capabilities through a native stdio MCP server:
-Calendar, Mail, Reminders, Safari, screenshots, PDFs, PVE, E3, Uber Eats, and
-other personal automation. The public interface is MCP. The scripts under
-`scripts/` are implementation atoms, not a supported human CLI surface.
+Calendar, Mail, Reminders, Safari, screenshots, PDFs, PVE, E3, Uber Eats, Google
+Maps lists, and other personal automation. The public interface is MCP. The
+scripts under `scripts/` are implementation atoms, not a supported human CLI
+surface.
 
 ## MCP
 
@@ -15,7 +16,7 @@ The server lives in `mcp/` and uses `@modelcontextprotocol/sdk` directly. It
 exposes only active agent-facing domains:
 
 ```text
-calendar e3p mail md2slide pdf pve reminders safari screenshot ubereats
+calendar e3p gmaps mail md2slide pdf pve reminders safari screenshot ubereats
 ```
 
 Claude Code registration is automatic: the plugin's `.mcp.json` serves this
