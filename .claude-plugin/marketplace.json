@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "zyx \u2014 unified Claude Code plugin: skills + worker agents + the utils MCP toolbox, one namespace.",
-    "version": "0.15.2"
+    "version": "0.16.0"
   },
   "plugins": [
     {
