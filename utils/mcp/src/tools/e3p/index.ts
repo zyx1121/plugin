@@ -6,21 +6,35 @@ const script = "e3p.py";
 const envelope = true;
 const timeoutMs = 60000;
 
+/** Every call hits the NYCU E3 Moodle API with a stored token. */
+const read = { readOnlyHint: true, openWorldHint: true } as const;
+
 export const e3pTools: ToolboxTool[] = [
   scriptTool({
     name: "e3p_logout",
-    description: "Forget the stored E3 token/config file. Destructive credential reset; requires confirm=true.",
+    description: "Forget the stored E3 token/config file. Destructive credential reset: every other e3p tool fails until the user logs in again interactively. Requires confirm=true.",
     inputSchema: { confirm: z.literal(true).describe("Required explicit confirmation.") },
+    annotations: { readOnlyHint: false, destructiveHint: true, openWorldHint: false },
     script,
     envelope,
     timeoutMs,
     buildArgs: () => ["logout"],
   }),
-  scriptTool({ name: "e3p_whoami", description: "Show the authenticated E3 user and site info.", inputSchema: {}, script, envelope, timeoutMs, buildArgs: () => ["whoami"] }),
+  scriptTool({
+    name: "e3p_whoami",
+    description: "Show the authenticated E3 user and site info. Cheapest way to check whether the stored token is still valid.",
+    inputSchema: {},
+    annotations: read,
+    script,
+    envelope,
+    timeoutMs,
+    buildArgs: () => ["whoami"],
+  }),
   scriptTool({
     name: "e3p_list_courses",
-    description: "List enrolled E3 courses, sorted newest first.",
+    description: "List enrolled E3 courses, sorted newest first. Past semesters are often hidden; pass show_hidden=true when a course seems missing.",
     inputSchema: { show_hidden: z.boolean().optional().describe("Include hidden/archived courses.") },
+    annotations: read,
     script,
     envelope,
     timeoutMs,
@@ -32,11 +46,13 @@ export const e3pTools: ToolboxTool[] = [
   }),
   scriptTool({
     name: "e3p_list_assignments",
-    description: "List assignments for one course or all enrolled courses. status=true performs extra API calls.",
+    description: "List assignments for one course or all enrolled courses. status=true costs one extra API call per assignment, so scope it with courseid.",
     inputSchema: { courseid: z.number().optional().describe("Course ID. Omit for all courses."), status: z.boolean().optional().describe("Also fetch submission status per assignment.") },
+    annotations: read,
     script,
     envelope,
     timeoutMs,
+    truncationHint: "pass courseid to scope to one course, or drop status",
     buildArgs: (input) => {
       const argv = ["assignments"];
       pushPos(argv, input.courseid);
@@ -46,11 +62,13 @@ export const e3pTools: ToolboxTool[] = [
   }),
   scriptTool({
     name: "e3p_list_due",
-    description: "List upcoming E3 action events and deadlines.",
+    description: "List upcoming E3 action events and deadlines. Shows only what E3 itself tracks, so deadlines announced only in class are absent.",
     inputSchema: { days: z.number().optional().describe("Look-ahead days. Default: 14."), limit: z.number().optional().describe("Maximum events. Default: 50.") },
+    annotations: read,
     script,
     envelope,
     timeoutMs,
+    truncationHint: "lower days or limit",
     buildArgs: (input) => {
       const argv = ["due"];
       pushFlag(argv, "--days", input.days);
@@ -58,13 +76,47 @@ export const e3pTools: ToolboxTool[] = [
       return argv;
     },
   }),
-  scriptTool({ name: "e3p_get_submission", description: "Get detailed submission status for one assignment.", inputSchema: { assignid: z.number().describe("Assignment ID.") }, script, envelope, timeoutMs, buildArgs: (input) => ["submission", String(input.assignid)] }),
-  scriptTool({ name: "e3p_list_grades", description: "List gradebook items for one course or all enrolled courses.", inputSchema: { courseid: z.number().optional().describe("Course ID. Omit for all courses.") }, script, envelope, timeoutMs, buildArgs: (input) => { const argv = ["grades"]; pushPos(argv, input.courseid); return argv; } }),
-  scriptTool({ name: "e3p_get_content", description: "Get a course outline with sections and activities.", inputSchema: { courseid: z.number().describe("Course ID.") }, script, envelope, timeoutMs, buildArgs: (input) => ["content", String(input.courseid)] }),
+  scriptTool({
+    name: "e3p_get_submission",
+    description: "Get detailed submission status for one assignment.",
+    inputSchema: { assignid: z.number().describe("Assignment ID.") },
+    annotations: read,
+    script,
+    envelope,
+    timeoutMs,
+    buildArgs: (input) => ["submission", String(input.assignid)],
+  }),
+  scriptTool({
+    name: "e3p_list_grades",
+    description: "List gradebook items for one course or all enrolled courses. Grades not released by the instructor read as empty rather than missing.",
+    inputSchema: { courseid: z.number().optional().describe("Course ID. Omit for all courses.") },
+    annotations: read,
+    script,
+    envelope,
+    timeoutMs,
+    truncationHint: "pass courseid to scope to one course",
+    buildArgs: (input) => {
+      const argv = ["grades"];
+      pushPos(argv, input.courseid);
+      return argv;
+    },
+  }),
+  scriptTool({
+    name: "e3p_get_content",
+    description: "Get a course outline with sections and activities. Whole-semester outlines are long and get truncated; file URLs here are the input to e3p_download_file.",
+    inputSchema: { courseid: z.number().describe("Course ID.") },
+    annotations: read,
+    script,
+    envelope,
+    timeoutMs,
+    truncationHint: "read the outline section by section",
+    buildArgs: (input) => ["content", String(input.courseid)],
+  }),
   scriptTool({
     name: "e3p_download_file",
-    description: "Download a Moodle pluginfile.php URL with the stored auth token.",
+    description: "Download a Moodle pluginfile.php URL with the stored auth token. A plain fetch of the same URL returns a login page instead of the file.",
     inputSchema: { url: z.string().describe("pluginfile.php URL."), out: z.string().optional().describe("Output path. Default: URL basename.") },
+    annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: true },
     script,
     envelope,
     timeoutMs,

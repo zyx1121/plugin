@@ -6,6 +6,9 @@ const script = "ubereats.py";
 const envelope = false;
 const timeoutMs = 300000;
 
+/** Auth is a live browser session, so expiry looks like empty data rather than an error. */
+const staleCookie = "Auth is a live Safari cookie; when it expires the result is an empty order list, not an error, so an empty result means re-auth before it means no orders.";
+
 const common = {
   recent: z.number().optional().describe("Only include N most recent orders."),
   since: z.string().optional().describe("Only include orders on/after YYYY-MM-DD."),
@@ -25,11 +28,13 @@ function pushCommon(argv: string[], input: { recent?: number; since?: string; un
 export const ubereatsTools: ToolboxTool[] = [
   scriptTool({
     name: "ubereats_fetch_receipts",
-    description: "Fetch Uber Eats itemized receipt details into an output directory. Auth: Safari cookies (macOS) or ~/.config/ubereats/cookie.txt fallback.",
+    description: `Fetch Uber Eats itemized receipt details into an output directory. One network call per order, so scope with recent/since. ${staleCookie}`,
     inputSchema: { ...common, out: z.string().optional().describe("Receipt output directory."), no_cache: z.boolean().optional().describe("Force refetch instead of cached JSON.") },
+    annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: true },
     script,
     envelope,
     timeoutMs,
+    truncationHint: "scope with recent= or since=",
     buildArgs: (input) => {
       const argv: string[] = [];
       pushCommon(argv, input);
@@ -40,11 +45,13 @@ export const ubereatsTools: ToolboxTool[] = [
   }),
   scriptTool({
     name: "ubereats_list_orders",
-    description: "List matching Uber Eats past orders without fetching per-order receipt details.",
+    description: `List matching Uber Eats past orders without fetching per-order receipt details. Much cheaper than ubereats_fetch_receipts; use it first. ${staleCookie}`,
     inputSchema: { ...common, out: z.string().optional().describe("Directory for index.json.") },
+    annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: true },
     script,
     envelope,
     timeoutMs,
+    truncationHint: "scope with recent= or since=",
     buildArgs: (input) => {
       const argv = ["--list-only"];
       pushCommon(argv, input);
@@ -54,8 +61,15 @@ export const ubereatsTools: ToolboxTool[] = [
   }),
   scriptTool({
     name: "ubereats_update_ledger",
-    description: "Update group-order debt CSVs from Uber Eats orders. Writes debts.csv/names.csv.",
-    inputSchema: { ...common, csv_dir: z.string().optional().describe("Ledger CSV directory."), no_cache: z.boolean().optional().describe("Force refetch receipts."), me: z.string().optional().describe("Your Uber display name.") },
+    description: `Update group-order debt CSVs from Uber Eats orders. Overwrites debts.csv/names.csv in the target directory rather than appending. ${staleCookie}`,
+    inputSchema: {
+      ...common,
+      csv_dir: z.string().optional().describe("Ledger CSV directory."),
+      no_cache: z.boolean().optional().describe("Force refetch receipts."),
+      me: z.string().optional().describe("Your Uber display name."),
+      confirm: z.literal(true).describe("Required explicit confirmation; the ledger CSVs are rewritten in place."),
+    },
+    annotations: { readOnlyHint: false, destructiveHint: true, openWorldHint: true },
     script,
     envelope,
     timeoutMs,
@@ -70,8 +84,9 @@ export const ubereatsTools: ToolboxTool[] = [
   }),
   scriptTool({
     name: "ubereats_dump_cookie",
-    description: "Export Safari ubereats.com Cookie header to a chmod 600 file. Writes live session credential; requires confirm=true.",
+    description: "Export the Safari ubereats.com Cookie header to a chmod 600 file. Writes a live session credential to disk; requires confirm=true, and the file grants account access until the session expires.",
     inputSchema: { path: z.string().describe("Output cookie file path."), confirm: z.literal(true).describe("Required explicit confirmation.") },
+    annotations: { readOnlyHint: false, destructiveHint: true, openWorldHint: false },
     script,
     envelope,
     timeoutMs,

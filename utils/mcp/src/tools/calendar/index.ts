@@ -1,16 +1,23 @@
 import { z } from "zod";
 import { pushFlag, pushPos } from "../../core/argv.ts";
+import { envelopeOutput } from "../../core/schema.ts";
 import { scriptTool, type ToolboxTool } from "../../core/tool.ts";
 
 const envelope = true;
 const timeoutMs = 70000;
 const script = "calendar.py";
 
+const read = { readOnlyHint: true, openWorldHint: false } as const;
+const write = { readOnlyHint: false, destructiveHint: false, openWorldHint: false } as const;
+const destroy = { readOnlyHint: false, destructiveHint: true, openWorldHint: false } as const;
+
 export const calendarTools: ToolboxTool[] = [
   scriptTool({
     name: "calendar_list_calendars",
-    description: "List Calendar.app calendars with writability. Use before add/list/search/delete when the target calendar name is unknown.",
+    description: "List Calendar.app calendars with writability. Use before add/list/search/delete when the target calendar name is unknown. Several calendars can share a display name, so prefer an exact string the user confirmed.",
     inputSchema: {},
+    outputSchema: envelopeOutput(z.array(z.looseObject({ name: z.string(), writable: z.boolean() }))),
+    annotations: read,
     script,
     envelope,
     timeoutMs,
@@ -25,9 +32,11 @@ export const calendarTools: ToolboxTool[] = [
       end: z.string().optional().describe("Range end. Same formats as start. Default: start + 7 days."),
       limit: z.number().optional().describe("Maximum events returned."),
     },
+    annotations: read,
     script,
     envelope,
     timeoutMs,
+    truncationHint: "narrow the date range or set limit",
     buildArgs: (input) => {
       const argv = ["list"];
       pushFlag(argv, "--cal", input.cal);
@@ -39,7 +48,7 @@ export const calendarTools: ToolboxTool[] = [
   }),
   scriptTool({
     name: "calendar_add_event",
-    description: "Add a Calendar.app event. This writes to the user's calendar.",
+    description: "Add a Calendar.app event. Writes to the user's real calendar and syncs to their other devices; there is no undo beyond calendar_delete_event.",
     inputSchema: {
       summary: z.string().describe("Event title."),
       at: z.string().describe("Start time: YYYY-MM-DDTHH:MM, tomorrow, etc."),
@@ -48,6 +57,7 @@ export const calendarTools: ToolboxTool[] = [
       location: z.string().optional().describe("Event location."),
       notes: z.string().optional().describe("Event notes."),
     },
+    annotations: write,
     script,
     envelope,
     timeoutMs,
@@ -72,9 +82,11 @@ export const calendarTools: ToolboxTool[] = [
       end: z.string().optional().describe("Range end. Default: today + 30 days."),
       limit: z.number().optional().describe("Maximum events returned."),
     },
+    annotations: read,
     script,
     envelope,
     timeoutMs,
+    truncationHint: "narrow the date range or set limit",
     buildArgs: (input) => {
       const argv = ["search"];
       pushPos(argv, input.query);
@@ -87,7 +99,7 @@ export const calendarTools: ToolboxTool[] = [
   }),
   scriptTool({
     name: "calendar_delete_event",
-    description: "Delete the first event with an exact matching summary in one explicit calendar. Destructive.",
+    description: "Delete the first event with an exact matching summary in one explicit calendar. Destructive and irreversible; confirm the exact event with calendar_search_events first, since only the first match is removed.",
     inputSchema: {
       summary: z.string().describe("Exact event summary."),
       cal: z.string().describe("Calendar to search. Required; no cross-calendar fuzzy delete."),
@@ -95,6 +107,7 @@ export const calendarTools: ToolboxTool[] = [
       end: z.string().optional().describe("Range end. Default: today + 30 days."),
       confirm: z.literal(true).describe("Required explicit confirmation."),
     },
+    annotations: destroy,
     script,
     envelope,
     timeoutMs,
