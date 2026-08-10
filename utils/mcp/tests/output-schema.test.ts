@@ -56,7 +56,7 @@ const SAMPLES: Record<string, unknown> = {
   },
   ubereats_update_ledger: {
     summary: "🧾 新增 1 筆團購欠款:",
-    new_debts: [{ order_uuid: "00000000-0000-0000-0000-000000000001", date: "2026-07-01", store: "Example Store", uber_name: "Example Person", items: "1x Example Item", amount: "160", paid: "no" }],
+    new_debts: [{ order_uuid: "00000000-0000-0000-0000-000000000001", date: "2026-07-01", store: "Example Store", uber_name: "Example Person", items: "1x Example Item", amount: "160", paid: "no", paid_date: "", note: "" }],
     unpaid_by_person: { "Example Person": 160 },
     csv_dir: "/example/ledger",
     debts_csv: "/example/ledger/debts.csv",

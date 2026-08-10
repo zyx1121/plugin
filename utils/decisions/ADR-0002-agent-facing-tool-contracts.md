@@ -123,3 +123,14 @@ On a TTY the printed output is unchanged.
 Output schemas for all four ubereats tools are Tier A: their fields are literals
 in this script rather than a reshaping of an external payload, and the shapes
 were checked against a live `list_orders` run plus the TCC failure path.
+
+Follow-up (2026-08-10): once Full Disk Access was granted, all four modes ran
+against a real logged-in session. Every declared field matched, `--ledger`
+proved idempotent on a second run (0 new rows, totals unchanged), and the
+`new_debts` rows turned out to carry two more columns than declared —
+`paid_date` and `note`. `z.looseObject` meant they passed rather than broke,
+which is the tier's whole point; they are now declared.
+
+That is the case for Tier A being *earned*: two of these shapes were written
+from the emit sites and still came out incomplete. Only a live call closed the
+gap.
