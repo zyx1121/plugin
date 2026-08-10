@@ -22,14 +22,22 @@ cookie 得自己從 Mac 匯出(--dump-cookie)再放過去。
 ledger 只處理「你發起」的團購(別人欠你),排除你自己那份;金額=各人品項小計。
 debts.csv 以 (order_uuid, uber_name) 為鍵 upsert——既有列(含 paid 狀態)一律保留。
 names.csv 把沒見過的 uber 名字加進來、real_name 留空給你填,摘要會帶上真名。
+
+輸出走共用 envelope:stdout 只有那一份 JSON,所有進度與診斷都到 stderr。
+ledger 的可讀摘要仍在 data.summary(TTY 下照舊直接印出來)。
 """
 import sys as _sys
 from pathlib import Path as _Path
 
 # siblings like json.py / uuid.py shadow stdlib — drop this dir from sys.path
 _sys.path[:] = [p for p in _sys.path if _Path(p).resolve() != _Path(__file__).resolve().parent]
+_LIB = str(_Path(__file__).resolve().parent.parent / "lib")
+if _LIB not in _sys.path:
+    _sys.path.insert(0, _LIB)
 
 import argparse, json, struct, os, sys, re, time, csv, urllib.request, urllib.error
+
+from _envelope import emit, fail  # noqa: E402
 
 SAFARI_COOKIES = os.path.expanduser(
     "~/Library/Containers/com.apple.Safari/Data/Library/Cookies/Cookies.binarycookies")
@@ -41,8 +49,13 @@ PAID_TRUE = {"yes", "y", "1", "true", "paid", "已還", "已付"}
 
 # ---------- cookies ----------
 def parse_binarycookies(path):
-    with open(path, "rb") as f:
-        data = f.read()
+    try:
+        with open(path, "rb") as f:
+            data = f.read()
+    except PermissionError:
+        fail("讀不到 Safari 的 cookie jar",
+             why=f"macOS TCC 擋下 {path}",
+             hint="給這個終端機 Full Disk Access(系統設定 > 隱私權與安全性 > 完整磁碟取用權限),或改用 --cookie-file")
     if data[:4] != b"cook":
         raise ValueError("not a binarycookies file")
     npages = struct.unpack(">I", data[4:8])[0]
@@ -87,8 +100,9 @@ def load_cookie_header(cookie_file):
     if os.path.exists(DEFAULT_COOKIE_FILE):
         hdr = open(DEFAULT_COOKIE_FILE, encoding="utf-8").read().strip()
         return hdr, len([x for x in hdr.split(";") if "=" in x])
-    sys.exit("此機無 Safari binarycookies,也沒有 ~/.config/ubereats/cookie.txt — "
-             "請用 --cookie-file 指定(在 Mac 上跑 ubereats_dump_cookie 匯出)")
+    fail("找不到任何 Uber Eats cookie 來源",
+         why=f"此機無 Safari binarycookies,也沒有 {DEFAULT_COOKIE_FILE}",
+         hint="在 Mac 上跑 ubereats_dump_cookie 匯出,再用 --cookie-file 指到那個檔")
 
 
 # ---------- API ----------
@@ -104,8 +118,25 @@ def make_api(cookie_hdr, locale):
                 "origin": "https://www.ubereats.com",
                 "referer": "https://www.ubereats.com/tw-en/orders",
                 "user-agent": UA, "cookie": cookie_hdr, "x-requested-with": "XMLHttpRequest"})
-        with urllib.request.urlopen(req, timeout=30) as r:
-            return json.loads(r.read().decode("utf-8", "replace"))
+        try:
+            with urllib.request.urlopen(req, timeout=30) as r:
+                return json.loads(r.read().decode("utf-8", "replace"))
+        except urllib.error.HTTPError as e:
+            if e.code in (401, 403):
+                fail("Uber Eats 拒絕這組 cookie",
+                     why=f"{name} 回 HTTP {e.code}",
+                     hint="session 已過期,在 Safari 重新登入後跑 ubereats_dump_cookie 重新匯出")
+            fail(f"Uber Eats API 回 HTTP {e.code}",
+                 why=f"{name}: {e.reason}",
+                 hint="內部 API 沒有版本保證,稍後再試;持續失敗代表端點已改變")
+        except urllib.error.URLError as e:
+            fail("連不上 Uber Eats",
+                 why=f"{name}: {e.reason}",
+                 hint="檢查網路連線或 proxy 設定")
+        except json.JSONDecodeError:
+            fail("Uber Eats 回的不是 JSON",
+                 why=f"{name} 的回應無法解析",
+                 hint="通常是被擋在登入頁;重新匯出 cookie 後再試")
 
     return post
 
@@ -399,21 +430,29 @@ def main():
 
     if a.dump_cookie:
         if not os.path.exists(SAFARI_COOKIES):
-            sys.exit("此機無 Safari binarycookies(--dump-cookie 僅限 macOS)")
+            fail("此機無 Safari binarycookies",
+                 why="--dump-cookie 只能在有 Safari 的 macOS 上跑",
+                 hint="在 Mac 上匯出後,把檔案搬到這台機器並用 --cookie-file 指定")
         hdr, n = cookie_header(parse_binarycookies(SAFARI_COOKIES), HOST)
         if n == 0:
-            sys.exit("找不到 ubereats.com cookie — 確認 Safari 已登入")
+            fail("找不到 ubereats.com cookie",
+                 why="Safari 的 cookie jar 裡沒有這個網域",
+                 hint="在 Safari 登入 ubereats.com 後重跑")
         path = os.path.expanduser(a.dump_cookie)
         with open(path, "w", encoding="utf-8") as f:
             f.write(hdr)
         os.chmod(path, 0o600)
-        print(f"已匯出 {n} 個 cookie 的 header → {path} (chmod 600)")
+        emit({"path": path, "cookies": n, "mode": 0o600},
+             {"action": "dump-cookie"},
+             human=lambda d, _m: print(f"已匯出 {d['cookies']} 個 cookie 的 header → {d['path']} (chmod 600)"))
         return
 
     cookie_hdr, n = load_cookie_header(a.cookie_file)
     print(f"[cookies] 送 {n} 個給 {HOST}", file=sys.stderr)
     if n == 0:
-        sys.exit("cookie 為空 — 確認來源已登入")
+        fail("cookie 為空",
+             why="來源檔案存在但沒有任何 name=value",
+             hint="確認來源瀏覽器已登入 ubereats.com,再重新匯出")
     post = make_api(cookie_hdr, a.locale)
 
     orders, beo_map = enumerate_orders(post, limit=a.recent, since=a.since)
@@ -430,22 +469,43 @@ def main():
     if a.ledger:
         csv_dir = os.path.expanduser(a.csv_dir)
         new_rows, debts, names = run_ledger(orders, beo_map, post, csv_dir, a.no_cache, a.me)
-        print(ledger_summary(new_rows, debts, names))   # stdout:給 wrapper 餵 Telegram
+        summary = ledger_summary(new_rows, debts, names)
+        unpaid = {}
+        for r in debts.values():
+            if str(r.get("paid", "no")).strip().lower() not in PAID_TRUE:
+                try:
+                    unpaid[r["uber_name"]] = unpaid.get(r["uber_name"], 0.0) + float(r.get("amount") or 0)
+                except ValueError:
+                    pass
+        emit({"summary": summary, "new_debts": new_rows,
+              "unpaid_by_person": {k: round(v) for k, v in sorted(unpaid.items(), key=lambda x: -x[1])},
+              "csv_dir": csv_dir,
+              "debts_csv": os.path.join(csv_dir, "debts.csv"),
+              "names_csv": os.path.join(csv_dir, "names.csv")},
+             {"action": "ledger", "orders_scanned": len(orders),
+              "new_debts": len(new_rows), "total_debts": len(debts)},
+             human=lambda d, _m: print(d["summary"]))
         return
 
     # ---- 抓收據模式 ----
     out_dir = os.path.expanduser(a.out)
     os.makedirs(out_dir, exist_ok=True)
-    with open(os.path.join(out_dir, "index.json"), "w", encoding="utf-8") as f:
+    index_path = os.path.join(out_dir, "index.json")
+    with open(index_path, "w", encoding="utf-8") as f:
         json.dump(orders, f, ensure_ascii=False, indent=2)
     if a.list_only:
-        for o in orders:
-            print(f"  {(o['completedAt'] or '??????????')[:10]}  {o['uuid']}  items={o['numItems']}"
-                  + ("  [CANCELLED]" if o["isCancelled"] else ""))
-        print(f"\n(index.json 已存到 {out_dir})", file=sys.stderr)
+        def human_list(rows, _m):
+            for o in rows:
+                print(f"  {(o['completedAt'] or '??????????')[:10]}  {o['uuid']}  items={o['numItems']}"
+                      + ("  [CANCELLED]" if o["isCancelled"] else ""))
+
+        emit(orders,
+             {"action": "list-orders", "count": len(orders), "index_file": index_path,
+              "range": [min(rng), max(rng)] if rng else None},
+             human=human_list)
         return
 
-    ok, fb, skipped, summ = 0, 0, [], []
+    ok, fb, skipped, summ, receipts = 0, 0, [], [], []
     for i, o in enumerate(orders, 1):
         u = o["uuid"]
         p, src = fetch_parsed(u, post, out_dir, a.no_cache, beo_map)
@@ -453,21 +513,47 @@ def main():
             time.sleep(0.35)
         if not p["people"]:
             skipped.append(u)
-            print(f"[{i}/{len(orders)}] {u[:8]}  跳過(無資料)")
+            print(f"[{i}/{len(orders)}] {u[:8]}  跳過(無資料)", file=sys.stderr)
             continue
         ok += 1
         fb += (src == "order-list")
         tag = "  ⟨order-list⟩" if src == "order-list" else ""
         summ.append(fmt_block(p, u, tag))
-        print(f"[{i}/{len(orders)}] {p['date']}  {p.get('store') or '(店名未知)'}  ${p['total']:.0f}  · {len(p['people'])}人{tag}")
+        receipts.append({"uuid": u, "date": p["date"], "store": p.get("store"),
+                         "total": p["total"], "people": len(p["people"]), "source": src,
+                         "file": os.path.join(out_dir, f"{u}.json")})
+        print(f"[{i}/{len(orders)}] {p['date']}  {p.get('store') or '(店名未知)'}  ${p['total']:.0f}  · {len(p['people'])}人{tag}",
+              file=sys.stderr)
 
-    with open(os.path.join(out_dir, "summary.txt"), "w", encoding="utf-8") as f:
+    summary_path = os.path.join(out_dir, "summary.txt")
+    with open(summary_path, "w", encoding="utf-8") as f:
         f.write("\n\n".join(summ))
-    print(f"\n✅ {ok}/{len(orders)} 筆有明細(receipt/cache {ok - fb}、order-list fallback {fb})→ {out_dir}/")
-    print("   summary.txt = 可讀版, index.json = 索引, <uuid>.json = 結構化收據")
-    if skipped:
-        print(f"⚠️  {len(skipped)} 筆完全無明細: " + ", ".join(s[:8] for s in skipped))
+
+    def human_receipts(d, _m):
+        print(f"\n✅ {d['with_details']}/{d['total']} 筆有明細"
+              f"(receipt/cache {d['with_details'] - d['from_order_list']}、order-list fallback {d['from_order_list']})"
+              f"→ {d['out_dir']}/")
+        print("   summary.txt = 可讀版, index.json = 索引, <uuid>.json = 結構化收據")
+        if d["skipped"]:
+            print(f"⚠️  {len(d['skipped'])} 筆完全無明細: " + ", ".join(s[:8] for s in d["skipped"]))
+
+    emit({"out_dir": out_dir, "index_file": index_path, "summary_file": summary_path,
+          "receipts": receipts, "skipped": skipped,
+          "total": len(orders), "with_details": ok, "from_order_list": fb},
+         {"action": "fetch-receipts", "count": len(orders),
+          "range": [min(rng), max(rng)] if rng else None},
+         human=human_receipts)
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except SystemExit:
+        raise                       # fail() and argparse already spoke
+    except KeyboardInterrupt:
+        fail("已中斷", hint="重跑即可;已抓過的 receipt 有快取,不會重複打 API")
+    except Exception as exc:        # noqa: BLE001 — an unhandled traceback is not a contract
+        import traceback
+        fail(f"{type(exc).__name__}: {exc}",
+             why=traceback.format_exc()[-800:],
+             hint="這是未預期的錯誤;直接跑這支 script 看完整 traceback")
