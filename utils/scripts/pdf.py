@@ -47,7 +47,12 @@ def _check_pdf(path: Path) -> Path:
     if not path.exists():
         fail(f"no such file: {path}", hint="check the path", code=2)
     if path.suffix.lower() != ".pdf":
-        fail(f"not a .pdf: {path}", why=f"suffix is {path.suffix!r}", code=2)
+        fail(
+            f"not a .pdf: {path}",
+            why=f"suffix is {path.suffix!r}",
+            hint="pass the PDF itself; this tool does not convert other formats",
+            code=2,
+        )
     return path
 
 
@@ -78,7 +83,12 @@ def _parse_pages(spec: Optional[str], total: int) -> list[int]:
             fail(f"bad page spec: {part!r}", hint="use forms like 1-3,5,7", code=2)
     bad = sorted({p + 1 for p in out if p < 0 or p >= total})
     if bad:
-        fail(f"page(s) out of range: {bad}", why=f"document has {total} page(s)", code=2)
+        fail(
+            f"page(s) out of range: {bad}",
+            why=f"document has {total} page(s)",
+            hint=f"pages are 1-based; use a range within 1-{total}",
+            code=2,
+        )
     seen: set[int] = set()
     return [p for p in out if not (p in seen or seen.add(p))]
 
@@ -266,7 +276,12 @@ def compress(
         capture_output=True, text=True,
     )
     if proc.returncode != 0 or not op.exists():
-        fail("ghostscript failed", why=(proc.stderr or "").strip()[:300] or "non-zero exit", code=2)
+        fail(
+            "ghostscript failed",
+            why=(proc.stderr or "").strip()[:300] or "non-zero exit",
+            hint="the PDF may be encrypted; run `pdf decrypt` first, or try a different --level",
+            code=2,
+        )
     after = _size(op)
     ratio = after / before if before else 1.0
     emit(

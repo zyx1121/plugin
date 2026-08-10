@@ -196,7 +196,12 @@ def _parse_frontmatter(text: str) -> tuple[dict, str]:
     except yaml.YAMLError as e:
         fail("bad front-matter YAML", why=str(e), hint="check the `---` block at the top of the file", code=2)
     if not isinstance(meta, dict):
-        fail("front-matter must be a YAML mapping", why=f"got {type(meta).__name__}", code=2)
+        fail(
+            "front-matter must be a YAML mapping",
+            why=f"got {type(meta).__name__}",
+            hint="the `---` block needs `key: value` lines, not a bare list or scalar",
+            code=2,
+        )
     return meta, text[m.end():]
 
 
@@ -452,7 +457,12 @@ def _print_to_pdf(chrome: str, html_path: Path, pdf_path: Path) -> None:
         capture_output=True, text=True, timeout=90,
     )
     if proc.returncode != 0 or not pdf_path.exists():
-        fail("chrome print-to-pdf failed", why=(proc.stderr or "").strip()[:300] or "non-zero exit", code=2)
+        fail(
+            "chrome print-to-pdf failed",
+            why=(proc.stderr or "").strip()[:300] or "non-zero exit",
+            hint="build with --html-only and open the HTML to check it renders, then retry the PDF",
+            code=2,
+        )
 
 
 # ── init ─────────────────────────────────────────────────────────

@@ -46,6 +46,12 @@ JS_HINT = (
 )
 
 
+def normalize_quotes(text: str) -> str:
+    """AppleScript errors use typographic apostrophes ("Can't get window 1"),
+    so plain-ASCII substring probes never match without this."""
+    return text.replace("’", "'").replace("‘", "'")
+
+
 def run_as(script: str, *, want_stdout: bool = True) -> str:
     result = subprocess.run(
         ["osascript", "-e", script],
@@ -53,11 +59,30 @@ def run_as(script: str, *, want_stdout: bool = True) -> str:
     )
     if result.returncode != 0:
         stderr = result.stderr.strip()
-        if "Allow JavaScript from Apple Events" in stderr:
+        probe = normalize_quotes(stderr)
+        if "Allow JavaScript from Apple Events" in probe:
             fail("JavaScript-from-Apple-Events is disabled", why=stderr, hint=JS_HINT, code=2)
-        if "Can't get current tab" in stderr or "Can't get tab" in stderr:
+        if "Can't get window" in probe or "Invalid index" in probe:
+            fail(
+                "Safari has no open window",
+                why=stderr,
+                hint="open a Safari window first, or call safari_open_url to create one",
+                code=2,
+            )
+        if "Can't get current tab" in probe or "Can't get tab" in probe:
             fail("no active tab", why=stderr, hint="open a page in Safari first", code=2)
-        fail(stderr or "AppleScript failed", code=2)
+        if "not authorized" in probe or "-1743" in probe:
+            fail(
+                "macOS denied Automation access to Safari",
+                why=stderr,
+                hint="System Settings > Privacy & Security > Automation: allow this terminal to control Safari",
+                code=2,
+            )
+        fail(
+            stderr or "AppleScript failed",
+            hint="check that Safari is running and this terminal has Automation access to it",
+            code=2,
+        )
     return result.stdout.rstrip("\n") if want_stdout else ""
 
 

@@ -1480,7 +1480,9 @@ def caddy(
         emit({"domains": heads, "action": "unchanged", "reason": "block already matches"})
         return
     if status != "written":
-        fail(f"unexpected caddy upsert status {status!r}", why=json.dumps(res)[:500])
+        fail(f"unexpected caddy upsert status {status!r}",
+             why=json.dumps(res)[:500],
+             hint="the Caddyfile was left untouched; run `pve caddy --action list` to check its current state")
 
     _caddy_reload_or_restore(res.get("backup"))
     emit({"domains": heads, "action": res.get("action"), "validated": res.get("validated"),
