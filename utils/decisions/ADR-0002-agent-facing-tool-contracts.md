@@ -79,7 +79,8 @@ deciding to call was missing:
 - (−) Descriptions grew. Capped at 300 characters each and asserted in CI, since
   all 69 sit in every session's context.
 - (−) `ubereats.py` still emits no envelope, so its failures remain raw stderr.
-  Moving it onto the envelope contract is separate work.
+  Moving it onto the envelope contract is separate work. **Closed by the
+  amendment below.**
 
 ## Verification
 
@@ -89,3 +90,36 @@ deciding to call was missing:
 - Live smoke against a real stdio client for the Tier A reads. Its output is
   reported in the PR, not committed — this repo is public and those calls return
   internal hostnames and addresses.
+
+## Amendment (2026-08-10): ubereats speaks the envelope
+
+The last exception is gone. `ubereats.py` now emits the shared envelope, so all
+69 tools speak one contract and the "known gap" above is closed.
+
+Three things came out of the move that the original decision did not anticipate:
+
+1. **The uncaught-exception path was never part of the contract.** Making the
+   handled failures structured is not enough when an unhandled traceback still
+   escapes to stderr. A `PermissionError` from macOS TCC on Safari's cookie jar
+   did exactly that. `main()` is now wrapped so any unexpected exception becomes
+   an envelope carrying the traceback tail, and the recognized cases (TCC,
+   HTTP 401/403, network failure, non-JSON reply) fail with their own next step.
+
+2. **stdout is a single-writer channel.** The receipts mode printed progress
+   lines to stdout, which is fine for a human and fatal for an envelope. All
+   progress moved to stderr; the human-readable rendering survives as the
+   `human=` callback, which only fires on a TTY.
+
+3. **An expired session returns success, not an error.** Verified with a
+   deliberately bogus cookie: the API answers 200 with an empty order list. The
+   tool descriptions already carried this trap, and it is now confirmed rather
+   than assumed — no error handling can catch it, so reading an empty result as
+   "re-auth first" stays a description-level fact.
+
+Breaking change: `--ledger` used to print the digest to stdout as bare text for
+a chat wrapper to forward. That text is now `data.summary` inside the envelope.
+On a TTY the printed output is unchanged.
+
+Output schemas for all four ubereats tools are Tier A: their fields are literals
+in this script rather than a reshaping of an external payload, and the shapes
+were checked against a live `list_orders` run plus the TCC failure path.
