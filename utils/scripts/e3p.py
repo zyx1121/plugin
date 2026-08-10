@@ -124,7 +124,11 @@ def _post(url: str, data: dict) -> Any:
     try:
         return json.loads(raw)
     except json.JSONDecodeError:
-        fail("e3p: non-JSON response", why=raw[:200].decode(errors="replace"))
+        fail(
+            "e3p: non-JSON response",
+            why=raw[:200].decode(errors="replace"),
+            hint="usually an E3 login/maintenance page; run `utils e3p whoami` to check the token",
+        )
 
 
 def _flatten(params: dict) -> list[tuple[str, str]]:
@@ -160,7 +164,11 @@ def _ws(function: str, *, _creds: Optional[dict] = None, **params) -> Any:
         msg = result.get("message", "")
         if ec in ("invalidtoken", "accessexception"):
             fail("invalid or expired token", why=msg, hint="run `utils e3p login` to refresh")
-        fail(f"e3p WS error: {ec}", why=msg)
+        fail(
+            f"e3p WS error: {ec}",
+            why=msg,
+            hint=f"'{function}' was rejected; check the id arguments, or that you are enrolled in that course",
+        )
     return result
 
 

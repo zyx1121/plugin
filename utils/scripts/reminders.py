@@ -44,7 +44,19 @@ def run_as(script: str) -> str:
         capture_output=True, text=True, check=False,
     )
     if result.returncode != 0:
-        fail(result.stderr.strip() or "AppleScript failed", code=2)
+        stderr = result.stderr.strip()
+        if "not authorized" in stderr or "-1743" in stderr:
+            fail(
+                "macOS denied Automation access to Reminders",
+                why=stderr,
+                hint="System Settings > Privacy & Security > Automation: allow this terminal to control Reminders",
+                code=2,
+            )
+        fail(
+            stderr or "AppleScript failed",
+            hint="run `reminders show-lists` to confirm the list name exists",
+            code=2,
+        )
     return result.stdout.rstrip("\n")
 
 

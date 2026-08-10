@@ -44,7 +44,19 @@ def run_as(script: str) -> str:
         capture_output=True, text=True, check=False, timeout=60,
     )
     if result.returncode != 0:
-        fail(result.stderr.strip() or "AppleScript failed", code=2)
+        stderr = result.stderr.strip()
+        if "not authorized" in stderr or "-1743" in stderr:
+            fail(
+                "macOS denied Automation access to Calendar",
+                why=stderr,
+                hint="System Settings > Privacy & Security > Automation: allow this terminal to control Calendar",
+                code=2,
+            )
+        fail(
+            stderr or "AppleScript failed",
+            hint="run `calendar show-cals` to confirm the calendar name exists and is writable",
+            code=2,
+        )
     return result.stdout.rstrip("\n")
 
 

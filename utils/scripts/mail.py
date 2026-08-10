@@ -43,7 +43,19 @@ def run_as(script: str) -> str:
         capture_output=True, text=True, check=False, timeout=120,
     )
     if result.returncode != 0:
-        fail(result.stderr.strip() or "AppleScript failed", code=2)
+        stderr = result.stderr.strip()
+        if "not authorized" in stderr or "-1743" in stderr:
+            fail(
+                "macOS denied Automation access to Mail",
+                why=stderr,
+                hint="System Settings > Privacy & Security > Automation: allow this terminal to control Mail",
+                code=2,
+            )
+        fail(
+            stderr or "AppleScript failed",
+            hint="open Mail.app and let it finish syncing, then retry",
+            code=2,
+        )
     return result.stdout.rstrip("\n")
 
 
@@ -288,10 +300,19 @@ end tell
 '''
     raw = run_as(script)
     if not raw:
-        fail(f"no inbox message with subject '{subject}'")
+        fail(
+            f"no inbox message with subject '{subject}'",
+            why="matching is exact first, then substring, and only over synced inbox messages",
+            hint="run `mail search <substring>` to find the real subject, then retry with it",
+        )
     parts = raw.split("<<<SEP>>>")
     if len(parts) != 5:
-        fail("unexpected output format", code=2)
+        fail(
+            "unexpected output format",
+            why="the AppleScript reply did not split into the expected 5 fields",
+            hint="a field in the message probably contains the separator; try another message or read it in Mail.app",
+            code=2,
+        )
     s, snd, rcpt, d, body = parts
     data = {"subject": s, "from": snd, "to": rcpt, "date": d, "body": body}
 

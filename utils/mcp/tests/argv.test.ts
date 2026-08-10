@@ -121,7 +121,7 @@ describe("selected native tool argv mappings", () => {
 
   test("ubereats split tools set the correct mode", async () => {
     expect((await runCaptured("ubereats_list_orders", { recent: 5 })).argv).toEqual(["--list-only", "--recent", "5"]);
-    expect((await runCaptured("ubereats_update_ledger", { since: "2026-07-01", csv_dir: "ue" })).argv).toEqual(["--ledger", "--since", "2026-07-01", "--csv-dir", "ue"]);
+    expect((await runCaptured("ubereats_update_ledger", { since: "2026-07-01", csv_dir: "ue", confirm: true })).argv).toEqual(["--ledger", "--since", "2026-07-01", "--csv-dir", "ue"]);
   });
 
   test("pdf_decrypt passes password through env, not argv", async () => {
@@ -137,5 +137,6 @@ describe("selected native tool argv mappings", () => {
     await expectRejected("reminders_complete", { name: "pay bill" });
     await expectRejected("reminders_delete", { name: "pay bill" });
     await expectRejected("safari_close_tab", {});
+    await expectRejected("ubereats_update_ledger", { csv_dir: "ue" });
   });
 });

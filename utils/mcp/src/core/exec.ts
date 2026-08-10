@@ -1,14 +1,18 @@
 import { join } from "node:path";
 import { homedir } from "node:os";
 import type { ToolRunResult } from "./result.ts";
+import { truncateStructured } from "./truncate.ts";
 
 export interface RunScriptOptions {
   script: string;
   args: string[];
   envelope: boolean;
   timeoutMs: number;
+  truncationHint?: string;
   env?: Record<string, string | undefined>;
 }
+
+export const DEFAULT_TRUNCATION_HINT = "narrow the request or rerun writing the full output to a file";
 
 interface EnvelopeSuccess {
   success: true;
@@ -78,8 +82,48 @@ async function waitExitedUntil(proc: { exited: Promise<number> }, deadlineAt: nu
   return Promise.race([proc.exited, new Promise<number>((resolve) => setTimeout(() => resolve(-1), remainingMs))]);
 }
 
-export function mapScriptOutput(envelope: boolean, run: { stdout: string; stderr: string; exitCode: number; timedOut: boolean; timeoutMs: number; argv0: string }): ToolRunResult {
+interface ScriptRun {
+  stdout: string;
+  stderr: string;
+  exitCode: number;
+  timedOut: boolean;
+  timeoutMs: number;
+  argv0: string;
+}
+
+/** Cap string leaves so one call cannot swallow the caller's context; records what was cut. */
+function finalize(result: ToolRunResult, hint: string): ToolRunResult {
+  const { value, truncation } = truncateStructured(result.structuredContent, hint);
+  if (!truncation) return result;
+  return { isError: result.isError, structuredContent: { ...value, _truncation: truncation } };
+}
+
+export function mapScriptOutput(envelope: boolean, run: ScriptRun, truncationHint: string = DEFAULT_TRUNCATION_HINT): ToolRunResult {
+  return finalize(mapRawScriptOutput(envelope, run), truncationHint);
+}
+
+/**
+ * Every failure of an envelope-speaking script reports the same shape.
+ *
+ * This is not cosmetic: the MCP client validates structuredContent against the
+ * declared outputSchema even when isError is set, so a one-off failure shape
+ * turns a readable error into a protocol error.
+ */
+function envelopeFailure(message: string, why: string | null, hint: string | null): ToolRunResult {
+  return { isError: true, structuredContent: { error: { message, why, hint } } };
+}
+
+function streamTail(run: ScriptRun): string | null {
+  const tail = [run.stderr.trim(), run.stdout.trim()].filter(Boolean).join("\n").slice(-800);
+  return tail || null;
+}
+
+function mapRawScriptOutput(envelope: boolean, run: ScriptRun): ToolRunResult {
   if (run.timedOut) {
+    const message = `script '${run.argv0}' timed out after ${run.timeoutMs}ms and was killed`;
+    if (envelope) {
+      return envelopeFailure(message, streamTail(run), "narrow the request, or the target host may be unreachable");
+    }
     return {
       isError: true,
       structuredContent: {
@@ -87,7 +131,7 @@ export function mapScriptOutput(envelope: boolean, run: { stdout: string; stderr
         stderr: run.stderr,
         exit_code: run.exitCode,
         timed_out: true,
-        message: `script '${run.argv0}' timed out after ${run.timeoutMs}ms and was killed`,
+        message,
       },
     };
   }
@@ -103,17 +147,19 @@ export function mapScriptOutput(envelope: boolean, run: { stdout: string; stderr
   try {
     parsed = JSON.parse(run.stdout);
   } catch {
-    return {
-      isError: true,
-      structuredContent: { stdout: run.stdout, stderr: run.stderr, exit_code: run.exitCode },
-    };
+    return envelopeFailure(
+      `script '${run.argv0}' produced no JSON envelope (exit ${run.exitCode})`,
+      streamTail(run),
+      "the script likely crashed before emitting output; run it directly to see the traceback",
+    );
   }
 
   if (!isEnvelope(parsed)) {
-    return {
-      isError: true,
-      structuredContent: { stdout: run.stdout, stderr: run.stderr, exit_code: run.exitCode },
-    };
+    return envelopeFailure(
+      `script '${run.argv0}' emitted JSON that is not an envelope (exit ${run.exitCode})`,
+      streamTail(run),
+      "the script must emit {success, data, metadata} or {success: false, error}",
+    );
   }
 
   if (parsed.success) {
@@ -123,10 +169,8 @@ export function mapScriptOutput(envelope: boolean, run: { stdout: string; stderr
     };
   }
 
-  return {
-    isError: true,
-    structuredContent: { error: parsed.error ?? { message: "script reported failure with no error detail" } },
-  };
+  const error = parsed.error ?? {};
+  return envelopeFailure(error.message ?? "script reported failure with no error detail", error.why ?? null, error.hint ?? null);
 }
 
 export async function runScript(options: RunScriptOptions): Promise<ToolRunResult> {
@@ -146,7 +190,7 @@ export async function runScript(options: RunScriptOptions): Promise<ToolRunResul
 
   try {
     const [stdout, stderr, exitCode] = await Promise.all([readStreamUntil(proc.stdout, deadlineAt), readStreamUntil(proc.stderr, deadlineAt), waitExitedUntil(proc, deadlineAt)]);
-    return mapScriptOutput(options.envelope, { stdout, stderr, exitCode, timedOut, timeoutMs, argv0: argv[0]! });
+    return mapScriptOutput(options.envelope, { stdout, stderr, exitCode, timedOut, timeoutMs, argv0: argv[0]! }, options.truncationHint ?? DEFAULT_TRUNCATION_HINT);
   } finally {
     clearTimeout(timer);
   }
