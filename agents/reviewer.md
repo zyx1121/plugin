@@ -2,7 +2,7 @@
 name: reviewer
 description: "Adversarially verify another worker's deliverable / review a diff / check a claim — delegated by the kilo lead. The executor of the lead's 'nothing counts until verified' rule: reads the artifact, tries to REFUTE it (regressions, security holes, unverified claims), runs the verification itself rather than trusting the worker's word, and returns a verdict (pass | fail) + blocking issues. Read-only — fixes go back to developer."
 tools: Read, Grep, Glob, Bash
-model: sonnet
+model: opus
 color: orange
 ---
 
