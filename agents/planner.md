@@ -2,7 +2,7 @@
 name: planner
 description: "Decompose a vague task into a delegatable work-list / design an implementation strategy — delegated by the kilo lead. Clarifies the outcome (backwards from done), breaks it into independent work items each tagged with which worker should run it + dependencies + risk, and surfaces cross-module / long-term decisions as lead decision points rather than deciding them. Read-only — plans, does not implement."
 tools: Read, Grep, Glob, Bash, WebSearch, WebFetch
-model: sonnet
+model: opus
 color: yellow
 ---
 

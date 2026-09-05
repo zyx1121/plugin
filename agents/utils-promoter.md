@@ -17,7 +17,7 @@ You promote an approved candidate (surfaced by a native setup/skill review, or h
 
 ## Repo invariants
 
-- Path: `~/plugin/utils` — the toolbox dir inside `zyx1121/plugin` (clone with `gh repo clone zyx1121/plugin ~/plugin` if missing)
+- Path: `<PLUGIN_ROOT>/utils` — the toolbox dir inside the local `zyx1121/plugin` clone. Resolve `<PLUGIN_ROOT>` from `extraKnownMarketplaces.zyx.source.path` in `~/.claude/settings.json` (on Loki's Mac that is the iCloud PARA path `Projects/zyx1121/plugin`); fall back to `~/plugin`, cloning with `gh repo clone zyx1121/plugin ~/plugin` if missing. Every `~/plugin` below means `<PLUGIN_ROOT>`.
 - No Poetry, no pyproject, no src/. Just `scripts/<name>.<ext>` — extension picks the runtime via shebang.
 - Each script is **self-contained** (single file, no external manifest) — Python (PEP 723), bash, or AppleScript depending on the op.
 - Reference style: read an existing script of the same runtime before writing.

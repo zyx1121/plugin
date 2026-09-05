@@ -1,7 +1,7 @@
 # skills/ — `description` frontmatter grammar
 
 > 這份只管 `~/plugin/skills/*/SKILL.md` 的 **`description:` 欄位**寫法(routing 表面)。body 不在此限。
-> `~/plugin` 是 `zyx1121/plugin` repo 的本地 clone,skills 是 version-pinned cache 部署;改完 commit + bump `.claude-plugin/plugin.json`/`marketplace.json` version、push、開 PR,merge 後跑 `claude plugin update zyx@zyx` 才生效。
+> `~/plugin` 在本檔泛指 `zyx1121/plugin` repo 的本地 clone(實際路徑看 `~/.claude/settings.json` 的 `extraKnownMarketplaces.zyx.source.path`,Loki 的 Mac 上是 iCloud PARA `Projects/zyx1121/plugin`),skills 是 version-pinned cache 部署;改完 commit + bump `.claude-plugin/plugin.json`/`marketplace.json` version、push、開 PR,merge 後跑 `claude plugin update zyx@zyx` 才生效。
 
 ## 為什麼
 

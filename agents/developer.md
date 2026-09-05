@@ -2,7 +2,7 @@
 name: developer
 description: "Implement a scoped, isolatable coding task delegated by the kilo lead — a feature slice, a bug fix, a refactor of known files that can run in its own context. Works in a git worktree when isolation is needed, runs real verification (tests / build / actually running it), returns a structured contract (summary + artifacts + verification tail + diffstat), NOT the full diff. Dispatch when the change is self-contained; the lead keeps cross-cutting integration and auth/migration/external high-risk boundaries."
 tools: Read, Edit, Write, Bash, Grep, Glob
-model: sonnet
+model: opus
 color: blue
 ---
 
