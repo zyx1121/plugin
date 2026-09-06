@@ -7,12 +7,13 @@ implementation details and debug fallbacks.
 ## Architecture
 
 ```text
-src/server.ts              MCP entrypoint: registerTools() -> StdioServerTransport
+src/server.ts              MCP entrypoint: probe host -> registerTools() -> StdioServerTransport
 src/core/argv.ts           argv construction helpers
 src/core/exec.ts           Bun.spawn wrapper, timeout, envelope/raw output mapping
+src/core/requires.ts       host requirement DSL and bounded, memoised probes
 src/core/tool.ts           native @modelcontextprotocol/sdk tool registration helper
 src/tools/<domain>/        one folder per toolbox domain
-tests/                     registry + argv contract tests
+tests/                     registry + argv + host-requirement contract tests
 ```
 
 The server uses `@modelcontextprotocol/sdk` directly. There is no YAML manifest
@@ -43,6 +44,7 @@ Only active agent-facing domains are exposed:
 - `safari`
 - `screenshot`
 - `ubereats`
+- `utils` (`utils_capabilities` only, always registered)
 
 Dormant utilities such as clipboard/json/uuid/tokens/notebooklm remain outside
 the MCP surface.
@@ -61,9 +63,48 @@ the MCP surface.
   path.
 - Interactive tools must say they block for user interaction.
 
+## Host awareness
+
+Registration is host-aware. Each domain declares what the machine must provide
+(`src/core/requires.ts`), the server probes those requirements in parallel at
+startup, and only the tools that can actually run are registered. A Linux box
+never sees the AppleScript domains, and a machine with no `pve` alias in its SSH
+config never sees the 16 `pve_*` tools.
+
+Requirement kinds:
+
+| Kind | Satisfied when |
+|------|----------------|
+| `platform:darwin` / `platform:linux` | the process platform matches |
+| `binary:<name>` | the executable is on the augmented PATH the tools run with |
+| `ssh:<alias>` | `ssh` is on PATH and the alias is a `Host` entry in `~/.ssh/config` (`Include` followed, wildcard patterns ignored) |
+| `env:<NAME>` | the variable is set and non-empty |
+| `file:<path>` | the path exists (leading `~` expanded) |
+
+No check touches the network. The snapshot is taken once at startup and holds
+for the whole session, so a requirement states whether the host is *configured*
+for a tool, not whether the target answers this second: a laptop briefly off the
+tailnet is still a pve machine, and an unreachable host is the tool's own
+timeout to report. An unknown kind fails closed, every check is capped at 4 s,
+results are memoised per requirement string, and a check that throws hides its
+tool rather than taking the server down. Startup logs the split to stderr:
+
+```text
+[utils-mcp] registered 54, hidden 16 (pve: ssh:pve)
+```
+
+`utils_capabilities` declares no requirements, so it is registered on every
+host. It reports platform/hostname/arch, the registered tool names, and each
+hidden tool with the requirement it failed, which is how a caller finds out why
+a tool it remembers is missing today.
+
+`UTILS_FORCE_PLATFORM=linux` overrides the detected platform. It exists to
+exercise the split on one machine (the darwin domains disappear); it does not
+make macOS tools work anywhere else.
+
 ## Current Tool Surface
 
-68 tools total:
+70 tools total:
 
 - `calendar_list_calendars`, `calendar_list_events`, `calendar_add_event`,
   `calendar_search_events`, `calendar_delete_event`
@@ -89,6 +130,7 @@ the MCP surface.
   `screenshot_region`, `screenshot_clipboard`
 - `ubereats_fetch_receipts`, `ubereats_list_orders`,
   `ubereats_update_ledger`, `ubereats_dump_cookie`
+- `utils_capabilities`
 
 ## Registering With Clients
 
@@ -115,8 +157,9 @@ bun run start
 ```
 
 Add a new domain tool by editing `src/tools/<domain>/index.ts` or adding a new
-domain folder, then export it from `src/tools/index.ts`. Add/adjust tests for
-tool count, name prefix, and any nontrivial argv mapping.
+domain folder, then export it from `src/tools/index.ts`. Declare the domain's
+`requires` alongside its `script` const, one shared array per domain. Add/adjust
+tests for tool count, name prefix, and any nontrivial argv mapping.
 
 ## Executor Rules
 

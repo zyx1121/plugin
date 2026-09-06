@@ -3,6 +3,8 @@ import { pushFlag } from "../../core/argv.ts";
 import { scriptTool, type ToolboxTool } from "../../core/tool.ts";
 
 const script = "md2slide.py";
+/** Chrome is a soft dep: only the PDF pass needs it, and md2slide_build --html-only works without it. */
+const requires = ["binary:uv"];
 const envelope = true;
 const timeoutMs = 60000;
 
@@ -15,6 +17,7 @@ export const md2slideTools: ToolboxTool[] = [
     inputSchema: { dir: z.string().describe("Target directory to scaffold (created if missing).") },
     annotations: generate,
     script,
+    requires,
     envelope,
     timeoutMs,
     buildArgs: (input) => ["init", input.dir],
@@ -29,6 +32,7 @@ export const md2slideTools: ToolboxTool[] = [
     },
     annotations: generate,
     script,
+    requires,
     envelope,
     timeoutMs,
     buildArgs: (input) => {

@@ -4,6 +4,12 @@ import { envelopeOutput } from "../../core/schema.ts";
 import { scriptTool, type ToolboxTool } from "../../core/tool.ts";
 
 const script = "pve.py";
+/**
+ * Every pve tool is an SSH round trip to the homelab host, so probe the alias
+ * itself. Resolved the same way pve.py does, so an overridden host is probed.
+ */
+const pveHost = process.env.UTILS_PVE_HOST?.trim() || "pve";
+const requires = ["binary:uv", "binary:ssh", `ssh:${pveHost}`];
 const envelope = true;
 const timeoutMs = 120000;
 const name = z.string().describe("VM/CT name or VMID.");
@@ -36,6 +42,7 @@ export const pveTools: ToolboxTool[] = [
     ),
     annotations: read,
     script,
+    requires,
     envelope,
     timeoutMs,
     buildArgs: () => ["list"],
@@ -46,6 +53,7 @@ export const pveTools: ToolboxTool[] = [
     inputSchema: { name: name.optional() },
     annotations: read,
     script,
+    requires,
     envelope,
     timeoutMs,
     truncationHint: "pass name to scope the status to one guest",
@@ -57,6 +65,7 @@ export const pveTools: ToolboxTool[] = [
     inputSchema: { name },
     annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: true },
     script,
+    requires,
     envelope,
     timeoutMs,
     buildArgs: (input) => ["start", input.name],
@@ -67,6 +76,7 @@ export const pveTools: ToolboxTool[] = [
     inputSchema: { name, yes },
     annotations: destroy,
     script,
+    requires,
     envelope,
     timeoutMs,
     buildArgs: (input) => {
@@ -81,6 +91,7 @@ export const pveTools: ToolboxTool[] = [
     inputSchema: { name, yes },
     annotations: destroy,
     script,
+    requires,
     envelope,
     timeoutMs,
     buildArgs: (input) => {
@@ -106,6 +117,7 @@ export const pveTools: ToolboxTool[] = [
     },
     annotations: write,
     script,
+    requires,
     envelope,
     timeoutMs,
     buildArgs: (input) => {
@@ -143,6 +155,7 @@ export const pveTools: ToolboxTool[] = [
     },
     annotations: write,
     script,
+    requires,
     envelope,
     timeoutMs,
     buildArgs: (input) => {
@@ -170,6 +183,7 @@ export const pveTools: ToolboxTool[] = [
     outputSchema: envelopeOutput(z.looseObject({ rules: z.array(z.string()) })),
     annotations: read,
     script,
+    requires,
     envelope,
     timeoutMs,
     buildArgs: () => ["forward", "--action", "list"],
@@ -180,6 +194,7 @@ export const pveTools: ToolboxTool[] = [
     inputSchema: { spec: z.string().describe("HOST_PORT:VM_IP:VM_PORT."), confirm },
     annotations: write,
     script,
+    requires,
     envelope,
     timeoutMs,
     buildArgs: (input) => ["forward", input.spec, "--action", "add"],
@@ -190,6 +205,7 @@ export const pveTools: ToolboxTool[] = [
     inputSchema: { line: z.number().describe("Line number from pve_list_forwards."), confirm },
     annotations: destroy,
     script,
+    requires,
     envelope,
     timeoutMs,
     buildArgs: (input) => ["forward", "--action", "del", "--line", String(input.line)],
@@ -206,6 +222,7 @@ export const pveTools: ToolboxTool[] = [
     ),
     annotations: read,
     script,
+    requires,
     envelope,
     timeoutMs,
     buildArgs: () => ["dns", "--action", "list"],
@@ -216,6 +233,7 @@ export const pveTools: ToolboxTool[] = [
     inputSchema: { host: z.string().describe("Hostname."), ip: z.string().describe("IP address."), dry_run: z.boolean().optional().describe("Preview without writing."), yes },
     annotations: write,
     script,
+    requires,
     envelope,
     timeoutMs,
     buildArgs: (input) => {
@@ -231,6 +249,7 @@ export const pveTools: ToolboxTool[] = [
     inputSchema: { host: z.string().describe("Hostname."), yes },
     annotations: destroy,
     script,
+    requires,
     envelope,
     timeoutMs,
     buildArgs: (input) => {
@@ -259,6 +278,7 @@ export const pveTools: ToolboxTool[] = [
     ),
     annotations: read,
     script,
+    requires,
     envelope,
     timeoutMs,
     truncationHint: "the raw Caddyfile is long; read pve_list_caddy blocks instead of the file",
@@ -278,6 +298,7 @@ export const pveTools: ToolboxTool[] = [
     },
     annotations: write,
     script,
+    requires,
     envelope,
     timeoutMs,
     buildArgs: (input) => {
@@ -298,6 +319,7 @@ export const pveTools: ToolboxTool[] = [
     inputSchema: { domain: z.string().describe("Domain block to remove."), yes },
     annotations: destroy,
     script,
+    requires,
     envelope,
     timeoutMs,
     buildArgs: (input) => {

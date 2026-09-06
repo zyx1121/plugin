@@ -2,6 +2,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { ToolAnnotations } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
 import { augmentedEnv, runScript, type RunScriptOptions } from "./exec.ts";
+import { evaluateRequirements, type EvaluateOptions } from "./requires.ts";
 import { mcpResult, type ToolRunResult } from "./result.ts";
 import { envelopeOutput, rawOutput } from "./schema.ts";
 
@@ -11,6 +12,8 @@ export interface ToolboxTool {
   inputSchema: z.ZodRawShape;
   outputSchema: z.ZodRawShape;
   annotations: ToolAnnotations;
+  /** Host requirements (see core/requires.ts). Unmet means the tool is not registered at all. */
+  requires?: string[];
   run(args: Record<string, unknown>): Promise<ToolRunResult>;
 }
 
@@ -22,6 +25,8 @@ export interface ScriptToolDefinition<Shape extends z.ZodRawShape> {
   outputSchema?: z.ZodRawShape;
   /** Required, so a new tool cannot be added without declaring whether it reads or writes. */
   annotations: ToolAnnotations;
+  /** Host requirements (see core/requires.ts); usually one const shared by the whole domain. */
+  requires?: string[];
   script: string;
   envelope: boolean;
   timeoutMs: number;
@@ -41,6 +46,7 @@ export function scriptTool<const Shape extends z.ZodRawShape>(definition: Script
     inputSchema: definition.inputSchema,
     outputSchema,
     annotations: definition.annotations,
+    requires: definition.requires,
     async run(args) {
       const input = schema.parse(args);
       return runScript({
@@ -75,4 +81,48 @@ export function registerTools(server: McpServer, tools: ToolboxTool[]): void {
       async (args) => mcpResult(await tool.run(args as Record<string, unknown>)),
     );
   }
+}
+
+export interface HiddenTool {
+  tool: string;
+  failed: string[];
+}
+
+export interface HostSelection {
+  registered: ToolboxTool[];
+  hidden: HiddenTool[];
+}
+
+/**
+ * Split a toolset by what this host can actually run.
+ *
+ * All requirements are probed in parallel and memoised per requirement string,
+ * so a whole domain sharing `ssh:pve` costs one probe. A failing probe hides its
+ * tool; it never rejects.
+ */
+export async function selectRunnableTools(tools: ToolboxTool[], options: EvaluateOptions = {}): Promise<HostSelection> {
+  const results = await Promise.all(tools.map((tool) => evaluateRequirements(tool.requires ?? [], options)));
+
+  const registered: ToolboxTool[] = [];
+  const hidden: HiddenTool[] = [];
+
+  tools.forEach((tool, index) => {
+    const result = results[index]!;
+    if (result.ok) registered.push(tool);
+    else hidden.push({ tool: tool.name, failed: result.failed });
+  });
+
+  return { registered, hidden };
+}
+
+/** One entry per distinct family/reason pair, e.g. `safari: platform:darwin`, for the startup log. */
+export function summariseHidden(hidden: HiddenTool[]): string {
+  const reasons = new Set<string>();
+
+  for (const entry of hidden) {
+    const family = entry.tool.split("_")[0] ?? entry.tool;
+    reasons.add(`${family}: ${entry.failed.join(", ") || "unknown"}`);
+  }
+
+  return [...reasons].join(", ");
 }

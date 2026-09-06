@@ -4,6 +4,8 @@ import { envelopeOutput } from "../../core/schema.ts";
 import { scriptTool, type ToolboxTool } from "../../core/tool.ts";
 
 const script = "pdf.py";
+/** pikepdf/pymupdf are pip deps uv resolves; only ghostscript is a host binary, and only pdf_compress needs it. */
+const requires = ["binary:uv"];
 const envelope = true;
 const timeoutMs = 60000;
 
@@ -34,6 +36,7 @@ export const pdfTools: ToolboxTool[] = [
     ),
     annotations: read,
     script,
+    requires,
     envelope,
     timeoutMs,
     buildArgs: (input) => ["info", input.file],
@@ -44,6 +47,7 @@ export const pdfTools: ToolboxTool[] = [
     inputSchema: { file, pages, out },
     annotations: readOrWrite,
     script,
+    requires,
     envelope,
     timeoutMs,
     truncationHint: "pass out=<path> to write the full text to a file, or narrow pages=",
@@ -61,6 +65,7 @@ export const pdfTools: ToolboxTool[] = [
     inputSchema: { file, pages, fields: z.string().optional().describe("Comma-separated keys: page,type,author,content,marked_text."), out },
     annotations: readOrWrite,
     script,
+    requires,
     envelope,
     timeoutMs,
     truncationHint: "pass out=<path>, narrow pages=, or drop marked_text from fields=",
@@ -79,6 +84,7 @@ export const pdfTools: ToolboxTool[] = [
     inputSchema: { file, level: z.enum(["screen", "ebook", "printer", "prepress"]).optional().describe("Compression preset. Default: ebook."), out },
     annotations: derive,
     script,
+    requires,
     envelope,
     timeoutMs,
     buildArgs: (input) => {
@@ -95,6 +101,7 @@ export const pdfTools: ToolboxTool[] = [
     inputSchema: { file, password: z.string().optional().describe("Open password, if required."), out },
     annotations: derive,
     script,
+    requires,
     envelope,
     timeoutMs,
     buildArgs: (input) => {
@@ -111,6 +118,7 @@ export const pdfTools: ToolboxTool[] = [
     inputSchema: { inputs: z.array(z.string()).describe("Input PDF paths in merge order."), out: z.string().describe("Output path.") },
     annotations: derive,
     script,
+    requires,
     envelope,
     timeoutMs,
     buildArgs: (input) => {
@@ -125,6 +133,7 @@ export const pdfTools: ToolboxTool[] = [
     inputSchema: { file, pages: z.string().describe("Pages to keep, e.g. 1-3,5."), out },
     annotations: derive,
     script,
+    requires,
     envelope,
     timeoutMs,
     buildArgs: (input) => {
@@ -141,6 +150,7 @@ export const pdfTools: ToolboxTool[] = [
     inputSchema: { file, deg: z.number().describe("Degrees clockwise: 90, 180, 270, or negative equivalent."), pages, out },
     annotations: derive,
     script,
+    requires,
     envelope,
     timeoutMs,
     buildArgs: (input) => {
@@ -158,6 +168,7 @@ export const pdfTools: ToolboxTool[] = [
     inputSchema: { file, pages, dpi: z.number().optional().describe("Render DPI. Default: 150."), out },
     annotations: derive,
     script,
+    requires,
     envelope,
     timeoutMs,
     buildArgs: (input) => {

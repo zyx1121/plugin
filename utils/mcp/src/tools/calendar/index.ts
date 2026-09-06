@@ -6,6 +6,8 @@ import { scriptTool, type ToolboxTool } from "../../core/tool.ts";
 const envelope = true;
 const timeoutMs = 70000;
 const script = "calendar.py";
+/** Calendar.app over AppleScript: macOS only, and the script itself runs under uv. */
+const requires = ["platform:darwin", "binary:osascript", "binary:uv"];
 
 const read = { readOnlyHint: true, openWorldHint: false } as const;
 const write = { readOnlyHint: false, destructiveHint: false, openWorldHint: false } as const;
@@ -19,6 +21,7 @@ export const calendarTools: ToolboxTool[] = [
     outputSchema: envelopeOutput(z.array(z.looseObject({ name: z.string(), writable: z.boolean() }))),
     annotations: read,
     script,
+    requires,
     envelope,
     timeoutMs,
     buildArgs: () => ["show-cals"],
@@ -34,6 +37,7 @@ export const calendarTools: ToolboxTool[] = [
     },
     annotations: read,
     script,
+    requires,
     envelope,
     timeoutMs,
     truncationHint: "narrow the date range or set limit",
@@ -59,6 +63,7 @@ export const calendarTools: ToolboxTool[] = [
     },
     annotations: write,
     script,
+    requires,
     envelope,
     timeoutMs,
     buildArgs: (input) => {
@@ -84,6 +89,7 @@ export const calendarTools: ToolboxTool[] = [
     },
     annotations: read,
     script,
+    requires,
     envelope,
     timeoutMs,
     truncationHint: "narrow the date range or set limit",
@@ -109,6 +115,7 @@ export const calendarTools: ToolboxTool[] = [
     },
     annotations: destroy,
     script,
+    requires,
     envelope,
     timeoutMs,
     buildArgs: (input) => {

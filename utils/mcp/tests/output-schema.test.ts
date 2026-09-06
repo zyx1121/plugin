@@ -143,7 +143,10 @@ describe("failure paths satisfy their own output schema", () => {
     "timeout": run({ timedOut: true, exitCode: -1 }),
   };
 
-  for (const tool of allTools) {
+  // Script-backed tools only: utils_capabilities answers from memory and speaks neither shell.
+  const scriptTools = allTools.filter((tool) => "data" in tool.outputSchema || "stdout" in tool.outputSchema);
+
+  for (const tool of scriptTools) {
     const isEnvelope = "data" in tool.outputSchema;
     const schema = z.object(tool.outputSchema);
 

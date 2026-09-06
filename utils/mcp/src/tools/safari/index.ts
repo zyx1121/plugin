@@ -3,6 +3,8 @@ import { envelopeOutput } from "../../core/schema.ts";
 import { scriptTool, type ToolboxTool } from "../../core/tool.ts";
 
 const script = "safari.py";
+/** Safari.app over AppleScript: macOS only, and the script itself runs under uv. */
+const requires = ["platform:darwin", "binary:osascript", "binary:uv"];
 const envelope = true;
 const timeoutMs = 60000;
 
@@ -22,6 +24,7 @@ export const safariTools: ToolboxTool[] = [
     outputSchema: envelopeOutput(z.looseObject({ url: z.string() })),
     annotations: read,
     script,
+    requires,
     envelope,
     timeoutMs,
     buildArgs: () => ["url"],
@@ -33,6 +36,7 @@ export const safariTools: ToolboxTool[] = [
     outputSchema: envelopeOutput(z.looseObject({ title: z.string() })),
     annotations: read,
     script,
+    requires,
     envelope,
     timeoutMs,
     buildArgs: () => ["title"],
@@ -43,6 +47,7 @@ export const safariTools: ToolboxTool[] = [
     inputSchema: {},
     annotations: read,
     script,
+    requires,
     envelope,
     timeoutMs,
     truncationHint: "read the page in sections, or fetch the URL directly instead of through the browser",
@@ -55,6 +60,7 @@ export const safariTools: ToolboxTool[] = [
     outputSchema: envelopeOutput(z.array(z.looseObject({ wt: z.string(), title: z.string(), url: z.string() }))),
     annotations: read,
     script,
+    requires,
     envelope,
     timeoutMs,
     buildArgs: () => ["tabs"],
@@ -65,6 +71,7 @@ export const safariTools: ToolboxTool[] = [
     inputSchema: { target: z.string().describe("URL to open.") },
     annotations: write,
     script,
+    requires,
     envelope,
     timeoutMs,
     buildArgs: (input) => ["open", input.target],
@@ -75,6 +82,7 @@ export const safariTools: ToolboxTool[] = [
     inputSchema: { confirm: z.literal(true).describe("Required explicit confirmation.") },
     annotations: destroy,
     script,
+    requires,
     envelope,
     timeoutMs,
     buildArgs: () => ["close"],
@@ -85,6 +93,7 @@ export const safariTools: ToolboxTool[] = [
     inputSchema: {},
     annotations: read,
     script,
+    requires,
     envelope,
     timeoutMs,
     buildArgs: () => ["selection"],
@@ -95,6 +104,7 @@ export const safariTools: ToolboxTool[] = [
     inputSchema: { expression: z.string().describe("JavaScript expression.") },
     annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: true },
     script,
+    requires,
     envelope,
     timeoutMs,
     truncationHint: "return a narrower value from the expression instead of a whole document",

@@ -4,6 +4,8 @@ import { envelopeOutput } from "../../core/schema.ts";
 import { scriptTool, type ToolboxTool } from "../../core/tool.ts";
 
 const script = "mail.py";
+/** Mail.app over AppleScript: macOS only, and the script itself runs under uv. */
+const requires = ["platform:darwin", "binary:osascript", "binary:uv"];
 const envelope = true;
 const timeoutMs = 130000;
 
@@ -17,6 +19,7 @@ export const mailTools: ToolboxTool[] = [
     outputSchema: envelopeOutput(z.array(z.looseObject({ name: z.string(), user: z.string(), addresses: z.string() }))),
     annotations: read,
     script,
+    requires,
     envelope,
     timeoutMs,
     buildArgs: () => ["accounts"],
@@ -27,6 +30,7 @@ export const mailTools: ToolboxTool[] = [
     inputSchema: { unread: z.boolean().optional().describe("Only unread messages."), limit: z.number().optional().describe("Maximum rows. Default: 20.") },
     annotations: read,
     script,
+    requires,
     envelope,
     timeoutMs,
     truncationHint: "lower limit, or set unread=true",
@@ -43,6 +47,7 @@ export const mailTools: ToolboxTool[] = [
     inputSchema: { query: z.string().describe("Subject/sender substring."), limit: z.number().optional().describe("Maximum rows. Default: 20.") },
     annotations: read,
     script,
+    requires,
     envelope,
     timeoutMs,
     truncationHint: "lower limit or use a narrower query",
@@ -59,6 +64,7 @@ export const mailTools: ToolboxTool[] = [
     inputSchema: { subject: z.string().describe("Exact subject preferred; falls back to contains.") },
     annotations: read,
     script,
+    requires,
     envelope,
     timeoutMs,
     truncationHint: "the body was long; ask for the specific part you need",
@@ -77,6 +83,7 @@ export const mailTools: ToolboxTool[] = [
     },
     annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false },
     script,
+    requires,
     envelope,
     timeoutMs,
     buildArgs: (input) => {
