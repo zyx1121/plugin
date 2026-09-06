@@ -68,8 +68,8 @@ the MCP surface.
 Registration is host-aware. Each domain declares what the machine must provide
 (`src/core/requires.ts`), the server probes those requirements in parallel at
 startup, and only the tools that can actually run are registered. A Linux box
-never sees the AppleScript domains, and a host with no reachable `pve` alias
-never sees the 16 `pve_*` tools.
+never sees the AppleScript domains, and a machine with no `pve` alias in its SSH
+config never sees the 16 `pve_*` tools.
 
 Requirement kinds:
 
@@ -77,14 +77,17 @@ Requirement kinds:
 |------|----------------|
 | `platform:darwin` / `platform:linux` | the process platform matches |
 | `binary:<name>` | the executable is on the augmented PATH the tools run with |
-| `ssh:<alias>` | `ssh -o BatchMode=yes -o ConnectTimeout=3 <alias> true` exits 0 |
+| `ssh:<alias>` | `ssh` is on PATH and the alias is a `Host` entry in `~/.ssh/config` (`Include` followed, wildcard patterns ignored) |
 | `env:<NAME>` | the variable is set and non-empty |
 | `file:<path>` | the path exists (leading `~` expanded) |
 
-An unknown kind fails closed, every probe is capped at 4 s, results are memoised
-per requirement string (one SSH round trip for all 16 pve tools), and a probe
-that throws hides its tool rather than taking the server down. Startup logs the
-split to stderr:
+No check touches the network. The snapshot is taken once at startup and holds
+for the whole session, so a requirement states whether the host is *configured*
+for a tool, not whether the target answers this second: a laptop briefly off the
+tailnet is still a pve machine, and an unreachable host is the tool's own
+timeout to report. An unknown kind fails closed, every check is capped at 4 s,
+results are memoised per requirement string, and a check that throws hides its
+tool rather than taking the server down. Startup logs the split to stderr:
 
 ```text
 [utils-mcp] registered 54, hidden 16 (pve: ssh:pve)
