@@ -4,6 +4,8 @@ import { envelopeOutput } from "../../core/schema.ts";
 import { scriptTool, type ToolboxTool } from "../../core/tool.ts";
 
 const script = "reminders.py";
+/** Reminders.app over AppleScript: macOS only, and the script itself runs under uv. */
+const requires = ["platform:darwin", "binary:osascript", "binary:uv"];
 const envelope = true;
 const timeoutMs = 60000;
 
@@ -19,6 +21,7 @@ export const remindersTools: ToolboxTool[] = [
     outputSchema: envelopeOutput(z.array(z.looseObject({ name: z.string() }))),
     annotations: read,
     script,
+    requires,
     envelope,
     timeoutMs,
     buildArgs: () => ["show-lists"],
@@ -29,6 +32,7 @@ export const remindersTools: ToolboxTool[] = [
     inputSchema: { list_name: z.string().optional().describe("Reminder list name."), show_done: z.boolean().optional().describe("Include completed reminders."), limit: z.number().optional().describe("Maximum reminders.") },
     annotations: read,
     script,
+    requires,
     envelope,
     timeoutMs,
     truncationHint: "set limit, or leave show_done off",
@@ -46,6 +50,7 @@ export const remindersTools: ToolboxTool[] = [
     inputSchema: { name: z.string().describe("Reminder text."), due: z.string().optional().describe("Due time/date."), list_name: z.string().optional().describe("Target list."), notes: z.string().optional().describe("Reminder notes.") },
     annotations: write,
     script,
+    requires,
     envelope,
     timeoutMs,
     buildArgs: (input) => {
@@ -63,6 +68,7 @@ export const remindersTools: ToolboxTool[] = [
     inputSchema: { name: z.string().describe("Exact reminder name."), list_name: z.string().optional().describe("List to search."), confirm: z.literal(true).describe("Required explicit confirmation.") },
     annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     script,
+    requires,
     envelope,
     timeoutMs,
     buildArgs: (input) => {
@@ -78,6 +84,7 @@ export const remindersTools: ToolboxTool[] = [
     inputSchema: { name: z.string().describe("Exact reminder name."), list_name: z.string().optional().describe("List to search."), confirm: z.literal(true).describe("Required explicit confirmation.") },
     annotations: destroy,
     script,
+    requires,
     envelope,
     timeoutMs,
     buildArgs: (input) => {

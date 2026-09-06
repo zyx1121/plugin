@@ -18,8 +18,8 @@ describe("native tool registry", () => {
   test("exposes only the selected agent-toolbox domains", () => {
     const domains = new Set(allTools.map((tool) => tool.name.split("_")[0]));
 
-    expect([...domains].sort()).toEqual(["calendar", "e3p", "gmaps", "mail", "md2slide", "pdf", "pve", "reminders", "safari", "screenshot", "ubereats"]);
-    expect(allTools).toHaveLength(69);
+    expect([...domains].sort()).toEqual(["calendar", "e3p", "gmaps", "mail", "md2slide", "pdf", "pve", "reminders", "safari", "screenshot", "ubereats", "utils"]);
+    expect(allTools).toHaveLength(70);
   });
 
   test("tool names are unique and prefixed by their domain", () => {
@@ -27,7 +27,7 @@ describe("native tool registry", () => {
     expect(new Set(names).size).toBe(names.length);
 
     for (const name of names) {
-      expect(name).toMatch(/^(calendar|e3p|gmaps|mail|md2slide|pdf|pve|reminders|safari|screenshot|ubereats)_/);
+      expect(name).toMatch(/^(calendar|e3p|gmaps|mail|md2slide|pdf|pve|reminders|safari|screenshot|ubereats|utils)_/);
     }
   });
 });
@@ -47,7 +47,7 @@ describe("tool contracts", () => {
 
   test("descriptions stay within the context budget", () => {
     for (const tool of allTools) {
-      expect(tool.description.length, `${tool.name} description is too long for 69 tools in every context`).toBeLessThanOrEqual(300);
+      expect(tool.description.length, `${tool.name} description is too long for 70 tools in every context`).toBeLessThanOrEqual(300);
     }
   });
 });

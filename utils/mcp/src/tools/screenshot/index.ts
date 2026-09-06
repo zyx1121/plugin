@@ -3,6 +3,8 @@ import { pushPos } from "../../core/argv.ts";
 import { scriptTool, type ToolboxTool } from "../../core/tool.ts";
 
 const script = "screenshot.sh";
+/** screenshot.sh wraps screencapture(1); a bash script, so no uv. */
+const requires = ["platform:darwin", "binary:screencapture"];
 const envelope = false;
 const timeoutMs = 60000;
 const out = z.string().optional().describe("Output PNG path. Default: /tmp/screenshot.png.");
@@ -18,6 +20,7 @@ export const screenshotTools: ToolboxTool[] = [
     inputSchema: { out },
     annotations: capture,
     script,
+    requires,
     envelope,
     timeoutMs,
     buildArgs: (input) => {
@@ -32,6 +35,7 @@ export const screenshotTools: ToolboxTool[] = [
     inputSchema: { out },
     annotations: capture,
     script,
+    requires,
     envelope,
     timeoutMs,
     buildArgs: (input) => {
@@ -46,6 +50,7 @@ export const screenshotTools: ToolboxTool[] = [
     inputSchema: { out },
     annotations: capture,
     script,
+    requires,
     envelope,
     timeoutMs,
     buildArgs: (input) => {
@@ -60,6 +65,7 @@ export const screenshotTools: ToolboxTool[] = [
     inputSchema: { region: z.string().describe("x,y,w,h."), out },
     annotations: capture,
     script,
+    requires,
     envelope,
     timeoutMs,
     buildArgs: (input) => {
@@ -74,6 +80,7 @@ export const screenshotTools: ToolboxTool[] = [
     inputSchema: {},
     annotations: capture,
     script,
+    requires,
     envelope,
     timeoutMs,
     buildArgs: () => ["--clipboard"],

@@ -4,6 +4,8 @@ import { envelopeOutput } from "../../core/schema.ts";
 import { scriptTool, type ToolboxTool } from "../../core/tool.ts";
 
 const script = "ubereats.py";
+/** Reads Safari's binarycookies jar directly (no AppleScript), so macOS plus uv. */
+const requires = ["platform:darwin", "binary:uv"];
 const envelope = true;
 const timeoutMs = 300000;
 
@@ -91,6 +93,7 @@ export const ubereatsTools: ToolboxTool[] = [
     outputSchema: receiptsOutput,
     annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: true },
     script,
+    requires,
     envelope,
     timeoutMs,
     truncationHint: "scope with recent= or since=",
@@ -109,6 +112,7 @@ export const ubereatsTools: ToolboxTool[] = [
     outputSchema: envelopeOutput(z.array(orderShape)),
     annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: true },
     script,
+    requires,
     envelope,
     timeoutMs,
     truncationHint: "scope with recent= or since=",
@@ -132,6 +136,7 @@ export const ubereatsTools: ToolboxTool[] = [
     outputSchema: ledgerOutput,
     annotations: { readOnlyHint: false, destructiveHint: true, openWorldHint: true },
     script,
+    requires,
     envelope,
     timeoutMs,
     buildArgs: (input) => {
@@ -150,6 +155,7 @@ export const ubereatsTools: ToolboxTool[] = [
     outputSchema: envelopeOutput(z.looseObject({ path: z.string(), cookies: z.number(), mode: z.number() })),
     annotations: { readOnlyHint: false, destructiveHint: true, openWorldHint: false },
     script,
+    requires,
     envelope,
     timeoutMs,
     buildArgs: (input) => ["--dump-cookie", input.path],

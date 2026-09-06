@@ -3,6 +3,8 @@ import { pushFlag, pushPos } from "../../core/argv.ts";
 import { scriptTool, type ToolboxTool } from "../../core/tool.ts";
 
 const script = "e3p.py";
+/** Pure HTTP against Moodle; the only host dependency is the uv runtime. */
+const requires = ["binary:uv"];
 const envelope = true;
 const timeoutMs = 60000;
 
@@ -16,6 +18,7 @@ export const e3pTools: ToolboxTool[] = [
     inputSchema: { confirm: z.literal(true).describe("Required explicit confirmation.") },
     annotations: { readOnlyHint: false, destructiveHint: true, openWorldHint: false },
     script,
+    requires,
     envelope,
     timeoutMs,
     buildArgs: () => ["logout"],
@@ -26,6 +29,7 @@ export const e3pTools: ToolboxTool[] = [
     inputSchema: {},
     annotations: read,
     script,
+    requires,
     envelope,
     timeoutMs,
     buildArgs: () => ["whoami"],
@@ -36,6 +40,7 @@ export const e3pTools: ToolboxTool[] = [
     inputSchema: { show_hidden: z.boolean().optional().describe("Include hidden/archived courses.") },
     annotations: read,
     script,
+    requires,
     envelope,
     timeoutMs,
     buildArgs: (input) => {
@@ -50,6 +55,7 @@ export const e3pTools: ToolboxTool[] = [
     inputSchema: { courseid: z.number().optional().describe("Course ID. Omit for all courses."), status: z.boolean().optional().describe("Also fetch submission status per assignment.") },
     annotations: read,
     script,
+    requires,
     envelope,
     timeoutMs,
     truncationHint: "pass courseid to scope to one course, or drop status",
@@ -66,6 +72,7 @@ export const e3pTools: ToolboxTool[] = [
     inputSchema: { days: z.number().optional().describe("Look-ahead days. Default: 14."), limit: z.number().optional().describe("Maximum events. Default: 50.") },
     annotations: read,
     script,
+    requires,
     envelope,
     timeoutMs,
     truncationHint: "lower days or limit",
@@ -82,6 +89,7 @@ export const e3pTools: ToolboxTool[] = [
     inputSchema: { assignid: z.number().describe("Assignment ID.") },
     annotations: read,
     script,
+    requires,
     envelope,
     timeoutMs,
     buildArgs: (input) => ["submission", String(input.assignid)],
@@ -92,6 +100,7 @@ export const e3pTools: ToolboxTool[] = [
     inputSchema: { courseid: z.number().optional().describe("Course ID. Omit for all courses.") },
     annotations: read,
     script,
+    requires,
     envelope,
     timeoutMs,
     truncationHint: "pass courseid to scope to one course",
@@ -107,6 +116,7 @@ export const e3pTools: ToolboxTool[] = [
     inputSchema: { courseid: z.number().describe("Course ID.") },
     annotations: read,
     script,
+    requires,
     envelope,
     timeoutMs,
     truncationHint: "read the outline section by section",
@@ -118,6 +128,7 @@ export const e3pTools: ToolboxTool[] = [
     inputSchema: { url: z.string().describe("pluginfile.php URL."), out: z.string().optional().describe("Output path. Default: URL basename.") },
     annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: true },
     script,
+    requires,
     envelope,
     timeoutMs,
     buildArgs: (input) => {

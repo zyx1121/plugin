@@ -3,6 +3,8 @@ import { pushFlag, pushPos } from "../../core/argv.ts";
 import { scriptTool, type ToolboxTool } from "../../core/tool.ts";
 
 const script = "gmaps.py";
+/** Pure HTTP against Google Maps; the only host dependency is the uv runtime. */
+const requires = ["binary:uv"];
 const envelope = true;
 const timeoutMs = 60000;
 
@@ -17,6 +19,7 @@ export const gmapsTools: ToolboxTool[] = [
     },
     annotations: { readOnlyHint: true, openWorldHint: true },
     script,
+    requires,
     envelope,
     timeoutMs,
     truncationHint: "lower limit to fetch fewer places",

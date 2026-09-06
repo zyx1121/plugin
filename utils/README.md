@@ -19,6 +19,11 @@ exposes only active agent-facing domains:
 calendar e3p gmaps mail md2slide pdf pve reminders safari screenshot ubereats
 ```
 
+Registration is host-aware: each domain declares what the machine must provide,
+and only the tools this host can run are registered (`decisions/ADR-0003`). The always-on
+`utils_capabilities` tool reports what was registered, what was hidden, and the
+requirement each hidden tool failed.
+
 Claude Code registration is automatic: the plugin's `.mcp.json` serves this
 server, and tools appear as `mcp__plugin_zyx_utils__<tool>` (ADR-0004
 amendment). Don't also register it user-scope — a same-named user-scope
