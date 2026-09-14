@@ -1,10 +1,8 @@
 #!/usr/bin/env -S uv run --script
 # /// script
-# requires-python = ">=3.11,<3.14"
+# requires-python = ">=3.11"
 # dependencies = ["typer", "rich"]
 # ///
-# Python 3.14 fails TLS against timetable.nycu.edu.tw (Missing Subject Key
-# Identifier); capped below 3.14 until the site fixes its cert chain.
 """NYCU timetable atoms: semesters / search / lookup / periods.
 
 Wraps timetable.nycu.edu.tw's public course query API (no auth required) so
@@ -36,6 +34,14 @@ from typing import Any, Optional
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
+
+import ssl
+
+# timetable.nycu.edu.tw's cert chain lacks the Subject Key Identifier extension,
+# which Python 3.13+ rejects under VERIFY_X509_STRICT. Keep full verification,
+# drop only the strict-extension check (same fix as e3p.py).
+_SSL_CTX = ssl.create_default_context()
+_SSL_CTX.verify_flags &= ~ssl.VERIFY_X509_STRICT
 
 import typer
 from rich.console import Console
@@ -123,7 +129,7 @@ def _call(r: str, data: Optional[dict] = None) -> Any:
             req = Request(url, headers=headers)
         else:
             req = Request(url, data=urlencode(data).encode(), headers=headers)
-        with urlopen(req, timeout=30) as resp:
+        with urlopen(req, timeout=30, context=_SSL_CTX) as resp:
             raw = resp.read()
     except HTTPError as e:
         if 400 <= e.code < 500:
