@@ -42,7 +42,7 @@ A local marketplace serves skill and agent edits live from the clone: `git pull`
 
 | Pillar | Pieces |
 |--------|--------|
-| [`skills/`](skills/) | `academic-sentence` · `nextjs-dev` · `paper-revise` · `project-docs` · `winlab-pptx` |
+| [`skills/`](skills/) | `academic-sentence` · `nextjs-dev` · `paper-revise` · `project-docs` · `release-engineering` · `winlab-pptx` · `xiao-lin-shuo` |
 | [`agents/`](agents/) | `planner` · `surveyor` · `developer` · `reviewer` · `utils-promoter` |
 | [`utils/`](utils/) | MCP toolbox: calendar · mail · reminders · safari · screenshot · pdf · pve · e3p · md2slide · gmaps · timetable · ubereats |
 | [`decisions/`](decisions/) | ADR trail: every merge and retirement has a written why |

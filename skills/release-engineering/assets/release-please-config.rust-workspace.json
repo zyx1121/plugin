@@ -1,0 +1,29 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "bump-minor-pre-major": true,
+  "bump-patch-for-minor-pre-major": false,
+  "include-v-in-tag": true,
+  "separate-pull-requests": false,
+  "packages": {
+    "crates/REPLACE_PRIMARY_CRATE": {
+      "release-type": "rust",
+      "changelog-path": "../../CHANGELOG.md",
+      "component": "REPLACE_PRIMARY_CRATE"
+    }
+  },
+  "plugins": [
+    {
+      "type": "cargo-workspace",
+      "merge": true
+    },
+    {
+      "type": "linked-versions",
+      "groupName": "workspace",
+      "components": [
+        "REPLACE_PRIMARY_CRATE",
+        "REPLACE_OTHER_CRATE"
+      ],
+      "merge": true
+    }
+  ]
+}

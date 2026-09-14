@@ -1,0 +1,38 @@
+# Squash merge makes the PR title the commit message on main, and that commit
+# is what release-please reads. An unconventional title is a release that does
+# not happen, so the title is linted like code.
+name: pr-title
+
+on:
+  pull_request_target:
+    types: [opened, edited, reopened, synchronize]
+
+permissions:
+  pull-requests: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: amannn/action-semantic-pull-request@v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # Same list as the changelog sections. `feat` and `fix` are the only
+          # two that move the version; the rest are honest bookkeeping.
+          types: |
+            feat
+            fix
+            perf
+            refactor
+            docs
+            test
+            build
+            ci
+            chore
+            revert
+          requireScope: false
+          subjectPattern: ^(?![A-Z]).+$
+          subjectPatternError: |
+            The subject "{subject}" of "{title}" starts with an uppercase
+            letter. Conventional Commits subjects are lowercase.
