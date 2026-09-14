@@ -38,6 +38,8 @@ Only active agent-facing domains are exposed:
 - `e3p`
 - `mail`
 - `md2slide`
+- `nycu`
+- `parttime`
 - `pdf`
 - `pve`
 - `reminders`
@@ -105,7 +107,7 @@ make macOS tools work anywhere else.
 
 ## Current Tool Surface
 
-74 tools total:
+82 tools total:
 
 - `calendar_list_calendars`, `calendar_list_events`, `calendar_add_event`,
   `calendar_search_events`, `calendar_delete_event`
@@ -115,6 +117,9 @@ make macOS tools work anywhere else.
 - `mail_list_accounts`, `mail_list_inbox`, `mail_search_messages`,
   `mail_read_message`, `mail_compose_draft`
 - `md2slide_init`, `md2slide_build`
+- `nycu_setup`, `nycu_whoami`, `nycu_list_systems`, `nycu_list_events`,
+  `nycu_logout`
+- `parttime_get_status`, `parttime_sign_in`, `parttime_sign_out`
 - `pdf_info`, `pdf_extract_text`, `pdf_extract_comments`, `pdf_compress`,
   `pdf_decrypt`, `pdf_merge`, `pdf_split`, `pdf_rotate`, `pdf_render`
 - `pve_list_guests`, `pve_get_status`, `pve_start_guest`, `pve_stop_guest`,

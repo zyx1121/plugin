@@ -1,0 +1,390 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head id="Head1"><title>
+	受僱者線上簽到退
+</title><link id="cssElement" type="text/css" rel="stylesheet" href="/EIP/visoft__tab_xpie7.css" /><link id="cssElement2" type="text/css" rel="stylesheet" href="/EIP/text/css-green-main.css" /><link id="cssElement3" type="text/css" rel="stylesheet" href="/EIP/Loading.css" /><link id="cssElement4" type="text/css" rel="stylesheet" href="/EIP/text/css-TextBoxWithValidation.css" /><link type="text/css" rel="stylesheet" href="/EIP/css/TYFD_collapse_alert.css" />
+
+    <script type="text/javascript" src="/EIP/js/jquery/jquery.js"></script>
+    <script type="text/javascript" src="/EIP/js/jquery/jquery-ui.js"></script>    
+    <script type="text/javascript" src="/EIP/js/jquery/jquery.blockUI.js"></script>    
+    <script type="text/javascript" src="/EIP/js/DatePicker/datepicker-zh-TW.js"></script>
+    <link href="/EIP/js/DatePicker/jquery-ui.css" rel="Stylesheet" type="text/css" />
+        
+    <script type="text/javascript">
+        function validateBeforeShowBlock() {
+            if (Page_ClientValidate()) {
+                ShowBlock();
+                return true;
+            }
+
+            return false;
+        }
+        function doUnload() {
+            var n = window.event.screenX - window.screenLeft;
+            //alert("n=" + n);  　　　
+            var b = n > document.documentElement.scrollWidth - 40;
+            // alert("b=" + b);  　
+            if (n > document.documentElement.scrollWidth - 40) {
+                if ((b && window.event.clientY < 0) || (window.event.screenY > document.body.clientHeight) || window.event.altKey) {
+                    event.returnValue = '請確認工作已完成再行離開'
+                }
+                else {
+                    //alert("1");                    
+                }
+            }
+        }
+        $(document).ready(function () {
+
+            Sys.WebForms.PageRequestManager.getInstance().add_beginRequest(function (evt, args) {
+              try {
+                  ShowBlock();
+              }
+              catch (err) {
+              }
+            });
+
+            Sys.WebForms.PageRequestManager.getInstance().add_pageLoaded(function (evt, args) {
+                try {
+                    $(".DatePickerCalendar").datepicker({ dateFormat: 'yy-mm-dd' });
+                    $(".MingoDatePickerCalendar").datepicker({
+                        dateFormat: 'Rmmdd',
+                        changeMonth: true,
+                        changeYear: true,
+                        yearRange: "-10:+10"
+                    });
+                }
+                catch (err) {
+                }
+
+            });
+            Sys.WebForms.PageRequestManager.getInstance().add_endRequest(function (evt, args) {
+                try {
+                    $.unblockUI();
+                }
+                catch (err) {
+                }
+            });
+        });
+        function ShowBlock() {
+            $.blockUI({
+                message: '<table width="100%"><tr><td width="100%" style="height:50px; valign: middle ; text-align:center;">處理中，請稍候...</td></tr></table>',
+                css: {
+                    padding: 0,
+                    margin: 0,
+                    width: '30%',
+                    top: 100,
+                    left: '35%',
+                    textAlign: 'center',
+                    color: '#000',
+                    border: '3px solid #aaa',
+                    backgroundColor: '#fff',
+                    cursor: 'wait'
+                }
+            });
+        }
+     
+        $(function () {
+            //先設定預設西元年的datepicker必要功能
+            var old_generateMonthYearHeader = $.datepicker._generateMonthYearHeader;
+            var old_formatDate = $.datepicker.formatDate;
+            var old_parseDate = $.datepicker.parseDate;
+
+            $.extend($.datepicker, {
+                //選擇日期之後的value
+                formatDate: function (format, date, settings) {
+                    var oformatDate = old_formatDate(format, date, settings);
+                    if (format == 'Rmmdd') {
+                        var d = date.getDate();
+                        var m = date.getMonth() + 1;
+                        var y = date.getFullYear();
+                        var fm = function (v) {
+                            return (v < 10 ? '0' : '') + v;
+                        };
+
+                        if ((y - 1911) >= 100) { y = y - 1911; } else { y = "0" + String(y - 1911); }
+                        return (y) + '' + fm(m) + '' + fm(d);
+                    }
+                    return oformatDate;
+
+                },
+                //點取已存在日期的parse
+                parseDate: function (format, value, settings) {
+                    var v = new String(value);
+                    var Y, M, D;
+                    if (format == 'Rmmdd') {
+                        if (v.length == 7) {/*1001215*/
+                            Y = v.substring(0, 3) - 0 + 1911;
+                            M = v.substring(3, 5) - 0 - 1;
+                            D = v.substring(5, 7) - 0;
+                            return (new Date(Y, M, D));
+                        } else if (v.length == 6) {/*0981215*/
+
+                            Y = "0" + String(v.substring(0, 2) - 0 + 1911);
+                            M = v.substring(2, 4) - 0 - 1;
+                            D = v.substring(4, 6) - 0;
+                            return (new Date(Y, M, D));
+                        }
+                        return (new Date());
+                    } else {
+                        var oparseDate = old_parseDate.apply(this, [format, value, settings]);
+                        return (oparseDate);
+                    }
+
+                },
+                //改變小工具的年
+                _generateMonthYearHeader: function (inst, drawMonth, drawYear, minDate, maxDate, secondary, monthNames, monthNamesShort) {
+                    var dateFormat = this._get(inst, "dateFormat");
+                    var htmlYearMonth = old_generateMonthYearHeader.apply(this, [inst, drawMonth, drawYear, minDate, maxDate, secondary, monthNames, monthNamesShort]);
+                    if (dateFormat == 'Rmmdd') {
+                        if ($(htmlYearMonth).find(".ui-datepicker-year").length > 0) {
+                            htmlYearMonth = $(htmlYearMonth).find(".ui-datepicker-year").find("option").each(function (i, e) {
+
+                                if (Number(e.value) - 1911 > 0) { $(e).text(Number(e.value) - 1911); }
+
+                            }).end().end().get(0).outerHTML;
+                        }
+                    }
+                    return htmlYearMonth;
+                }
+            });
+        });
+    </script>
+    
+<style>.Watermark{color:#FFFFFF}</style><link href="/EIP/WebResource.axd?d=gZYSYEsMm53j51UnA7Qy8ySGh9Y1plYzHGI1lrRKxE4RKAMtWHaqGqv3ylwGifoz5A89SRR4grSDXM_FNSLrjuFiK8DW6rlkcmfkJMePKVzRsIKR25EL6K_cMzUTO44GgMTLRR4yx00ZEBElCpo8mYz2aRMj-3BqI0YvSByHreg2H37q0&amp;t=639221333677308321" type="text/css" rel="stylesheet" /></head>
+<body id="budy" onbeforeunload="doUnload()">
+    <form method="post" action="./OnlineProjectAttend_NYCU.aspx" onsubmit="javascript:return WebForm_OnSubmit();" id="form1">
+<div class="aspNetHidden">
+<input type="hidden" name="__EVENTTARGET" id="__EVENTTARGET" value="" />
+<input type="hidden" name="__EVENTARGUMENT" id="__EVENTARGUMENT" value="" />
+<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="dDwtMTIzNDU2Nzg5O0ZJWFRVUkU=" />
+</div>
+
+<script type="text/javascript">
+//<![CDATA[
+var theForm = document.forms['form1'];
+if (!theForm) {
+    theForm = document.form1;
+}
+function __doPostBack(eventTarget, eventArgument) {
+    if (!theForm.onsubmit || (theForm.onsubmit() != false)) {
+        theForm.__EVENTTARGET.value = eventTarget;
+        theForm.__EVENTARGUMENT.value = eventArgument;
+        theForm.submit();
+    }
+}
+//]]>
+</script>
+
+
+<script src="/EIP/WebResource.axd?d=rp-wbhp_kKhKBpIBp3Lu60YDhhMawyF8V80DrP7tUZwyGeHIRh0u1ArKdtCM06ClCIzxe4ViSmB6f5qIRK4clPqKnzM1&amp;t=639192184340000000" type="text/javascript"></script>
+
+<script type='text/javascript'>
+function ctl00$ContentPlaceHolder1$ApplInfo$TextBoxWithValidation_pageLoadAlert(num, addlist) {
+var TextBox = document.getElementById('ctl00$ContentPlaceHolder1$ApplInfo$TextBoxWithValidation_pageLoadAlert$TextBox');
+for(var i = 0; i < num ; i++) {
+TextBox.value += addlist.options[i].text + '\n';
+}
+}
+</script>
+
+<script src="/EIP/ScriptResource.axd?d=vyWXnVD02j-4BvMc0smr5FDcvP6wr2vMmT7o4k0bKx5kuWpVNRu8VPgcNjwW1UG0gTWd2SskewHPkMQjpZB-lEXLSZb0KfmTRWRGuVnRF_mVpproaCAjTguwyuzDDmDMiGFG9DpyRA5FxawvAMOHzfmKw5xA3n0YjXgsQqnpd9xrb0gk0&amp;t=fffffffff7f39b88" type="text/javascript"></script>
+<script type="text/javascript">
+//<![CDATA[
+if (typeof(Sys) === 'undefined') throw new Error('ASP.NET Ajax 用戶端架構無法載入。');
+//]]>
+</script>
+
+<script src="/EIP/ScriptResource.axd?d=TuI2BPRTRHHTkLhUmfBdvblIUI59Fg_QmWHi_yssEdfx9zB_JBFLIWSnsVc8TLxabGO3iUBW2xZIBi6S9HzGlLxQ1FZP3IYqMvmPwQLTtTxrRzWDAf4uKKf91dL7_XiKRzPu_A_jAI_or5qa1C1Yte4-bqUJONtPDru2g-G_8MZ3GepIQFygfQFw0zlaNkX_36MuZw2&amp;t=fffffffff7f39b88" type="text/javascript"></script>
+<script type="text/javascript">
+//<![CDATA[
+function WebForm_OnSubmit() {
+null;
+return true;
+}
+//]]>
+</script>
+
+<div class="aspNetHidden">
+
+	<input type="hidden" name="__VIEWSTATEGENERATOR" id="__VIEWSTATEGENERATOR" value="DUMMY001" />
+	<input type="hidden" name="__VIEWSTATEENCRYPTED" id="__VIEWSTATEENCRYPTED" value="" />
+</div>
+        <input name="__RequestVerificationToken" type="hidden" value="dummy-request-verification-token" />
+    <script type="text/javascript">
+//<![CDATA[
+Sys.WebForms.PageRequestManager._initialize('ctl00$ScriptManager1', 'form1', [], [], [], 3600, 'ctl00');
+//]]>
+</script>
+
+    <script language="javascript" src="/EIP/js/AjaxResizeIFrame.js" type="text/javascript"></script>
+    <div>
+        
+    <div align="center">
+        <table class="tab-frame" align="center">
+            <tr>
+                <td background="/EIP/images/title-fun3-2.gif">
+                    <table class="tab-path" align="center">
+                        <tr>
+                            <td width="47" rowspan="2">
+                                <img height="47" src="/EIP/images/title-fun3-3.gif" width="47">
+                            </td>
+                            <td height="40%"></td>
+                        </tr>
+                        <tr>
+                            <td class="data-item">
+                                <span id="ContentPlaceHolder1_label_title">受僱者線上簽到退</span>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+        <div id="ContentPlaceHolder1_Panel_list" style="width:98%;">
+	            
+            <table class="tab-content" cellspacing="1" cellpadding="0">
+                <tr>
+                    <td>
+                        <table class="tab-content-in" id="Table5" cellspacing="1" cellpadding="3" border="0">
+                            <tr>
+                                <td align="left" height="30">
+                                    <p>簽到退注意事項：</p>
+                                    <p>一、每日正常工時為8小時，每日延長工時至多4小時，連續工作4小時應休息至少半小時；每月延長工時不得超過46小時；每7日中應有2日之休息，一日為例假日、一日為休息日。 </p>
+                                    <p>二、工作時數計算以小時為單位，例如8:20簽到、10:10簽退，該段工作時數計為1小時。 </p>
+                                    <p>三、跨日工作者，應分日簽到退，例如12/2 23:00開始工作至12/3 3:00，簽到方式應為12/2 23:00簽到、24:00簽退；12/3 0:00簽到、3:00簽退。 </p>
+                                    <p>四、忘記簽到退，請通知計畫主持人協助維護工時。</p>
+                                    
+                                    <p>Check-in and Check-out Guidelines:</p>
+                                    <p>1.	Daily Working Hours: The normal working hours are 8 hours per day. Overtime can be extended up to 4 hours per day. After working continuously for 4 hours, a break of at least half an hour is required. Monthly overtime should not exceed 46 hours. There should be 2 days of rest every 7 days, one being a regular holiday and the other a rest day.</p>
+                                    <p>2.	Calculation of Working Hours: Working hours are calculated in hours. For example, if you check in at 8:20 and check out at 10:10, the working hours for that period are counted as 1 hour.</p>
+                                    <p>3.	Cross-Day Work: For those working across days, check-in and check-out should be done separately for each day. For example, if you start working at 23:00 on 12/2 and finish at 3:00 on 12/3, you should check in at 23:00 on 12/2 and check out at 24:00; then check in at 0:00 on 12/3 and check out at 3:00.</p>
+                                    <p>4.	Forgot to Check-in or Check-out: If you forget to check in or check out, please notify the project manager to assist in maintaining the working hours.</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td align="center">
+
+                                    <div>
+		<table class="tab-content-in" cellspacing="1" cellpadding="3" rules="all" id="ContentPlaceHolder1_GridView_attend" style="border-color:White;border-width:0px;">
+			<tr align="center">
+				<td align="center">測試計畫 Test Project</td><td align="left" style="background-color:#FFEDDA;">
+                                                   <p> <a href='/EIP/common/ProjectWkrecordViewer.aspx?planid=ltci1agYFi6Q7KPP1oGCoQ%3d%3d&paid=pqmkFPJZ55ecTq35xZGcPw%3d%3d' target='_blank'>000P000000　測試計畫 Test Project　王小明(AT0000)(, )　2026-09-02~2026-09-25</a></p>
+                                                    <p> 每月工時上限： 目前累積：0小時 尚缺：</p>
+                                                  <p style="color: #8a8a8a;">   <font-color='#8a8a8a'></font> </p>
+                                                   <p>  <font color='red'></font></p>
+                                                </td><td>
+                                                  <p>  <a id="ContentPlaceHolder1_GridView_attend_LinkButton_signIn_0" class="input-button" href="javascript:WebForm_DoPostBackWithOptions(new WebForm_PostBackOptions(&quot;ctl00$ContentPlaceHolder1$GridView_attend$ctl02$LinkButton_signIn&quot;, &quot;&quot;, true, &quot;&quot;, &quot;&quot;, false, true))" style="color:#663333;">簽到SignIn</a></p>
+                                                    <p> </p>
+                                                  <p>   <a id="ContentPlaceHolder1_GridView_attend_HyperLink_query_0" class="input-button" href="/EIP/common/ProjectWkrecordViewer.aspx?planid=ltci1agYFi6Q7KPP1oGCoQ%3d%3d&amp;paid=pqmkFPJZ55ecTq35xZGcPw%3d%3d" target="_blank" style="color:#663333;">查詢</a></p>
+                                                </td>
+			</tr><tr align="center" style="background-color:White;">
+				<td align="center">測試計畫 Test Project</td><td align="left" style="background-color:#FFEDDA;">
+                                                   <p> <a href='/EIP/common/ProjectWkrecordViewer.aspx?planid=ltci1agYFi6Q7KPP1oGCoQ%3d%3d&paid=dKzDhV%2fvk5MTG54s7YTG%2bg%3d%3d' target='_blank'>000P000000　測試計畫 Test Project　王小明(AT0000)(, )　2026-03-13~2026-03-31</a></p>
+                                                    <p> 每月工時上限： 目前累積：4小時 尚缺：</p>
+                                                  <p style="color: #8a8a8a;">   <font-color='#8a8a8a'></font> </p>
+                                                   <p>  <font color='red'></font></p>
+                                                </td><td>
+                                                  <p>  </p>
+                                                    <p> </p>
+                                                  <p>   <a id="ContentPlaceHolder1_GridView_attend_HyperLink_query_1" class="input-button" href="/EIP/common/ProjectWkrecordViewer.aspx?planid=ltci1agYFi6Q7KPP1oGCoQ%3d%3d&amp;paid=dKzDhV%2fvk5MTG54s7YTG%2bg%3d%3d" target="_blank" style="color:#663333;">查詢</a></p>
+                                                </td>
+			</tr><tr align="center">
+				<td align="center">測試計畫 Test Project</td><td align="left" style="background-color:#FFEDDA;">
+                                                   <p> <a href='/EIP/common/ProjectWkrecordViewer.aspx?planid=ltci1agYFi6Q7KPP1oGCoQ%3d%3d&paid=dKzDhV%2fvk5OFkKS3jr98Tw%3d%3d' target='_blank'>000P000000　測試計畫 Test Project　王小明(AT0000)(, )　2026-04-02~2026-04-30</a></p>
+                                                    <p> 每月工時上限： 目前累積：4小時 尚缺：</p>
+                                                  <p style="color: #8a8a8a;">   <font-color='#8a8a8a'></font> </p>
+                                                   <p>  <font color='red'></font></p>
+                                                </td><td>
+                                                  <p>  </p>
+                                                    <p> </p>
+                                                  <p>   <a id="ContentPlaceHolder1_GridView_attend_HyperLink_query_2" class="input-button" href="/EIP/common/ProjectWkrecordViewer.aspx?planid=ltci1agYFi6Q7KPP1oGCoQ%3d%3d&amp;paid=dKzDhV%2fvk5OFkKS3jr98Tw%3d%3d" target="_blank" style="color:#663333;">查詢</a></p>
+                                                </td>
+			</tr><tr align="center" style="background-color:White;">
+				<td align="center">測試計畫 Test Project</td><td align="left" style="background-color:#FFEDDA;">
+                                                   <p> <a href='/EIP/common/ProjectWkrecordViewer.aspx?planid=ltci1agYFi6Q7KPP1oGCoQ%3d%3d&paid=dKzDhV%2fvk5NRQokSm4lx%2bw%3d%3d' target='_blank'>000P000000　測試計畫 Test Project　王小明(AT0000)(, )　2026-05-02~2026-05-29</a></p>
+                                                    <p> 每月工時上限： 目前累積：1小時 尚缺：</p>
+                                                  <p style="color: #8a8a8a;">   <font-color='#8a8a8a'></font> </p>
+                                                   <p>  <font color='red'></font></p>
+                                                </td><td>
+                                                  <p>  </p>
+                                                    <p> </p>
+                                                  <p>   <a id="ContentPlaceHolder1_GridView_attend_HyperLink_query_3" class="input-button" href="/EIP/common/ProjectWkrecordViewer.aspx?planid=ltci1agYFi6Q7KPP1oGCoQ%3d%3d&amp;paid=dKzDhV%2fvk5NRQokSm4lx%2bw%3d%3d" target="_blank" style="color:#663333;">查詢</a></p>
+                                                </td>
+			</tr><tr align="center">
+				<td align="center">測試計畫 Test Project</td><td align="left" style="background-color:#FFEDDA;">
+                                                   <p> <a href='/EIP/common/ProjectWkrecordViewer.aspx?planid=ltci1agYFi6Q7KPP1oGCoQ%3d%3d&paid=ItxR10Ex50WONkbzrzPTxA%3d%3d' target='_blank'>000P000000　測試計畫 Test Project　王小明(AT0000)(, )　2026-06-02~2026-06-03</a></p>
+                                                    <p> 每月工時上限： 目前累積：1小時 尚缺：</p>
+                                                  <p style="color: #8a8a8a;">   <font-color='#8a8a8a'></font> </p>
+                                                   <p>  <font color='red'></font></p>
+                                                </td><td>
+                                                  <p>  </p>
+                                                    <p> </p>
+                                                  <p>   <a id="ContentPlaceHolder1_GridView_attend_HyperLink_query_4" class="input-button" href="/EIP/common/ProjectWkrecordViewer.aspx?planid=ltci1agYFi6Q7KPP1oGCoQ%3d%3d&amp;paid=ItxR10Ex50WONkbzrzPTxA%3d%3d" target="_blank" style="color:#663333;">查詢</a></p>
+                                                </td>
+			</tr><tr align="center" style="background-color:White;">
+				<td align="center">測試計畫 Test Project</td><td align="left" style="background-color:#FFEDDA;">
+                                                   <p> <a href='/EIP/common/ProjectWkrecordViewer.aspx?planid=ltci1agYFi6Q7KPP1oGCoQ%3d%3d&paid=l%2bMBv8nLGI1tjfXtqP%2fZFA%3d%3d' target='_blank'>000P000000　測試計畫 Test Project　王小明(AT0000)(, )　2026-06-04~2026-06-05</a></p>
+                                                    <p> 每月工時上限： 目前累積：3小時 尚缺：</p>
+                                                  <p style="color: #8a8a8a;">   <font-color='#8a8a8a'></font> </p>
+                                                   <p>  <font color='red'></font></p>
+                                                </td><td>
+                                                  <p>  </p>
+                                                    <p> </p>
+                                                  <p>   <a id="ContentPlaceHolder1_GridView_attend_HyperLink_query_5" class="input-button" href="/EIP/common/ProjectWkrecordViewer.aspx?planid=ltci1agYFi6Q7KPP1oGCoQ%3d%3d&amp;paid=l%2bMBv8nLGI1tjfXtqP%2fZFA%3d%3d" target="_blank" style="color:#663333;">查詢</a></p>
+                                                </td>
+			</tr><tr align="center">
+				<td align="center">測試計畫 Test Project</td><td align="left" style="background-color:#FFEDDA;">
+                                                   <p> <a href='/EIP/common/ProjectWkrecordViewer.aspx?planid=ltci1agYFi6Q7KPP1oGCoQ%3d%3d&paid=pqmkFPJZ55c2HKJKnDkfJw%3d%3d' target='_blank'>000P000000　測試計畫 Test Project　王小明(AT0000)(, )　2026-07-30~2026-07-31</a></p>
+                                                    <p> 每月工時上限： 目前累積：2小時 尚缺：</p>
+                                                  <p style="color: #8a8a8a;">   <font-color='#8a8a8a'></font> </p>
+                                                   <p>  <font color='red'></font></p>
+                                                </td><td>
+                                                  <p>  </p>
+                                                    <p> </p>
+                                                  <p>   <a id="ContentPlaceHolder1_GridView_attend_HyperLink_query_6" class="input-button" href="/EIP/common/ProjectWkrecordViewer.aspx?planid=ltci1agYFi6Q7KPP1oGCoQ%3d%3d&amp;paid=pqmkFPJZ55c2HKJKnDkfJw%3d%3d" target="_blank" style="color:#663333;">查詢</a></p>
+                                                </td>
+			</tr><tr align="center" style="background-color:White;">
+				<td align="center">測試計畫 Test Project</td><td align="left" style="background-color:#FFEDDA;">
+                                                   <p> <a href='/EIP/common/ProjectWkrecordViewer.aspx?planid=ltci1agYFi6Q7KPP1oGCoQ%3d%3d&paid=pqmkFPJZ55fgJWcfx6GkWg%3d%3d' target='_blank'>000P000000　測試計畫 Test Project　王小明(AT0000)(, )　2026-08-02~2026-08-31</a></p>
+                                                    <p> 每月工時上限： 目前累積：3小時 尚缺：</p>
+                                                  <p style="color: #8a8a8a;">   <font-color='#8a8a8a'></font> </p>
+                                                   <p>  <font color='red'></font></p>
+                                                </td><td>
+                                                  <p>  </p>
+                                                    <p> </p>
+                                                  <p>   <a id="ContentPlaceHolder1_GridView_attend_HyperLink_query_7" class="input-button" href="/EIP/common/ProjectWkrecordViewer.aspx?planid=ltci1agYFi6Q7KPP1oGCoQ%3d%3d&amp;paid=pqmkFPJZ55fgJWcfx6GkWg%3d%3d" target="_blank" style="color:#663333;">查詢</a></p>
+                                                </td>
+			</tr>
+		</table>
+	</div>
+
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+
+            </table>
+        
+</div>
+        
+    </div>
+     <br />
+
+
+
+
+        
+    </div>
+    </form>
+    <script type="text/javascript">
+        Sys.Browser.WebKit = {}; //Safari 3 is considered WebKit 
+        if (navigator.userAgent.indexOf('WebKit/') > -1) {
+            Sys.Browser.agent = Sys.Browser.WebKit;
+            Sys.Browser.version = parseFloat(navigator.userAgent.match(/WebKit\/(\d+(\.\d+)?)/)[1]);
+            Sys.Browser.name = 'WebKit';
+        }
+</script>
+</body>
+</html>

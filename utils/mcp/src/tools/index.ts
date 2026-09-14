@@ -4,6 +4,8 @@ import { e3pTools } from "./e3p/index.ts";
 import { gmapsTools } from "./gmaps/index.ts";
 import { mailTools } from "./mail/index.ts";
 import { md2slideTools } from "./md2slide/index.ts";
+import { nycuTools } from "./nycu/index.ts";
+import { parttimeTools } from "./parttime/index.ts";
 import { pdfTools } from "./pdf/index.ts";
 import { pveTools } from "./pve/index.ts";
 import { remindersTools } from "./reminders/index.ts";
@@ -19,6 +21,8 @@ export const allTools = [
   ...gmapsTools,
   ...mailTools,
   ...md2slideTools,
+  ...nycuTools,
+  ...parttimeTools,
   ...pdfTools,
   ...pveTools,
   ...remindersTools,
