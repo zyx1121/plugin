@@ -1,12 +1,14 @@
 #!/usr/bin/env -S uv run --script
 # /// script
-# requires-python = ">=3.11"
+# requires-python = ">=3.11,<3.14"
 # dependencies = ["typer", "rich"]
 # ///
-"""NYCU timetable atoms — semesters / search / lookup / periods.
+# Python 3.14 fails TLS against timetable.nycu.edu.tw (Missing Subject Key
+# Identifier); capped below 3.14 until the site fixes its cert chain.
+"""NYCU timetable atoms: semesters / search / lookup / periods.
 
 Wraps timetable.nycu.edu.tw's public course query API (no auth required) so
-agents can answer "what day/period/room is this class" — something E3/Moodle
+agents can answer "what day/period/room is this class", something E3/Moodle
 does not carry. cos_id is the same identifier E3 uses in its shortname
 (e.g. `1151.535702`: the part before the dot is the acysem, the part after is
 the cos_id), so `lookup` chains directly off `e3p courses` output.
@@ -28,6 +30,7 @@ if _LIB not in _sys.path:
 import html
 import json
 import re
+from concurrent.futures import ThreadPoolExecutor
 from enum import Enum
 from typing import Any, Optional
 from urllib.error import HTTPError, URLError
@@ -46,7 +49,7 @@ app = typer.Typer(
     rich_markup_mode=None,
     no_args_is_help=True,
     add_completion=False,
-    help="NYCU timetable atoms — semesters / search / lookup / periods.",
+    help="NYCU timetable atoms: semesters / search / lookup / periods.",
 )
 console = Console()
 
@@ -74,7 +77,7 @@ PERIOD_MAP = {code: (start, end) for code, start, end in PERIODS}
 
 _SKIP_KEYS = {"dep_id", "dep_cname", "dep_ename", "costype", "brief", "language"}
 
-_TIME_RE = re.compile(r"^([MTWRFSU])([^-\[]+)-?([^\[]*)(?:\[([^\]]*)\])?$")
+_TIME_RE = re.compile(r"^([A-Za-z])([^-\[]+)-?([^\[]*)(?:\[([^\]]*)\])?$")
 
 
 class SearchBy(str, Enum):
@@ -98,6 +101,12 @@ def _call(r: str, data: Optional[dict] = None) -> Any:
         with urlopen(req, timeout=30) as resp:
             raw = resp.read()
     except HTTPError as e:
+        if 400 <= e.code < 500:
+            fail(
+                "timetable rejected the query",
+                why=f"{e.code} {e.reason}",
+                hint="check --acysem against `timetable semesters` and the search value",
+            )
         fail("timetable unreachable", why=f"{e.code} {e.reason}", hint="check network or https://timetable.nycu.edu.tw")
     except URLError as e:
         fail("timetable unreachable", why=str(e), hint="check network or https://timetable.nycu.edu.tw")
@@ -124,9 +133,12 @@ def _default_acysem() -> str:
 
 
 def _split_acysem(acysem: str) -> tuple[str, str]:
-    if len(acysem) != 4:
-        fail("bad acysem", why=f"{acysem!r} is not 4 characters", hint="use a code from `timetable semesters`, e.g. 1151")
-    return acysem[:3], acysem[3]
+    if len(acysem) not in (3, 4):
+        fail("bad acysem", why=f"{acysem!r} is not 3 or 4 characters", hint="use a code from `timetable semesters`, e.g. 1151 or 99X")
+    acy, sem = acysem[:-1], acysem[-1]
+    if sem not in ("1", "2", "X"):
+        fail("bad acysem", why=f"{acysem!r} has semester {sem!r}, expected 1, 2, or X", hint="use a code from `timetable semesters`, e.g. 1151 or 99X")
+    return acy, sem
 
 
 def _query(acysem: str, option: str, value: str) -> Any:
@@ -183,11 +195,15 @@ def _parse_cos_time(raw: str) -> list[dict]:
         day, period_codes, room, campus = m.groups()
         room = room.strip() or None
         campus = campus or None
-        start = PERIOD_MAP.get(period_codes[0], (None, None))[0]
-        end = PERIOD_MAP.get(period_codes[-1], (None, None))[1]
+        day_name = DAY_NAMES.get(day)
+        if day_name is None:
+            start = end = None
+        else:
+            start = PERIOD_MAP.get(period_codes[0], (None, None))[0]
+            end = PERIOD_MAP.get(period_codes[-1], (None, None))[1]
         slots.append(
             {
-                "day": DAY_NAMES.get(day, day),
+                "day": day_name,
                 "periods": period_codes,
                 "start": start,
                 "end": end,
@@ -268,19 +284,34 @@ def search(
     emit(courses, {"count": len(courses), "acysem": sem, "query": query, "by": by.value}, human=_human_courses)
 
 
-@app.command(help="Look up specific courses by cos_id. IDs not found this semester are reported in metadata, not treated as an error.")
+MAX_LOOKUP_IDS = 20
+
+
+@app.command(help="Look up specific courses by cos_id (max 20 per call). IDs not found this semester are reported in metadata, not treated as an error.")
 def lookup(
-    cos_ids: list[str] = typer.Argument(..., help="One or more course IDs (cos_id), e.g. 535702."),
+    cos_ids: list[str] = typer.Argument(..., help="One or more course IDs (cos_id), e.g. 535702. Max 20 per call."),
     acysem: Optional[str] = typer.Option(None, "--acysem", help="Semester code like 1151. Default: latest semester."),
 ) -> None:
+    if len(cos_ids) > MAX_LOOKUP_IDS:
+        fail(
+            f"too many cos_ids ({len(cos_ids)})",
+            why=f"lookup accepts at most {MAX_LOOKUP_IDS} ids per call",
+            hint="split the ids across multiple `timetable lookup` calls",
+        )
     sem = acysem or _default_acysem()
+
+    def _lookup_one(cid: str) -> tuple[str, list[dict]]:
+        raw = _query(sem, "cos_id", str(cid))
+        return str(cid), _parse_courses(raw)
+
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        results = list(pool.map(_lookup_one, cos_ids))
+
     found: dict[str, dict] = {}
     missing: list[str] = []
-    for cid in cos_ids:
-        raw = _query(sem, "cos_id", str(cid))
-        courses = _parse_courses(raw)
+    for cid, courses in results:
         if not courses:
-            missing.append(str(cid))
+            missing.append(cid)
             continue
         for c in courses:
             found[c["cos_id"]] = c
