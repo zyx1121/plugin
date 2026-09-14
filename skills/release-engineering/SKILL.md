@@ -16,14 +16,13 @@ the reference half. The procedures come first because that is what gets used.
 
 ## What the global rules already say (do not restate, reference)
 
-- **Ship loop**: commit, push, PR, CI green, squash merge, delete branch. From
-  `CLAUDE.md`, not from this skill. This skill only adds what happens *after*
-  the squash merge.
+- **Ship loop**: commit, push, PR, CI green, squash merge, delete branch. That
+  lives in `CLAUDE.md`; this skill only adds what happens *after* the merge.
 - **Which scheme where**: SemVer for release / package / image, `vN` for API and
   protocol schemas, immutable git SHA for container tags. This skill explains
   how to mechanize the SemVer half, and where the other two show up.
-- **Skill and plugin repo bumps**: `~/plugin` bumps `plugin.json` and
-  `marketplace.json` by hand, see `skills/AGENTS.md`. It has no release PR.
+- **Plugin repo bumps**: `~/plugin` bumps `plugin.json` and `marketplace.json`
+  by hand, see `skills/AGENTS.md`. It has no release PR.
 
 ---
 
@@ -31,14 +30,24 @@ the reference half. The procedures come first because that is what gets used.
 
 ### 1. Detect the stack
 
-| Stack | Marker files | Config template | Notes |
+| Stack | Marker files | Config template | release-type |
 |---|---|---|---|
-| node | `package.json`, `bun.lock` | `release-please-config.node.json` | release-type `node` |
-| rust | `Cargo.toml` with `[package]` | `release-please-config.rust.json` | updates `Cargo.toml` + `Cargo.lock` |
-| rust workspace | `Cargo.toml` with `[workspace]` + `crates/` | `release-please-config.rust-workspace.json` | `cargo-workspace` + `linked-versions` plugins |
-| python (uv) | `pyproject.toml`, `uv.lock` | `release-please-config.python.json` | release-type `python` |
-| tauri | `package.json` + `src-tauri/tauri.conf.json` + `Cargo.toml` | `release-please-config.tauri.json` | multi-manifest, see step 6 |
-| generic | none of the above | `release-please-config.generic.json` | release-type `simple`, version in `version.txt` |
+| node | `package.json`, `bun.lock` | `release-please-config.node.json` | `node` |
+| rust | `Cargo.toml` with a real `[package]` | `release-please-config.rust.json` | `rust` |
+| rust workspace | `Cargo.toml` with `[workspace]`, members on `version.workspace = true` | `release-please-config.rust-workspace.json` | `simple` + `extra-files` |
+| python (uv) | `pyproject.toml`, `uv.lock` | `release-please-config.python.json` | `python` |
+| tauri | `package.json` + `src-tauri/tauri.conf.json` + `Cargo.toml` | `release-please-config.tauri.json` | `simple` + `extra-files` |
+| generic | none of the above | `release-please-config.generic.json` | `simple` |
+
+**Why the two workspace stacks do not use release-type `rust`:** the rust
+strategy throws on a virtual workspace root, which has no `[package]` to read,
+and it cannot follow a member crate that carries `version.workspace = true`.
+Proven on `zyx1121/ai-app-store`. The working recipe is release-type `simple`
+driving every manifest through `extra-files`: `toml` with
+`$.workspace.package.version` for `Cargo.toml`, `toml` with
+`$.package[?(@.name.value=='<crate>')].version` for the `Cargo.lock` entries,
+and `json` with `$.version` for `package.json` and `tauri.conf.json`. `simple`
+also writes a root `version.txt` on the first release PR, which is harmless.
 
 ### 2. Copy the templates
 
@@ -46,24 +55,24 @@ From `${CLAUDE_SKILL_DIR}/assets/`:
 
 ```bash
 cp assets/release-please-config.<stack>.json  release-please-config.json
-cp assets/release-please.yml                  .github/workflows/release.yml
+cp assets/release-please.yml                  .github/workflows/release-please.yml
 cp assets/pr-title.yml                        .github/workflows/pr-title.yml
 ```
 
-Open `release.yml`, keep the one commented build block that matches the stack,
-delete the others. Replace every `REPLACE_*` token in the config.
+Open `release-please.yml`, keep the one commented build block that matches the
+stack, uncomment it, delete the others. Replace every `REPLACE_*` token in the
+config, including the crate names inside the `Cargo.lock` jsonpath.
 
 ### 3. Seed the manifest from the current version
 
 `.release-please-manifest.json` is the only place Release Please reads the
 current version from. Seed it with what the repo is on *today*, not `0.0.0`, or
-the first release PR proposes a version that goes backwards.
+the first release PR proposes a version that goes backwards. If the repo already
+has `vX.Y.Z` tags, the seed must match the newest one.
 
 ```bash
 echo '{ ".": "0.4.2" }' > .release-please-manifest.json
 ```
-
-If the repo already has `vX.Y.Z` tags, the seed must match the newest one.
 
 ### 4. Seed the changelog
 
@@ -71,14 +80,19 @@ If the repo already has `vX.Y.Z` tags, the seed must match the newest one.
 cp assets/CHANGELOG.seed.md CHANGELOG.md
 ```
 
-History before the standard is not backfilled. The seed says the generated
-entries start here, and the old tags stay reachable in the GitHub releases list.
+History before the standard is not backfilled: the generated entries start here
+and the old tags stay reachable in the GitHub releases list.
 
 ### 5. Add the PR title check
 
 `pr-title.yml` lints the PR title with `amannn/action-semantic-pull-request`.
 With squash merge the PR title *is* the commit on `main`, so a title like
-"fix stuff" is a release that silently never happens.
+"fix stuff" is a release that silently never happens. Include the `edited` pull
+request type: a retitle rewrites the future commit message.
+
+If the check is going to be **required**, paste the job into `ci.yml` instead of
+installing the standalone file, because step 7 dispatches `ci.yml` by name and
+nothing outside it runs on the release PR.
 
 ### 6. Multi-manifest guard, tauri only
 
@@ -87,31 +101,46 @@ When one version lives in four files (`package.json`, `tauri.conf.json`,
 `scripts/check-versions.ts`, wire `bun run check:versions`, and run it in CI.
 Single-manifest repos skip this: there is nothing to disagree with.
 
-### 7. Give the workflow a real token
+### 7. Make CI run on the release PR, with no PAT
 
-Add `RELEASE_PLEASE_TOKEN`: a fine-grained PAT or a GitHub App installation
-token with `contents: write` and `pull-requests: write`. **This is not optional.**
-A PR opened by the default `GITHUB_TOKEN` does not trigger workflows, so CI
-never runs on the release PR, required checks stay pending, and the PR cannot be
-merged. The symptom looks like a stuck PR, the cause is the token.
+GitHub starts no workflow for a pull request opened by `GITHUB_TOKEN`, so the
+release PR would carry no checks and the release commit would ship unproven.
+**No secret is needed to fix this.** `workflow_dispatch` is one of the two
+documented exceptions to that rule, so the release job asks for CI by name on
+the release branch, with `github.token`:
+
+```yaml
+- name: Run CI on the release pull request
+  if: steps.release.outputs.pr != ''
+  env:
+    GH_TOKEN: ${{ github.token }}
+    BRANCH: ${{ fromJSON(steps.release.outputs.pr || '{}').headBranchName }}
+  run: gh workflow run ci.yml --ref "$BRANCH"
+```
+
+Two things this needs: the job holds `actions: write` on top of
+`contents: write` and `pull-requests: write`, and the repo's `ci.yml` carries a
+bare `workflow_dispatch:` trigger. Without that trigger the dispatch fails and
+the release PR stays checkless. The run reports against the branch head, which
+is the commit the PR shows.
 
 ### 8. Set required checks and merge style
 
 Branch protection on `main`: squash merge only, linear history, required checks
-= CI plus `pr-title`. Deleting the branch on merge is the repo setting, not a
-step anyone performs.
+= CI plus the title gate. Deleting the branch on merge is a repo setting.
 
 ### 9. Verify on the real repo
 
-First push to `main` opens the release PR. Merge it, then check all three
-outcomes, because the workflow being green proves only the first:
+First push to `main` opens the release PR, which should show a CI run started by
+the dispatch. Merge it, then check the outcomes the green workflow does not
+prove:
 
 ```bash
 gh release view v0.5.0 --json tagName,assets,body
 git ls-remote --tags origin | grep v0.5.0
 ```
 
-A release with no asset attached means the build hook was left commented out.
+A release with no asset means the build hook was left commented out.
 
 ---
 
@@ -124,8 +153,9 @@ There is no manual step anywhere in this list.
 2. Ready to ship means: merge the release PR. That is the whole release.
 3. **Hotfix**: open a `fix:` PR, merge it, then merge the refreshed release PR.
    A hotfix is not a different pipeline, only an impatient one.
-4. **Pre-1.0** (`bump-minor-pre-major: true` in every template): `feat:` moves
-   the minor, `fix:` moves the patch, and a breaking change also moves the minor
+4. **Pre-1.0 house rule**, `bump-minor-pre-major: true` plus
+   `bump-patch-for-minor-pre-major: false` in every template: `feat:` moves the
+   minor, `fix:` moves the patch, and a breaking change also moves the minor
    instead of jumping to `1.0.0`. Going to `1.0.0` is a deliberate `Release-As:
    1.0.0` commit footer, never an accident.
 5. `feat!:` or a `BREAKING CHANGE:` footer is for a break the *consumer* must
@@ -139,12 +169,11 @@ There is no manual step anywhere in this list.
 ## Conventions
 
 - Tags are `vX.Y.Z`, with the `v`. Versions inside manifests have no `v`.
-- Release assets are named `<artifact>-<tag>.<ext>`, each with a
-  `.sha256` sidecar next to it.
-- One release workflow file per repo, named `.github/workflows/release.yml`.
+- Release assets are named `<artifact>-<tag>.<ext>` with a `.sha256` sidecar.
+- One release workflow file per repo, named `.github/workflows/release-please.yml`.
 - No hand-written tags. `git tag` on a laptop is a tag no release stands behind.
-- No hand-edited versions in manifests, and no hand-edited generated changelog
-  entries. The next release PR overwrites both.
+- No hand-edited versions or generated changelog entries. The next release PR
+  overwrites both.
 - Conventional Commits scope is optional, subject is lowercase, no trailing period.
 
 ---
@@ -154,8 +183,8 @@ There is no manual step anywhere in this list.
 **SemVer 2.0.0** (<https://semver.org/spec/v2.0.0.html>) is the contract the
 version number makes: MAJOR for incompatible API changes, MINOR for
 backwards-compatible features, PATCH for backwards-compatible fixes. `0.y.z` is
-explicitly the unstable phase where anything may change, which is why the
-pre-1.0 rules below exist.
+explicitly the unstable phase where anything may change, which is why the pre-1.0
+rules exist at all.
 
 **Conventional Commits 1.0.0** (<https://www.conventionalcommits.org/en/v1.0.0/>)
 is the machine-readable commit format that lets a tool compute the next version.
@@ -164,7 +193,9 @@ footer bumps the major. `docs:`, `refactor:`, `test:`, `build:`, `ci:`, `chore:`
 `perf:`, `revert:` bump nothing but still land in the changelog sections that are
 enabled. Pre-1.0 the mapping is shifted by `bump-minor-pre-major: true`: a
 breaking change moves the minor, not the major, so a `0.x` repo cannot be
-accidentally promoted to `1.0.0` by one careless `!`.
+accidentally promoted to `1.0.0` by one careless `!`. The companion flag stays
+`bump-patch-for-minor-pre-major: false`, so a `feat:` still earns a minor before
+1.0 rather than being demoted to a patch.
 
 **Release Please** (<https://github.com/googleapis/release-please>) reads those
 commits and maintains a single open release PR containing the version bump, the
@@ -173,9 +204,11 @@ it tags the merge commit and creates the GitHub release. Config lives in
 `release-please-config.json` (manifest mode, one entry per package) and the
 current version in `.release-please-manifest.json`. Files outside the strategy's
 defaults are updated through `extra-files`, either by jsonpath for JSON, YAML,
-and TOML, or by an `x-release-please-version` annotation for anything else. The
-action must run with a PAT or a GitHub App token, because pushes made with
-`GITHUB_TOKEN` do not trigger workflows and the release PR would never get CI.
+and TOML, or by an `x-release-please-version` annotation for anything else. That
+escape hatch is what carries the workspace stacks, whose strategies cannot read
+a virtual root. The action runs on the plain `GITHUB_TOKEN`, and the release PR
+still gets CI because the job dispatches `ci.yml` on the release branch, so no
+repo here holds a release secret.
 
 **Keep a Changelog** (<https://keepachangelog.com/en/1.1.0/>) is the shape of
 `CHANGELOG.md`: newest first, grouped by change type, written for humans. Release
@@ -210,7 +243,7 @@ ADR.
 | File | Use |
 |---|---|
 | `release-please-config.<stack>.json` | node, rust, rust-workspace, python, tauri, generic |
-| `release-please.yml` | the release workflow, build hooks commented per stack |
-| `pr-title.yml` | conventional PR title check |
+| `release-please.yml` | the release workflow, one commented build hook per stack |
+| `pr-title.yml` | conventional PR title check, standalone or pasted into `ci.yml` |
 | `CHANGELOG.seed.md` | Keep a Changelog header |
 | `check-versions.ts` | multi-manifest agreement guard, tauri only |

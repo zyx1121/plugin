@@ -1,38 +1,48 @@
-# Squash merge makes the PR title the commit message on main, and that commit
-# is what release-please reads. An unconventional title is a release that does
-# not happen, so the title is linted like code.
+# Squash merge makes the pull request title the commit message on main, and that
+# commit is what Release Please reads. An unconventional title is a release that
+# does not happen, so the title is linted like code.
+#
+# Placement matters when the repo has no PAT: release-please.yml dispatches
+# `ci.yml` by name on the release branch, so only jobs inside ci.yml run on the
+# release pull request. If the title check is a required check, paste the
+# `pr-title` job below into ci.yml instead of installing this file, the way
+# zyx1121/ai-app-store does, and give ci.yml the `edited` pull request type plus
+# a concurrency group that a retitle cannot use to cancel a running build. This
+# standalone file is for repos where the title check is advisory.
 name: pr-title
 
 on:
-  pull_request_target:
-    types: [opened, edited, reopened, synchronize]
+  # `edited` matters: a retitle changes the commit message a squash merge will
+  # write, so the gate has to run again.
+  pull_request:
+    types: [opened, reopened, synchronize, edited]
 
 permissions:
   pull-requests: read
 
 jobs:
-  lint:
+  pr-title:
     runs-on: ubuntu-latest
     steps:
-      - uses: amannn/action-semantic-pull-request@v6
+      - uses: amannn/action-semantic-pull-request@v5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          # Same list as the changelog sections. `feat` and `fix` are the only
-          # two that move the version; the rest are honest bookkeeping.
+          # The same set release-please-config.json gives a changelog section.
           types: |
             feat
             fix
             perf
             refactor
             docs
-            test
-            build
             ci
             chore
+            test
+            build
             revert
           requireScope: false
+          # A changelog line reads as prose, so the subject starts lowercase.
           subjectPattern: ^(?![A-Z]).+$
-          subjectPatternError: |
-            The subject "{subject}" of "{title}" starts with an uppercase
-            letter. Conventional Commits subjects are lowercase.
+          subjectPatternError: >-
+            The subject "{subject}" of pull request "{title}" starts with an
+            uppercase letter. Conventional Commit subjects are lowercase.
