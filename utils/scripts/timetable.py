@@ -77,7 +77,32 @@ PERIOD_MAP = {code: (start, end) for code, start, end in PERIODS}
 
 _SKIP_KEYS = {"dep_id", "dep_cname", "dep_ename", "costype", "brief", "language"}
 
-_TIME_RE = re.compile(r"^([A-Za-z])([^-\[]+)-?([^\[]*)(?:\[([^\]]*)\])?$")
+# One <day><periods> run, e.g. "M78" or "R34". Periods only use the real
+# period-code alphabet so a stray letter (e.g. the B/A in "TBA") never
+# matches and gets mistaken for a day.
+_DAY_RUN = re.compile(r"([MTWRFSU])([yz1-9nabcd]+)")
+_DAY_RUN_SEQUENCE = re.compile(r"(?:[MTWRFSU][yz1-9nabcd]+)+")
+_ROOM_RE = re.compile(r"^([^\[]*)(?:\[([^\]]*)\])?$")
+
+
+class TimetableError(Exception):
+    """Raised by HTTP/parsing helpers instead of calling fail() directly.
+
+    Worker threads (see `lookup`) must never call fail(): sys.exit() only
+    kills that thread, so every failing worker would print its own envelope.
+    Helpers raise this instead, and exactly one call site (the main thread,
+    after a ThreadPoolExecutor drains) converts it to a single fail().
+    """
+
+    def __init__(self, message: str, why: Optional[str] = None, hint: Optional[str] = None) -> None:
+        super().__init__(message)
+        self.message = message
+        self.why = why
+        self.hint = hint
+
+
+def _fail_from(e: TimetableError) -> None:
+    fail(e.message, why=e.why, hint=e.hint)
 
 
 class SearchBy(str, Enum):
@@ -102,22 +127,24 @@ def _call(r: str, data: Optional[dict] = None) -> Any:
             raw = resp.read()
     except HTTPError as e:
         if 400 <= e.code < 500:
-            fail(
+            raise TimetableError(
                 "timetable rejected the query",
                 why=f"{e.code} {e.reason}",
                 hint="check --acysem against `timetable semesters` and the search value",
-            )
-        fail("timetable unreachable", why=f"{e.code} {e.reason}", hint="check network or https://timetable.nycu.edu.tw")
+            ) from e
+        raise TimetableError(
+            "timetable unreachable", why=f"{e.code} {e.reason}", hint="check network or https://timetable.nycu.edu.tw"
+        ) from e
     except URLError as e:
-        fail("timetable unreachable", why=str(e), hint="check network or https://timetable.nycu.edu.tw")
+        raise TimetableError("timetable unreachable", why=str(e), hint="check network or https://timetable.nycu.edu.tw") from e
     try:
         return json.loads(raw)
     except json.JSONDecodeError:
-        fail(
+        raise TimetableError(
             "timetable: non-JSON response",
             why=raw[:200].decode(errors="replace"),
             hint="check the acysem / search value; the API returns plain text on a malformed query",
-        )
+        ) from None
 
 
 def _semesters() -> list[str]:
@@ -128,16 +155,18 @@ def _semesters() -> list[str]:
 def _default_acysem() -> str:
     sems = _semesters()
     if not sems:
-        fail("no semesters available", why="get_acysem returned an empty list", hint="pass --acysem explicitly")
+        raise TimetableError("no semesters available", why="get_acysem returned an empty list", hint="pass --acysem explicitly")
     return sems[0]
 
 
 def _split_acysem(acysem: str) -> tuple[str, str]:
     if len(acysem) not in (3, 4):
-        fail("bad acysem", why=f"{acysem!r} is not 3 or 4 characters", hint="use a code from `timetable semesters`, e.g. 1151 or 99X")
+        raise TimetableError("bad acysem", why=f"{acysem!r} is not 3 or 4 characters", hint="use a code from `timetable semesters`, e.g. 1151 or 99X")
     acy, sem = acysem[:-1], acysem[-1]
     if sem not in ("1", "2", "X"):
-        fail("bad acysem", why=f"{acysem!r} has semester {sem!r}, expected 1, 2, or X", hint="use a code from `timetable semesters`, e.g. 1151 or 99X")
+        raise TimetableError(
+            "bad acysem", why=f"{acysem!r} has semester {sem!r}, expected 1, 2, or X", hint="use a code from `timetable semesters`, e.g. 1151 or 99X"
+        )
     return acy, sem
 
 
@@ -166,7 +195,7 @@ def _query(acysem: str, option: str, value: str) -> Any:
     fields[key] = value
     result = _call("main/get_cos_list", fields)
     if isinstance(result, str):
-        fail("timetable rejected the query", why=result, hint="check the acysem or search value")
+        raise TimetableError("timetable rejected the query", why=result, hint="check the acysem or search value")
     return result
 
 
@@ -183,34 +212,46 @@ def _to_float(v: Any) -> Optional[float]:
         return None
 
 
+def _parse_head_runs(head: str) -> list[tuple[Optional[str], str]]:
+    """Split the part of a chunk before the room dash into (day, periods) runs.
+
+    A chunk can pack more than one day into one room, e.g. "M78R34" is Mon
+    7-8 AND Thu 3-4. Only decompose when the whole head is nothing but valid
+    day+period runs; anything else (an unknown day letter, "TBA", ...) is
+    kept as one raw, undated run rather than guessing.
+    """
+    if head and _DAY_RUN_SEQUENCE.fullmatch(head):
+        return _DAY_RUN.findall(head)
+    return [(None, head)]
+
+
 def _parse_cos_time(raw: str) -> list[dict]:
     slots: list[dict] = []
     for chunk in (raw or "").split(","):
         chunk = chunk.strip()
         if not chunk:
             continue
-        m = _TIME_RE.match(chunk)
-        if not m:
-            continue
-        day, period_codes, room, campus = m.groups()
-        room = room.strip() or None
-        campus = campus or None
-        day_name = DAY_NAMES.get(day)
-        if day_name is None:
-            start = end = None
-        else:
-            start = PERIOD_MAP.get(period_codes[0], (None, None))[0]
-            end = PERIOD_MAP.get(period_codes[-1], (None, None))[1]
-        slots.append(
-            {
-                "day": day_name,
-                "periods": period_codes,
-                "start": start,
-                "end": end,
-                "room": room,
-                "campus": campus,
-            }
-        )
+        head, _sep, rest = chunk.partition("-")
+        room_match = _ROOM_RE.match(rest)
+        room = (room_match.group(1).strip() or None) if room_match else None
+        campus = (room_match.group(2) or None) if room_match else None
+        for day, period_codes in _parse_head_runs(head):
+            day_name = DAY_NAMES.get(day) if day else None
+            if day_name is None:
+                start = end = None
+            else:
+                start = PERIOD_MAP.get(period_codes[0], (None, None))[0]
+                end = PERIOD_MAP.get(period_codes[-1], (None, None))[1]
+            slots.append(
+                {
+                    "day": day_name,
+                    "periods": period_codes,
+                    "start": start,
+                    "end": end,
+                    "room": room,
+                    "campus": campus,
+                }
+            )
     return slots
 
 
@@ -268,7 +309,11 @@ def _human_courses(data: list[dict], metadata: dict) -> None:
 # ── commands ─────────────────────────────────────────────────────
 @app.command(help="List semester codes the timetable system knows about, newest first.")
 def semesters() -> None:
-    sems = _semesters()
+    try:
+        sems = _semesters()
+    except TimetableError as e:
+        _fail_from(e)
+        return
     emit(sems, {"count": len(sems)}, human=lambda d, _m: console.print(", ".join(d)))
 
 
@@ -278,8 +323,12 @@ def search(
     by: SearchBy = typer.Option(SearchBy.name, "--by", help="Field to search: name, teacher, or code."),
     acysem: Optional[str] = typer.Option(None, "--acysem", help="Semester code like 1151. Default: latest semester."),
 ) -> None:
-    sem = acysem or _default_acysem()
-    raw = _query(sem, _BY_OPTION[by], query)
+    try:
+        sem = acysem or _default_acysem()
+        raw = _query(sem, _BY_OPTION[by], query)
+    except TimetableError as e:
+        _fail_from(e)
+        return
     courses = _parse_courses(raw)
     emit(courses, {"count": len(courses), "acysem": sem, "query": query, "by": by.value}, human=_human_courses)
 
@@ -298,18 +347,36 @@ def lookup(
             why=f"lookup accepts at most {MAX_LOOKUP_IDS} ids per call",
             hint="split the ids across multiple `timetable lookup` calls",
         )
-    sem = acysem or _default_acysem()
+    try:
+        sem = acysem or _default_acysem()
+    except TimetableError as e:
+        _fail_from(e)
+        return
 
-    def _lookup_one(cid: str) -> tuple[str, list[dict]]:
-        raw = _query(sem, "cos_id", str(cid))
-        return str(cid), _parse_courses(raw)
+    def _lookup_one(cid: str) -> tuple[str, Optional[list[dict]], Optional[TimetableError]]:
+        # Runs on a worker thread: never call fail() here (sys.exit only
+        # kills this thread, so N failing ids would print N envelopes).
+        # Errors are carried back to the main thread and raised once there.
+        try:
+            raw = _query(sem, "cos_id", cid)
+        except TimetableError as e:
+            return cid, None, e
+        except ValueError as e:
+            return cid, None, TimetableError("timetable lookup failed", why=str(e), hint="check the cos_id value")
+        return cid, _parse_courses(raw), None
 
+    ids = [str(cid) for cid in cos_ids]
     with ThreadPoolExecutor(max_workers=4) as pool:
-        results = list(pool.map(_lookup_one, cos_ids))
+        results = list(pool.map(_lookup_one, ids))
+
+    first_error = next((err for _, _, err in results if err is not None), None)
+    if first_error is not None:
+        _fail_from(first_error)
+        return
 
     found: dict[str, dict] = {}
     missing: list[str] = []
-    for cid, courses in results:
+    for cid, courses, _err in results:
         if not courses:
             missing.append(cid)
             continue

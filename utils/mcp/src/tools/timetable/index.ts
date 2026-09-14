@@ -46,7 +46,7 @@ export const timetableTools: ToolboxTool[] = [
   }),
   scriptTool({
     name: "timetable_lookup_courses",
-    description: "Look up class meeting time (day/period/room) for specific course IDs, max 20 per call. cos_id is the part after the dot in an E3 shortname like 1151.535702 (acysem is the part before it), so this chains directly off e3p_list_courses output. Unmatched IDs are reported, not treated as an error.",
+    description: "Look up class meeting time (day/period/room) for specific course IDs, max 20 per call. cos_id is the part after the dot in an E3 shortname like 1151.535702; chains directly off e3p_list_courses output. Unmatched IDs are reported, not treated as an error.",
     inputSchema: {
       cos_ids: z.array(z.union([z.string(), z.number()])).max(20).describe("One or more course IDs (cos_id), e.g. 535702. Max 20 per call."),
       acysem: z.string().optional().describe("Semester code like 1151. Default: latest semester."),
