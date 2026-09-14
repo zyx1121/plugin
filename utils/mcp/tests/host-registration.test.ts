@@ -142,7 +142,7 @@ describe("declared requirements", () => {
     const { registered, hidden } = await selectRunnableTools(allTools, { check: linux });
     const families = (tools: string[]) => [...new Set(tools.map((name) => name.split("_")[0]))].sort();
 
-    expect(families(registered.map((tool) => tool.name))).toEqual(["e3p", "gmaps", "md2slide", "pdf", "pve", "utils"]);
+    expect(families(registered.map((tool) => tool.name))).toEqual(["e3p", "gmaps", "md2slide", "pdf", "pve", "timetable", "utils"]);
     expect(families(hidden.map((entry) => entry.tool))).toEqual(["calendar", "mail", "reminders", "safari", "screenshot", "ubereats"]);
   });
 });

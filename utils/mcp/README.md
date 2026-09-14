@@ -43,6 +43,7 @@ Only active agent-facing domains are exposed:
 - `reminders`
 - `safari`
 - `screenshot`
+- `timetable`
 - `ubereats`
 - `utils` (`utils_capabilities` only, always registered)
 
@@ -104,7 +105,7 @@ make macOS tools work anywhere else.
 
 ## Current Tool Surface
 
-70 tools total:
+74 tools total:
 
 - `calendar_list_calendars`, `calendar_list_events`, `calendar_add_event`,
   `calendar_search_events`, `calendar_delete_event`
@@ -128,6 +129,8 @@ make macOS tools work anywhere else.
   `safari_get_selection`, `safari_eval_js`
 - `screenshot_full`, `screenshot_area`, `screenshot_window`,
   `screenshot_region`, `screenshot_clipboard`
+- `timetable_list_semesters`, `timetable_search_courses`,
+  `timetable_lookup_courses`, `timetable_get_periods`
 - `ubereats_fetch_receipts`, `ubereats_list_orders`,
   `ubereats_update_ledger`, `ubereats_dump_cookie`
 - `utils_capabilities`

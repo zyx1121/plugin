@@ -44,7 +44,7 @@ A local marketplace serves skill and agent edits live from the clone: `git pull`
 |--------|--------|
 | [`skills/`](skills/) | `academic-sentence` · `nextjs-dev` · `paper-revise` · `project-docs` · `winlab-pptx` |
 | [`agents/`](agents/) | `planner` · `surveyor` · `developer` · `reviewer` · `utils-promoter` |
-| [`utils/`](utils/) | MCP toolbox: calendar · mail · reminders · safari · screenshot · pdf · pve · e3p · md2slide · ubereats |
+| [`utils/`](utils/) | MCP toolbox: calendar · mail · reminders · safari · screenshot · pdf · pve · e3p · md2slide · timetable · ubereats |
 | [`decisions/`](decisions/) | ADR trail: every merge and retirement has a written why |
 
 The `utils` MCP server is bundled via `.mcp.json`: installing the plugin registers it, no separate `claude mcp add`. Tools land as `mcp__plugin_zyx_utils__<tool>`.
