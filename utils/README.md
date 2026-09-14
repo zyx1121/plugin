@@ -16,7 +16,7 @@ The server lives in `mcp/` and uses `@modelcontextprotocol/sdk` directly. It
 exposes only active agent-facing domains:
 
 ```text
-calendar e3p gmaps mail md2slide pdf pve reminders safari screenshot timetable ubereats
+calendar e3p gmaps mail md2slide nycu parttime pdf pve reminders safari screenshot timetable ubereats
 ```
 
 Registration is host-aware: each domain declares what the machine must provide,

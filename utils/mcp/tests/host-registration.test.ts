@@ -127,7 +127,7 @@ describe("declared requirements", () => {
   });
 
   test("the macOS-only families are declared macOS-only", async () => {
-    const darwinOnly = ["calendar", "mail", "reminders", "safari", "screenshot", "ubereats"];
+    const darwinOnly = ["calendar", "mail", "nycu", "parttime", "reminders", "safari", "screenshot", "ubereats"];
 
     for (const tool of allTools) {
       const family = tool.name.split("_")[0]!;
@@ -143,6 +143,6 @@ describe("declared requirements", () => {
     const families = (tools: string[]) => [...new Set(tools.map((name) => name.split("_")[0]))].sort();
 
     expect(families(registered.map((tool) => tool.name))).toEqual(["e3p", "gmaps", "md2slide", "pdf", "pve", "timetable", "utils"]);
-    expect(families(hidden.map((entry) => entry.tool))).toEqual(["calendar", "mail", "reminders", "safari", "screenshot", "ubereats"]);
+    expect(families(hidden.map((entry) => entry.tool))).toEqual(["calendar", "mail", "nycu", "parttime", "reminders", "safari", "screenshot", "ubereats"]);
   });
 });
