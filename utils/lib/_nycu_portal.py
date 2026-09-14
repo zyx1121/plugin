@@ -362,6 +362,12 @@ def relay(sys_direct: str) -> tuple[Any, str, str]:
 
     relay_html = _post_form(f"{API}relay", {"token": tok, "url": sys_url, "sysDirect": sys_direct}, opener=opener).decode(errors="replace")
     match = _FORM_RE.search(relay_html)
+    if not match and "vpn-required" in relay_html:
+        raise PortalError(
+            f"{sys_direct!r} requires a campus IP",
+            why="portal answered vpn-required; this client is not on the NYCU network (140.113.x)",
+            hint="connect from campus Wi-Fi, NYCU VPN, or route through pve on the tailnet, then retry",
+        )
     if not match:
         raise PortalError(
             f"relay to {sys_direct!r} returned no form",
