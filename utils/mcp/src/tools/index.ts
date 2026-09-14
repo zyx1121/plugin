@@ -9,6 +9,7 @@ import { pveTools } from "./pve/index.ts";
 import { remindersTools } from "./reminders/index.ts";
 import { safariTools } from "./safari/index.ts";
 import { screenshotTools } from "./screenshot/index.ts";
+import { timetableTools } from "./timetable/index.ts";
 import { ubereatsTools } from "./ubereats/index.ts";
 
 export const allTools = [
@@ -23,5 +24,6 @@ export const allTools = [
   ...remindersTools,
   ...safariTools,
   ...screenshotTools,
+  ...timetableTools,
   ...ubereatsTools,
 ];
