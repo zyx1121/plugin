@@ -36,7 +36,7 @@ export const e3pTools: ToolboxTool[] = [
   }),
   scriptTool({
     name: "e3p_list_courses",
-    description: "List enrolled E3 courses, sorted newest first. Past semesters are often hidden; pass show_hidden=true when a course seems missing.",
+    description: "List enrolled E3 courses, sorted newest first, with the enrolment count per course (teachers and TAs included). Past semesters are often hidden; pass show_hidden=true when a course seems missing.",
     inputSchema: { show_hidden: z.boolean().optional().describe("Include hidden/archived courses.") },
     annotations: read,
     script,

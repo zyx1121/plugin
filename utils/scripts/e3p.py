@@ -272,6 +272,8 @@ def courses(
             "fullname": c["fullname"],
             "startdate": c.get("startdate"),
             "progress": c.get("progress"),
+            # Moodle counts every active enrolment, so teachers and TAs are included.
+            "enrolled": c.get("enrolledusercount"),
         }
         for c in data
     ]
@@ -281,8 +283,9 @@ def courses(
         t.add_column("ID")
         t.add_column("Shortname")
         t.add_column("Fullname")
+        t.add_column("Enrolled", justify="right")
         for c in d:
-            t.add_row(str(c["id"]), c["shortname"], c["fullname"])
+            t.add_row(str(c["id"]), c["shortname"], c["fullname"], "" if c["enrolled"] is None else str(c["enrolled"]))
         console.print(t)
 
     emit(rows, {"count": len(rows)}, human=human)
