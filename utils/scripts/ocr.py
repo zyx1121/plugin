@@ -87,6 +87,29 @@ def _token() -> str:
 
 
 # ── HTTP / multipart plumbing ───────────────────────────────────
+def _check_writable(out_path: Path) -> None:
+    """Fail fast on a bad output path before spending an upload on it."""
+    if out_path.is_dir():
+        fail(
+            f"output path is a directory: {out_path}",
+            hint="pass a file path, not a directory",
+            code=2,
+        )
+    parent = out_path.parent
+    if not parent.exists():
+        fail(
+            f"output directory does not exist: {parent}",
+            hint="create it first, or pass a different --out",
+            code=2,
+        )
+    if not os.access(parent, os.W_OK):
+        fail(
+            f"output directory is not writable: {parent}",
+            hint="check permissions, or pass a different --out",
+            code=2,
+        )
+
+
 def _multipart(fields: dict[str, str], filename: str, content: bytes, content_type: str) -> tuple[bytes, str]:
     boundary = uuid.uuid4().hex
     parts: list[bytes] = []
@@ -148,6 +171,7 @@ def file(
     out_path = Path(out) if out else path.with_name(path.name + ".md")
     if out_path.resolve() == path.resolve():
         fail(f"refusing to overwrite source: {out_path}", hint="pass --out with a different path", code=2)
+    _check_writable(out_path)
 
     token = _token()
     fields: dict[str, str] = {}
@@ -186,8 +210,17 @@ def file(
     except json.JSONDecodeError:
         fail("ocr: non-JSON response", why=raw[:200].decode(errors="replace"), hint="the service may still be starting up; retry in a bit")
 
-    markdown = data.get("markdown", "")
-    out_path.write_text(markdown, encoding="utf-8")
+    markdown = data.get("markdown")
+    if markdown is None:
+        fail(
+            "ocr: response had no markdown",
+            why="the service returned markdown=null",
+            hint="retry, or check --pages/--dpi and the input file",
+        )
+    try:
+        out_path.write_text(markdown, encoding="utf-8")
+    except OSError as e:
+        fail(f"ocr: cannot write output: {out_path}", why=str(e), hint="check the output path is writable")
     stats = data.get("stats", {})
     result = {"out": str(out_path), "pages": stats.get("pages", len(data.get("pages", []))), "stats": stats}
 

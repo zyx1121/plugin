@@ -71,6 +71,12 @@ const SAMPLES: Record<string, unknown> = {
     size_bytes: 123456,
     metadata: {},
   },
+  ocr_health: { ok: true, model: "jinaai/jina-ocr-v1" },
+  ocr_file: {
+    out: "/example/doc.pdf.md",
+    pages: 1,
+    stats: { pages: 1, seconds: 0.48, output_tokens: 18, tok_per_s: 37.2 },
+  },
 };
 
 describe("Tier A output schemas", () => {

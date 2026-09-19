@@ -8,8 +8,10 @@ const script = "ocr.py";
 const requires = ["binary:uv"];
 const envelope = true;
 
-/** Reads a remote GPU service over the open network. */
+/** Reads a remote GPU service over the open network; writes nothing locally. */
 const read = { readOnlyHint: true, openWorldHint: true } as const;
+/** Writes a markdown file next to the source; never mutates or deletes anything pre-existing. */
+const derive = { readOnlyHint: false, destructiveHint: false, openWorldHint: true } as const;
 
 export const ocrTools: ToolboxTool[] = [
   scriptTool({
@@ -21,7 +23,7 @@ export const ocrTools: ToolboxTool[] = [
     script,
     requires,
     envelope,
-    timeoutMs: 15000,
+    timeoutMs: 25000,
     buildArgs: () => ["health"],
   }),
   scriptTool({
@@ -31,7 +33,6 @@ export const ocrTools: ToolboxTool[] = [
       file: z.string().describe("Image or PDF path to OCR."),
       pages: z.string().optional().describe("Page range for PDFs, e.g. 1-3,5. Default: all."),
       dpi: z.number().optional().describe("Render DPI for PDFs. Default: 150."),
-      token: z.string().optional().describe("Bearer token override. Omit to use the stored ~/.config/utils/ocr.json token."),
     },
     outputSchema: envelopeOutput(
       z.looseObject({
@@ -40,7 +41,7 @@ export const ocrTools: ToolboxTool[] = [
         stats: z.looseObject({ pages: z.number(), seconds: z.number(), output_tokens: z.number(), tok_per_s: z.number() }),
       }),
     ),
-    annotations: read,
+    annotations: derive,
     script,
     requires,
     envelope,
@@ -52,6 +53,5 @@ export const ocrTools: ToolboxTool[] = [
       pushFlag(argv, "--dpi", input.dpi);
       return argv;
     },
-    buildEnv: (input) => (input.token ? { UTILS_OCR_TOKEN: input.token } : undefined),
   }),
 ];
