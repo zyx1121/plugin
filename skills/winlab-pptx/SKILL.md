@@ -1,6 +1,6 @@
 ---
 name: winlab-pptx
-description: "Loki 的唯一簡報 skill — 產 .pptx(NOT .key)涵蓋三類 deck:報告 / 技術簡報(lab talk / pitch / demo,英文高密度)、教學簡報(錄課 / 線上課程 / MOOC,中文低密度)、分鏡簡報(現場工作坊 / hands-on 課程,一頁一 beat 同圖差分)。Triggers on '做簡報', '做投影片', 'slide deck', 'presentation', 'powerpoint', 'pptx', '技術簡報', '實驗室簡報', 'lab talk', 'winlab slides', 'pptx 架構圖', '錄課', '教學簡報', '教學投影片', '線上課程投影片', '磨課師', 'MOOC', '工作坊簡報', 'hands-on 簡報', '分鏡簡報', 'workshop deck', '一頁一 beat', 'lessig', 'review 我的投影片', 'outline 一下', 'rewrite this deck'. NOT Markdown 成果報告 / 手冊 / runbook — 那是 project-docs."
+description: "Loki 的唯一簡報 skill — 產 .pptx(NOT .key)涵蓋三類 deck:報告 / 技術簡報(lab talk / pitch / demo,英文高密度)、教學簡報(錄課 / 線上課程 / MOOC,中文低密度)、分鏡簡報(現場工作坊 / hands-on 課程,一頁一 beat 同圖差分)。Triggers on '做簡報', '做投影片', 'slide deck', 'presentation', 'powerpoint', 'pptx', '技術簡報', '實驗室簡報', 'lab talk', 'winlab slides', 'pptx 架構圖', '錄課', '教學簡報', '教學投影片', '線上課程投影片', '磨課師', 'MOOC', '工作坊簡報', 'hands-on 簡報', '分鏡簡報', 'workshop deck', '一頁一 beat', 'lessig', 'review 我的投影片', 'outline 一下', 'rewrite this deck'. NOT Markdown 成果報告 / 手冊 / runbook — 那是 project-docs. NOT 單句潤稿 — 那是 academic-sentence."
 ---
 
 # WinLab pptx

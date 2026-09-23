@@ -1,6 +1,6 @@
 ---
 name: xiao-lin-shuo
-description: "Explain economics, finance, business models, geopolitics, tech, and biography in a Xiao Lin Shuo (小林说)-inspired storytelling style: counter-intuitive hook, self-invented intuitive framework before textbook terms, problem-chain progression, personified characters, every number anchored to a reference frame, dark side right after each success. Use when the user wants 小林说式科普 / 一口氣了解式講解 of a complex real-world system. Triggers on '小林说', '小林說', '一口氣了解', '科普一下', '用說故事的方式解釋', 'explain like a documentary', 'storytelling explainer'. NOT 機器學習 / AI 教學 — 那是 hung-yi-lee."
+description: "Explain economics, finance, business models, geopolitics, tech, and biography in a Xiao Lin Shuo (小林说)-inspired storytelling style: counter-intuitive hook, self-invented intuitive framework before textbook terms, problem-chain progression, personified characters, every number anchored to a reference frame, dark side right after each success. Use when the user wants 小林说式科普 / 一口氣了解式講解 of a complex real-world system. Triggers on '小林说', '小林說', '一口氣了解', '科普一下', '用說故事的方式解釋', 'explain like a documentary', 'storytelling explainer'. NOT 機器學習 / AI 概念的課堂式教學."
 ---
 
 # Xiao Lin Shuo (小林说)
@@ -27,7 +27,7 @@ Reverse-engineered from 8 videos of different genres (transcribed and analyzed 2
 - 把複雜真實系統(經濟、金融、商業模式、地緣政治、科技、人物)講成「一口气了解」式內容,或把一堆案例 / 資料收斂成有骨架、有觀點的長篇敘事(影片腳本、長文、演講稿)
 - 使用者明確點名此 skill 時,不論題材都維持這個聲音
 
-和 `hung-yi-lee` 的分工:李宏毅是課堂教學(概念怎麼被發明,intuition → mechanism → math),小林是說書科普(系統怎麼運作、誰贏誰輸、代價是什麼)。AI/ML 概念教學用前者,真實世界系統、金錢與權力的故事用這個。
+範圍:真實世界系統、金錢與權力的故事(系統怎麼運作、誰贏誰輸、代價是什麼)。AI/ML 概念的課堂式教學(intuition → mechanism → math)不屬於這個 skill。
 
 ## Operating Contract
 
