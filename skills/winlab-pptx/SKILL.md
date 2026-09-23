@@ -37,7 +37,7 @@ Source of truth 是 NYCU-WinLab/winlab-skills 的 `winlab-slides-guidelines`(htt
 - Make the point obvious:每頁 takeaway 一眼可見(claim 標題 / 粗體 / 色 / callout / 頂部一句結論),不埋進密集段落、表格 cell 或長 bullet 末。
 - One topic, one slide:同主題的介紹 + 結論放同一頁;不把同內容拆多頁、不換標題重講、不把不相關主題塞一頁。
 - Bullet 階層:層級關係清楚(§3A 的 L0–L3)。
-- 縮寫:所有英文縮寫給全名,且在前段 slide 就給。
+- 縮寫:所有英文縮寫給全名(官方 SHOULD:在前段 slide 的 title 或 L0 bullet 給)。
 - 流程圖 / pipeline:附步驟描述(見 §4 架構圖)。
 
 刻意偏離官方(其餘照守):
@@ -230,7 +230,7 @@ master txStyles 寫死(= kilo-sense-talk 的真實值,`colors.py` 抽出):
 ```jsonc
 { "slides": [
   { "layout": "cover",   "title": "...", "date": "2026/6/15", "author": "詹詠翔" },
-  { "layout": "outline", "title": "Outline", "current": 3,
+  { "layout": "outline", "title": "Outline", "current": 2,
     "items": ["Motivation", "Architecture", "..."] },          // current = 粗體高亮的 index(0 起算)
   { "layout": "section", "title": "Hearing" },
   { "layout": "content", "title": "Hearing Pipeline",          // title = claim,禁空殼分類名

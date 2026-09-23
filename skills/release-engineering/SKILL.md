@@ -56,7 +56,10 @@ cp assets/pr-title.yml                        .github/workflows/pr-title.yml
 
 Open `release-please.yml`, keep the one commented build block that matches the
 stack, uncomment it, delete the others. Replace every `REPLACE_*` token in the
-config, including the crate names inside the `Cargo.lock` jsonpath.
+config, including the crate names inside the `Cargo.lock` jsonpath. For the
+generic stack, the target file must carry an `x-release-please-version`
+annotation on the version line; without it the `generic` updater changes
+nothing and does not fail.
 
 ### 3. Seed the manifest from the current version
 
@@ -163,7 +166,7 @@ A release with no asset means the build hook was left commented out.
 - Tags are `vX.Y.Z`, with the `v`. Versions inside manifests have no `v`.
 - Release assets are named `<artifact>-<tag>.<ext>` with a `.sha256` sidecar.
   Only the node build hook does this today: the rust hook uploads the bare
-  binary name, and the tauri hook uploads the NSIS `.exe` as built with no
+  binary name (its `.sha256` sidecar keeps the same bare name), and the tauri hook uploads the NSIS `.exe` as built with no
   sidecar (kept byte-identical to `zyx1121/ai-app-store#3`).
 - One release workflow file per repo, named `.github/workflows/release-please.yml`.
 - No hand-written tags, hand-edited versions, or hand-edited changelog entries.
