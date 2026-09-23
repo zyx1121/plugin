@@ -5,24 +5,19 @@ description: "Loki 的發版與版本標準 — SemVer + Conventional Commits + 
 
 # release-engineering — how every repo here versions and ships
 
-One standard for every repo, so a release looks the same whether it is a Next.js
-app, a Rust crate, or a Tauri installer. **Publishing is a merge, not a command:**
-conventional commits land on `main`, Release Please keeps one open release PR
-carrying the next version and the changelog, and merging that PR is what tags,
-cuts the GitHub release, and attaches the artifact. Nothing is tagged by hand.
+One standard for every repo. Publishing is a merge, not a command: conventional
+commits land on `main`, Release Please keeps one open release PR carrying the
+next version and the changelog, and merging that PR tags, cuts the GitHub
+release, and attaches the artifact. Nothing is tagged by hand.
 
-The pieces are all off-the-shelf standards, listed with their canonical links in
-the reference half. The procedures come first because that is what gets used.
+Already covered elsewhere, not restated here:
 
-## What the global rules already say (do not restate, reference)
-
-- **Ship loop**: commit, push, PR, CI green, squash merge, delete branch. That
-  lives in `CLAUDE.md`; this skill only adds what happens *after* the merge.
-- **Which scheme where**: SemVer for release / package / image, `vN` for API and
-  protocol schemas, immutable git SHA for container tags. This skill explains
-  how to mechanize the SemVer half, and where the other two show up.
-- **Plugin repo bumps**: `~/plugin` bumps `plugin.json` and `marketplace.json`
-  by hand, see `skills/AGENTS.md`. It has no release PR.
+- Ship loop (commit, push, PR, CI green, squash merge, delete branch) is in
+  `CLAUDE.md`; this skill only adds what happens after the merge.
+- Scheme per artifact: SemVer for release / package / image, `vN` for API and
+  protocol schemas, git SHA for container tags. This skill mechanizes SemVer.
+- `~/plugin` bumps `plugin.json` and `marketplace.json` by hand (see
+  `skills/AGENTS.md`). It has no release PR.
 
 ---
 
@@ -66,7 +61,7 @@ config, including the crate names inside the `Cargo.lock` jsonpath.
 ### 3. Seed the manifest from the current version
 
 `.release-please-manifest.json` is the only place Release Please reads the
-current version from. Seed it with what the repo is on *today*, not `0.0.0`, or
+current version from. Seed it with what the repo is on today, not `0.0.0`, or
 the first release PR proposes a version that goes backwards. If the repo already
 has `vX.Y.Z` tags, the seed must match the newest one.
 
@@ -86,11 +81,11 @@ and the old tags stay reachable in the GitHub releases list.
 ### 5. Add the PR title check
 
 `pr-title.yml` lints the PR title with `amannn/action-semantic-pull-request`.
-With squash merge the PR title *is* the commit on `main`, so a title like
+With squash merge the PR title is the commit on `main`, so a title like
 "fix stuff" is a release that silently never happens. Include the `edited` pull
 request type: a retitle rewrites the future commit message.
 
-If the check is going to be **required**, paste the job into `ci.yml` instead of
+If the check is going to be required, paste the job into `ci.yml` instead of
 installing the standalone file, because step 7 dispatches `ci.yml` by name and
 nothing outside it runs on the release PR.
 
@@ -146,19 +141,16 @@ A release with no asset means the build hook was left commented out.
 
 ## Procedure: cut a release
 
-There is no manual step anywhere in this list.
-
 1. Merge conventional PRs into `main` as usual. Release Please rewrites its open
    release PR after every merge.
 2. Ready to ship means: merge the release PR. That is the whole release.
-3. **Hotfix**: open a `fix:` PR, merge it, then merge the refreshed release PR.
-   A hotfix is not a different pipeline, only an impatient one.
-4. **Pre-1.0 house rule**, `bump-minor-pre-major: true` plus
+3. Hotfix: open a `fix:` PR, merge it, then merge the refreshed release PR.
+4. Pre-1.0 house rule, `bump-minor-pre-major: true` plus
    `bump-patch-for-minor-pre-major: false` in every template: `feat:` moves the
    minor, `fix:` moves the patch, and a breaking change also moves the minor
    instead of jumping to `1.0.0`. Going to `1.0.0` is a deliberate `Release-As:
    1.0.0` commit footer, never an accident.
-5. `feat!:` or a `BREAKING CHANGE:` footer is for a break the *consumer* must
+5. `feat!:` or a `BREAKING CHANGE:` footer is for a break the consumer must
    act on: a removed API, a renamed config key, a migration that is not
    automatic. Internal refactors are `refactor:`, not `feat!:`.
 6. Nothing to release means no release PR is open. That is the correct state,
@@ -170,71 +162,40 @@ There is no manual step anywhere in this list.
 
 - Tags are `vX.Y.Z`, with the `v`. Versions inside manifests have no `v`.
 - Release assets are named `<artifact>-<tag>.<ext>` with a `.sha256` sidecar.
+  Only the node build hook does this today: the rust hook uploads the bare
+  binary name, and the tauri hook uploads the NSIS `.exe` as built with no
+  sidecar (kept byte-identical to `zyx1121/ai-app-store#3`).
 - One release workflow file per repo, named `.github/workflows/release-please.yml`.
-- No hand-written tags. `git tag` on a laptop is a tag no release stands behind.
-- No hand-edited versions or generated changelog entries. The next release PR
-  overwrites both.
+- No hand-written tags, hand-edited versions, or hand-edited changelog entries.
+  The next release PR overwrites the last two.
 - Conventional Commits scope is optional, subject is lowercase, no trailing period.
 
 ---
 
-## Reference: the stack
+## Reference
 
-**SemVer 2.0.0** (<https://semver.org/spec/v2.0.0.html>) is the contract the
-version number makes: MAJOR for incompatible API changes, MINOR for
-backwards-compatible features, PATCH for backwards-compatible fixes. `0.y.z` is
-explicitly the unstable phase where anything may change, which is why the pre-1.0
-rules exist at all.
+Standards: SemVer 2.0.0 (<https://semver.org/spec/v2.0.0.html>), Conventional
+Commits 1.0.0 (<https://www.conventionalcommits.org/en/v1.0.0/>), Release Please
+(<https://github.com/googleapis/release-please>), Keep a Changelog 1.1.0
+(<https://keepachangelog.com/en/1.1.0/>), Trunk-Based Development
+(<https://trunkbaseddevelopment.com/>), PR title lint via
+`amannn/action-semantic-pull-request`.
 
-**Conventional Commits 1.0.0** (<https://www.conventionalcommits.org/en/v1.0.0/>)
-is the machine-readable commit format that lets a tool compute the next version.
-`feat:` bumps the minor, `fix:` bumps the patch, `feat!:` or a `BREAKING CHANGE:`
-footer bumps the major. `docs:`, `refactor:`, `test:`, `build:`, `ci:`, `chore:`,
-`perf:`, `revert:` bump nothing but still land in the changelog sections that are
-enabled. Pre-1.0 the mapping is shifted by `bump-minor-pre-major: true`: a
-breaking change moves the minor, not the major, so a `0.x` repo cannot be
-accidentally promoted to `1.0.0` by one careless `!`. The companion flag stays
-`bump-patch-for-minor-pre-major: false`, so a `feat:` still earns a minor before
-1.0 rather than being demoted to a patch.
+House choices on top of them:
 
-**Release Please** (<https://github.com/googleapis/release-please>) reads those
-commits and maintains a single open release PR containing the version bump, the
-manifest edits, and the changelog entry. Merging the PR is the release trigger:
-it tags the merge commit and creates the GitHub release. Config lives in
-`release-please-config.json` (manifest mode, one entry per package) and the
-current version in `.release-please-manifest.json`. Files outside the strategy's
-defaults are updated through `extra-files`, either by jsonpath for JSON, YAML,
-and TOML, or by an `x-release-please-version` annotation for anything else. That
-escape hatch is what carries the workspace stacks, whose strategies cannot read
-a virtual root. The action runs on the plain `GITHUB_TOKEN`, and the release PR
-still gets CI because the job dispatches `ci.yml` on the release branch, so no
-repo here holds a release secret.
-
-**Keep a Changelog** (<https://keepachangelog.com/en/1.1.0/>) is the shape of
-`CHANGELOG.md`: newest first, grouped by change type, written for humans. Release
-Please generates it in this shape, so the only hand-written part is the header
-that `CHANGELOG.seed.md` provides.
-
-**Trunk-Based Development** (<https://trunkbaseddevelopment.com/>) is why there
-are no release branches: short-lived branches, squash merged into `main`, and
-every commit on `main` is releasable. The cost of squash merge is that the PR
-title becomes the commit that Release Please parses, so the title is linted by
-`amannn/action-semantic-pull-request`
-(<https://github.com/amannn/action-semantic-pull-request>).
-
-**Immutable identifiers** are the other half of "which version is running".
-SemVer names the release; the git SHA names the exact build. Container images
-are tagged with the SHA and a floating `vX.Y.Z` tag may point at it, never the
-other way round. Release assets carry a SHA-256 sidecar so a download can be
-verified without trusting the transport.
-
-**Signing and provenance** are named here, not implemented: artifact signing
-(Sigstore cosign, <https://www.sigstore.dev/>) and build provenance
-(SLSA, <https://slsa.dev/>, via `actions/attest-build-provenance`) both belong in
-the build hook, between the build step and the upload step. Windows code signing
-sits in the same slot and needs a certificate that is not in any repo. Adopt them
-per repo when there is a consumer who checks them, and record the decision in an
-ADR.
+- Changelog shows only `feat`, `fix`, `perf`; every other type is a hidden
+  section in the config templates. The only hand-written part of
+  `CHANGELOG.md` is the header from `CHANGELOG.seed.md`.
+- No release branches: every commit on `main` is releasable.
+- No repo holds a release secret. The action runs on `GITHUB_TOKEN` and the
+  release PR gets CI through the `ci.yml` dispatch in step 7.
+- Container images are tagged with the git SHA; a floating `vX.Y.Z` tag may
+  point at a SHA, never the other way round.
+- Signing and provenance are named, not implemented: cosign
+  (<https://www.sigstore.dev/>), SLSA provenance (<https://slsa.dev/>, via
+  `actions/attest-build-provenance`), and Windows code signing all go in the
+  build hook between build and upload. Adopt per repo when a consumer checks
+  them, and record the decision in an ADR.
 
 ---
 
