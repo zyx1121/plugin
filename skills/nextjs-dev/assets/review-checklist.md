@@ -1,9 +1,8 @@
 # review-checklist — 對舊 Next.js 專案做 house-style audit
 
-逐 dimension 對。每項給：**check（要看什麼）** / **pass（對齊長相）** / **flag（偏離就標）**。
-反模式表在最後 — 那些是從舊 repo 實際撈到的、**確定不要傳播**的東西。
+逐 dimension 對：checkbox 是要看什麼，flag 是偏離就標。最後的反模式表是從舊 repo 實際撈到、不要傳播的東西。
 
-review 報告請按 dimension 分組，每個 finding 標 `[hard]`/`[soft]` + 一句修法。安全項（auth / RLS）即使全 repo 都沒做也要 flag — 那是 bug 不是風格。
+review 報告按 dimension 分組，每個 finding 標 `[hard]`/`[soft]` + 一句修法。安全項（auth / RLS）即使全 repo 都沒做也要 flag，那是 bug 不是風格。
 
 ---
 
@@ -22,7 +21,7 @@ review 報告請按 dimension 分組，每個 finding 標 `[hard]`/`[soft]` + �
 
 ## 3. 樣式 / Tailwind [hard]
 
-- [ ] **沒有** `tailwind.config.*`？theme 在 `app/globals.css`（`@import "tailwindcss"` + `@theme inline`）？
+- [ ] 沒有 `tailwind.config.*`？theme 在 `app/globals.css`（`@import "tailwindcss"` + `@theme inline`）？
 - [ ] color tokens 用 oklch、有 `:root` + `.dark`？`postcss.config.mjs` 只掛 `@tailwindcss/postcss`？
 - [ ] `cn()` 在 `lib/utils.ts` 且實際被 import 使用？`cva` 只在 `components/ui`？
 - **flag**：還有 `tailwind.config.js`（= Tailwind v3 殘留或誤裝）、HEX 色硬寫、`clsx`/`tailwind-merge`/`cva` 裝了沒用（dead scaffold dep）、`cn` 缺失。
@@ -47,22 +46,22 @@ review 報告請按 dimension 分組，每個 finding 標 `[hard]`/`[soft]` + �
 - [ ] 寫入走 server action（`"use server"` + getUser + early-return `{error}` + revalidate）？
 - [ ] 讀取走 async Server Component？
 - [ ] 若用 react-query（OK，一等公民）：有集中 query-key factory（`hooks/query-keys.ts`）+ onSuccess invalidate？
-- **flag [hard]**：**100% client-side 資料層、零 server component/action**（舊 cluster 反模式 — 見下表）。
+- **flag [hard]**：100% client-side 資料層、零 server component/action（舊 cluster 反模式，見下表）。
 - **flag [soft]**：react-query 散裝沒有 query-key factory、手刻 fetch + useEffect。
 
 ## 7. Auth [hard / 含 security]
 
 - [ ] gate 在 `proxy.ts`（不是 `middleware.ts`）？呼叫 `getUser()`、有 `publicPaths` allowlist？
-- [ ] **[security]** OAuth callback 有 open-redirect guard（`next.startsWith('/') && !startsWith('//')`）？
+- [ ] [security] OAuth callback 有 open-redirect guard（`next.startsWith('/') && !startsWith('//')`）？
 - [ ] 跨子網域：cookie 有加固（UTF-8 filter / size warn / domain / sameSite lax / secure）？
-- **flag**：legacy `middleware.ts`（建議改名 `proxy.ts`）、**缺 open-redirect guard（一律 flag，這是漏洞）**、auth 只靠 RLS 沒有 app-layer 檢查。
+- **flag**：legacy `middleware.ts`（建議改名 `proxy.ts`）、缺 open-redirect guard（漏洞，一律 flag）、auth 只靠 RLS 沒有 app-layer 檢查。
 
 ## 8. RLS / migrations [hard / 含 security]
 
-- [ ] **[security]** 沒有 `using(true)` / `with check(true)` 開放策略？
+- [ ] [security] 沒有 `using(true)` / `with check(true)` 開放策略？
 - [ ] migrations version-control 在 `supabase/migrations/*.sql`？
 - [ ] DB 型別是 `supabase gen types` 產的 `types/supabase.ts`，不是手寫 interface？
-- **flag**：`using(true)`（**一律 flag，PII 外洩風險**，要 `TODO(security):` + 時程）、schema 只在遠端沒進 repo、手寫 `types/database.ts`（drift 風險）。
+- **flag**：`using(true)`（PII 外洩風險，一律 flag，要 `TODO(security):` + 時程）、schema 只在遠端沒進 repo、手寫 `types/database.ts`（drift 風險）。
 
 ## 9. 表單 [hard]
 
@@ -79,7 +78,7 @@ review 報告請按 dimension 分組，每個 finding 標 `[hard]`/`[soft]` + �
 
 - [ ] ESLint 9 flat config（`eslint.config.mjs` + `eslint-config-next`）？沒有 `.eslintrc`？
 - [ ] 套件管理用 bun（`bun.lock`）？
-- [ ] **Prettier 3 + `prettier-plugin-tailwindcss`**，雙引號 + 分號，且 repo-wide 跑過、CI 有檢查？
+- [ ] Prettier 3 + `prettier-plugin-tailwindcss`，雙引號 + 分號，且 repo-wide 跑過、CI 有檢查？
 - **flag**：legacy `.eslintrc`、npm/pnpm（除非有理由）、無 formatter 或引號/分號 drift、有 `.prettierrc` 但沒 repo-wide 跑。
 
 ## 12. 收尾衛生 [soft]
@@ -90,27 +89,27 @@ review 報告請按 dimension 分組，每個 finding 標 `[hard]`/`[soft]` + �
 
 ---
 
-## 反模式表（確定不要傳播；review 撈到就標 + 給修法）
+## 反模式表（review 撈到就標 + 給修法）
 
 | 反模式 | 哪來的（evidence） | 修法 |
 |---|---|---|
-| **100% client-side 資料層**（browser client 包在 TanStack Query，零 server component/action） | bento, debit, directory, leave, temp（2026-04 cluster） | 新 app 用 RSC 讀 + server action 寫；react-query 留給真正 client-interactive 的，不是預設 |
-| **手寫 DB 型別** `types/database.ts` | bento, directory, debit, 1909, leave | 改 `supabase gen types` → `types/supabase.ts` |
-| **無 in-repo migrations**（schema/RLS 只在遠端或 TS 註解） | bento, debit, directory, leave, temp, link | schema/RLS 進 `supabase/migrations/*.sql` |
-| **`using(true)` / 開放 RLS** | 1909 expenses UPDATE, directory members SELECT | 收斂成最小權限策略；暫時放寬要 `TODO(security):` + 時程 |
-| **dead shadcn scaffold dep**（clsx/twMerge/cva 裝了沒 import、alias 指向不存在的檔） | link, zyx.tw | 移除 dead dep 或補上 `cn()`；修 `components.json` alias |
-| **npm 不用 bun** | mediatek | 遷 bun（`bun install` 重生 lockfile） |
-| **create-next-app 殘留**（預設 README/metadata、`public/*.svg`） | test, mcp.winlab, temp | ship 前清乾淨 |
-| **`@media prefers-color-scheme` only、無 next-themes** | test, mcp.winlab | 改 `next-themes` class 策略 |
-| **inline `style={{}}` 不用 Tailwind** | mcp.winlab page | 改 Tailwind utility（MCP backend UI 薄可放寬） |
+| 100% client-side 資料層（browser client 包在 TanStack Query，零 server component/action） | bento, debit, directory, leave, temp（2026-04 cluster） | 新 app 用 RSC 讀 + server action 寫；react-query 留給真正 client-interactive 的，不是預設 |
+| 手寫 DB 型別 `types/database.ts` | bento, directory, debit, 1909, leave | 改 `supabase gen types` → `types/supabase.ts` |
+| 無 in-repo migrations（schema/RLS 只在遠端或 TS 註解） | bento, debit, directory, leave, temp, link | schema/RLS 進 `supabase/migrations/*.sql` |
+| `using(true)` / 開放 RLS | 1909 expenses UPDATE, directory members SELECT | 收斂成最小權限策略；暫時放寬要 `TODO(security):` + 時程 |
+| dead shadcn scaffold dep（clsx/twMerge/cva 裝了沒 import、alias 指向不存在的檔） | link, zyx.tw | 移除 dead dep 或補上 `cn()`；修 `components.json` alias |
+| npm 不用 bun | mediatek | 遷 bun（`bun install` 重生 lockfile） |
+| create-next-app 殘留（預設 README/metadata、`public/*.svg`） | test, mcp.winlab, temp | ship 前清乾淨 |
+| `@media prefers-color-scheme` only、無 next-themes | test, mcp.winlab | 改 `next-themes` class 策略 |
+| inline `style={{}}` 不用 Tailwind | mcp.winlab page | 改 Tailwind utility（MCP backend UI 薄可放寬） |
 
 ---
 
-## 強度速查（這條有多硬？）
+## 強度速查
 
-- **universal（16/16）**：App Router 無 src、Tailwind v4 無 config、kebab 檔名、ESLint flat config。
-- **dominant（多數 + 全部最新）**：bun、shadcn、Supabase `@supabase/ssr`、`proxy.ts` auth、next-themes。
-- **emerging（只有最新幾個，但是該走的方向）**：RSC + server actions、unified/base-ui headless、Sentry + 測試、生成型別 + in-repo migrations。
-- **security（無視 prevalence，一律對齊）**：open-redirect guard、不用 `using(true)`、admin client 不外洩。
+- universal（16/16）：App Router 無 src、Tailwind v4 無 config、kebab 檔名、ESLint flat config。
+- dominant（多數 + 全部最新）：bun、shadcn、Supabase `@supabase/ssr`、`proxy.ts` auth、next-themes。
+- emerging（只有最新幾個，但是該走的方向）：RSC + server actions、unified/base-ui headless、Sentry + 測試、生成型別 + in-repo migrations。
+- security（無視 prevalence，一律對齊）：open-redirect guard、不用 `using(true)`、admin client 不外洩。
 
-> review 時：universal/dominant 偏離 → 直接 flag；emerging 沒跟上 → 標「可升級到新方向」；security → 當 bug 處理。
+review 時：universal/dominant 偏離直接 flag；emerging 沒跟上標「可升級到新方向」；security 當 bug 處理。

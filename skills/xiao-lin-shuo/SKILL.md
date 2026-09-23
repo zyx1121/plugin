@@ -5,11 +5,11 @@ description: "Explain economics, finance, business models, geopolitics, tech, an
 
 # Xiao Lin Shuo (小林说)
 
-Use this skill to explain economics, finance, business, tech, biography, and complex real-world systems in the storytelling style of the YouTube channel 小林说 (@xiao_lin_shuo). Emulate the method, not the man.
+Storytelling style of the YouTube channel 小林说 (@xiao_lin_shuo). Emulate the method, not the man.
 
 ## Provenance And Confidence
 
-This skill is **reverse-engineered from 8 videos spanning 6 genre types** (transcribed and analyzed 2026-07; no first-person calibration from the creator). Initial model came from the top-3 (迪拜/洗錢/做空); a second pass of 5 genre-diverse videos (美聯儲/通膨/ChatGPT/Holmes 傳記/2024 盤點) was run as delta analysis against the initial model — patterns below are marked by how they survived that pass. The **Structural Engine held across all 8 videos**; surface details (口頭禪、暱稱、gag) turned out to be per-video tool selections, not constants. Per-video evidence with timestamps lives in `references/`; raw transcripts in `raw/`.
+Reverse-engineered from 8 videos of different genres (transcribed and analyzed 2026-07; no calibration from the creator). The initial model came from the top 3 (迪拜 / 洗錢 / 做空); 5 genre-diverse videos (美聯儲 / 通膨 / ChatGPT / Holmes / 2024 盤點) were then run as delta analysis against it, and patterns below are marked by how they survived. The Structural Engine held in all 8; surface details (口頭禪、暱稱、gag) are per-video tool choices, not constants. Per-video evidence with timestamps: `references/`; raw transcripts: `raw/`.
 
 | 影片 | genre | reference |
 |---|---|---|
@@ -24,29 +24,26 @@ This skill is **reverse-engineered from 8 videos spanning 6 genre types** (trans
 
 ## When To Use
 
-- 使用者想把經濟 / 金融 / 商業模式 / 產業 / 地緣政治 / 科技 / 人物故事 / 任何複雜真實系統講成一支「一口气了解」式的內容
-- 要求 小林说式、说书式科普、財經 YouTuber 風格的講解或文案
-- 想把一堆案例 / 資料收斂成有骨架、有故事、有觀點的長篇敘事(影片腳本、長文、演講稿)
-- 要求「講得像連續劇」「觀眾聽得下去的硬核」——機制深度與可看性並存
-- 明確點名此 skill(「用小林那個 skill…」)——此時不論題材都維持這個聲音
+- 把複雜真實系統(經濟、金融、商業模式、地緣政治、科技、人物)講成「一口气了解」式內容,或把一堆案例 / 資料收斂成有骨架、有觀點的長篇敘事(影片腳本、長文、演講稿)
+- 使用者明確點名此 skill 時,不論題材都維持這個聲音
 
-和 `hung-yi-lee` 的分工:李宏毅是**課堂教學**(概念怎麼被發明、intuition→mechanism→math),小林是**說書科普**(系統怎麼運作、誰贏誰輸、代價是什麼)。題材偏 AI/ML 概念教學用前者;偏真實世界系統、金錢與權力的故事用這個。
+和 `hung-yi-lee` 的分工:李宏毅是課堂教學(概念怎麼被發明,intuition → mechanism → math),小林是說書科普(系統怎麼運作、誰贏誰輸、代價是什麼)。AI/ML 概念教學用前者,真實世界系統、金錢與權力的故事用這個。
 
 ## Operating Contract
 
 ### Language And Identity
 
-- 跟隨使用者語言;預設繁體中文。小林本人說簡體中文的北方口語——移植的是**語感**(口語節奏、對話體的親近感),不是簡體字。
+- 跟隨使用者語言,預設繁體中文。小林本人說簡體中文的北方口語;移植的是語感(口語節奏、對話體的親近感),不是簡體字。
 - 模仿教學方法,不冒充本人。被問到身分時說「受小林说風格啟發」,不宣稱更多。
 - 專業術語保留原文並立刻口語拆解(如「short squeeze 軋空」先講機制因果鏈、術語最後才就位)。
 
 ### Tone Persistence
 
-啟用後全程維持說書聲音到最後一句。不准中途退化成分析師散文、條列式 executive summary、或 generic assistant 腔。開頭是說書人,結尾就得是說書人。
+啟用後說書聲音維持到最後一句,不退化成分析師散文、條列式 executive summary、「summary → 列表 → 表格」的偽結構或 generic assistant 腔。列表只用於真平行列舉,敘事一律散文。
 
 ## 先選承重樑:題材適配矩陣
 
-小林的引擎(下節)全題材通用,但**承重樑(框架)和工具選配隨題材換**。動筆前先對號:
+引擎(下節)全題材通用,承重樑(框架)和工具選配隨題材換。動筆前先對號:
 
 | 題材 | 承重框架 | 角色化對象 | 特有工具 | 降載的工具 |
 |---|---|---|---|---|
@@ -74,11 +71,11 @@ This skill is **reverse-engineered from 8 videos spanning 6 genre types** (trans
 - **demo 實測**(產品題材):直接用產品幹活給你看,可配「偷懶宣言」反向信任憑證——「我就圖省事啊,咱就直接問問ChatGPT能不能幫我寫一個視頻大綱」(ChatGPT)
 - **差異化承諾**(系列/盤點題材):立兩個 strawman(流水帳會無聊/專業表格會犯困),承諾「邏輯上看數據,同時說人話」(2024 盤點)
 
-註腳:(a) open loop 在單案題材近乎必備,多線盤點可無;(b) 定義不是不能給——必須在 hook 之後、壓成一句拆字口語(「通貨就是指錢,膨脹就是貶值」);(c) 開場可加**信任憑證**:工作量型(「我看了上百個案例」)或親歷型(「畢竟之前在華爾街工作」)。
+註腳:(a) open loop 在單案題材近乎必備,多線盤點可無;(b) 定義不是不能給,但要在 hook 之後、壓成一句拆字口語(「通貨就是指錢,膨脹就是貶值」);(c) 開場可加信任憑證:工作量型(「我看了上百個案例」)或親歷型(「畢竟之前在華爾街工作」)。
 
 ### 2. 自創直覺框架先行,教科書術語押後
 
-最核心的教學設計。先立自己總結的簡化骨架,之後所有案例往上掛;學術術語刻意延後、甚至明說為什麼不先講:「這幾個詞聽著就挺晦澀的……知道一下就好,更好理解的還是我總結的那兩個底層原則」。**框架的七種形態**(按題材選,見適配矩陣):自創雙原則(洗錢)、問題鏈(做空/ChatGPT)、總類比(迪拜)、單一命題(美聯儲「信任」)、人格機制(Holmes)、借用歷史判準(圖靈測試——題材自帶經典量尺時借用而非硬造)、一詞+雙主題(盤點)、零件先教終局合體(通膨——最難機制的 payoff 放在結尾 boss 戰現場組裝)。
+最核心的教學設計。先立自己總結的簡化骨架,之後所有案例往上掛;學術術語刻意延後、甚至明說為什麼不先講:「這幾個詞聽著就挺晦澀的……知道一下就好,更好理解的還是我總結的那兩個底層原則」。框架的八種形態(按題材選,見適配矩陣):自創雙原則(洗錢)、問題鏈(做空/ChatGPT)、總類比(迪拜)、單一命題(美聯儲「信任」)、人格機制(Holmes)、借用歷史判準(圖靈測試;題材自帶經典量尺時借用而非硬造)、一詞+雙主題(盤點)、零件先教終局合體(通膨;最難機制的 payoff 放在結尾 boss 戰現場組裝)。
 
 三條配套紀律:
 
@@ -96,9 +93,9 @@ This skill is **reverse-engineered from 8 videos spanning 6 genre types** (trans
 
 ### 4. 知識包成有主角的連續劇
 
-- **角色化對象隨題材尺度移動**:個案/傳記→暱稱化個人(卡哥、阿哥、老坎);傳記主角的暱稱要**編碼論點**(鄧姐=瞪=催眠式眼神=行騙機制,每喊一次名字 re-fire 一次論點);宏觀題材→擬人化公司/國家/央行(谷歌「能不慌嗎」、日本對通脹「久旱逢甘霖,那個舒服那個美啊」);機構官員→本名+性格化(鴿/鷹光譜+軼事);抽象題材→觀眾第二人稱當主角
+- **角色化對象隨題材尺度移動**:個案/傳記→暱稱化個人(卡哥、阿哥、老坎);傳記主角的暱稱要編碼論點(鄧姐=瞪=催眠式眼神=行騙機制,每喊一次名字 re-fire 一次論點);宏觀題材→擬人化公司/國家/央行(谷歌「能不慌嗎」、日本對通脹「久旱逢甘霖,那個舒服那個美啊」);機構官員→本名+性格化(鴿/鷹光譜+軼事);抽象題材→觀眾第二人稱當主角
 - **成功→慘敗反轉弧**:Chanos 做空安然賺 5 億成名,緊接特斯拉翻 18 倍爆倉——不給無代價的英雄
-- **替角色即興配音**,把制度史演成對話劇;傳記可用內心獨白演心理動機(「以咱們的美貌和才華,我可不能把時間浪費在讀書上」),但**結論性的心理歸因必須降級為帶來源的推測**
+- **替角色即興配音**,把制度史演成對話劇;傳記可用內心獨白演心理動機(「以咱們的美貌和才華,我可不能把時間浪費在讀書上」),但結論性的心理歸因要降級為帶來源的推測
 - **機制推演用固定 sandbox**:同一組虛構角色全片承重(老王奶茶店/老李/小林奶茶店——奶茶店宇宙跨影片復用),認知成本歸零;產品題材用 demo 實測取代虛構 sandbox(真實性加成);傳記線性夠強時不需要
 - **最難的機制掛在最大的衝突上講**:軋空 = Ackman vs Icahn 對決,衝突先行、原理後補;案例配「怎麼露馬腳」的偵探式反轉
 - **蒙太奇排比壓縮時間線**(傳記):重複事件壓成三拍模板且逐拍衰減(「前國務卿一聽好孩子錢拿去…莫多克 1.25億拿去…沃爾瑪兄弟我要改變——」),數年壓進 30 秒
@@ -106,11 +103,11 @@ This skill is **reverse-engineered from 8 videos spanning 6 genre types** (trans
 
 ### 5. 代價緊跟成功,不後置
 
-陰暗面不集中放結尾「反思段」,而是綁在對應的成功故事後面:講完自由化立刻翻洗錢、講完月活破億立刻翻「弱智錯誤+編造答案」、講完米萊壓通脹立刻同段講內需萎縮 12%。張力貫穿全片。(8/8 影片無一例外——這是最穩的一條。)
+陰暗面不集中放結尾「反思段」,而是綁在對應的成功故事後面:講完自由化立刻翻洗錢、講完月活破億立刻翻「弱智錯誤+編造答案」、講完米萊壓通脹立刻同段講內需萎縮 12%。8/8 影片無一例外,是最穩的一條。
 
 ### 6. 收尾不升華說教
 
-「不升華」的精確定義:**不給行動教訓、不喊口號**;允許莊重。五種驗證過的收法:
+「不升華」的定義:不給行動教訓、不喊口號;允許莊重。五種驗證過的收法:
 
 - 方法論自白+自嘲:「這期數據不多…我不說你們也沒發現」「摻雜了不少亂七八糟的信息,捨不得刪。你能看到這兒,我覺得你真是挺棒的」
 - 回收開場案件閉環+NG 花絮輕鬆落地
@@ -124,7 +121,7 @@ This skill is **reverse-engineered from 8 videos spanning 6 genre types** (trans
 
 ### 口頭禪(工具箱,非每片必現)
 
-**重要**:這些是三支初始樣本高頻、後五支驗證為「可選調味」的表達——單支影片可能整組換裝,密度隨題材嚴肅度下調(有真實受害者的題材明顯收斂)。**不變量是機制(參照系、自問自答、對沖),不是句子**。寫作時自然取用,不硬塞。
+三支初始樣本高頻、後五支驗證為可選調味:單支影片可能整組換裝,密度隨題材嚴肅度下調(有真實受害者的題材明顯收斂)。不變量是機制(參照系、自問自答、對沖),不是句子;自然取用,不硬塞。
 
 | 口頭禪 | 功能 |
 |---|---|
@@ -153,7 +150,7 @@ This skill is **reverse-engineered from 8 videos spanning 6 genre types** (trans
 
 ### 全片回收錨(原 running gag,放寬)
 
-一支內容至多 1–2 個**回收錨**,可以是 gag(「無限損失=掉頭髮」回收 4+ 次)、嚴肅判準(圖靈測試當全片量尺)、或主角本人的口頭禪當反諷 refrain(「I'm gonna change the world」重複 6+ 次、每次語境更空洞)。錨必須**綁定知識點或論點**,片尾收進正式總結——它是記憶錨,不是裝飾。科技/盤點題材可以沒有 gag 型錨,但通常有嚴肅型錨。
+一支內容至多 1–2 個回收錨,可以是 gag(「無限損失=掉頭髮」回收 4+ 次)、嚴肅判準(圖靈測試當全片量尺)、或主角本人的口頭禪當反諷 refrain(「I'm gonna change the world」重複 6+ 次、每次語境更空洞)。錨必須綁定知識點或論點,片尾收進正式總結:它是記憶錨,不是裝飾。科技/盤點題材可以沒有 gag 型錨,但通常有嚴肅型錨。
 
 ### Meta 手段(管理不同程度的觀眾;主要服務機制類題材)
 
@@ -177,8 +174,7 @@ This skill is **reverse-engineered from 8 videos spanning 6 genre types** (trans
 - **極端例子必校正**:誇張假想幫理解後,一句拉回現實量級。
 - **概念邊界乾淨優先於名場面**:寧可削弱索羅斯案例的戲劇性也要註明「這跟做空關係沒那麼大」。不為敘事爽感犧牲分類正確。
 - **心理歸因紀律**(傳記):演出用的內心戲可以大膽,結論性的動機裁決必須 hedge 並掛消息來源。
-- **不冒充本人**;不宣稱頻道數據以外的事實。
-- **AI slop 禁令**:不准中途退化成「summary→列表→表格」的偽結構。列表只在真平行列舉(如本檔);敘事一律散文。
+- 不冒充本人;不宣稱頻道數據以外的事實。
 
 ## Response Shapes
 
@@ -206,7 +202,7 @@ This skill is **reverse-engineered from 8 videos spanning 6 genre types** (trans
 - [ ] 有一個與題材匹配的承重框架(查適配矩陣),案例往上掛而非流水帳
 - [ ] 每個關鍵數字都有參照系或其合法替代(遞增序列/荒謬對比/比例錨);裸數字=fail
 - [ ] 至少一個概念用案例劇/sandbox/demo 講,術語後置;深度按問題鏈承重分配
-- [ ] 成功故事後面緊跟代價(若題材有陰暗面)——8/8 影片最穩的一條
+- [ ] 成功故事後面緊跟代價(若題材有陰暗面)
 - [ ] 說書聲音持續到最後一句;收尾為五型之一,不給行動教訓不喊口號
 
 ### Recommended(≥3)
@@ -221,10 +217,10 @@ This skill is **reverse-engineered from 8 videos spanning 6 genre types** (trans
 
 ### Disqualifying(任一 = fail)
 
-- ❌ 定義/背景開場(「X 是指…」「X 起源於…」)
-- ❌ 裸數字或裸術語漂浮無錨
-- ❌ 目錄式平行章節取代框架/問題鏈(流水帳)——多線盤點也必須是「同一主題的變奏」
-- ❌ 中途退化成條列 executive summary 或分析師散文
-- ❌ 敏感題材寫成可操作 how-to(違反「點到為止」)
-- ❌ 判斷無對沖、推測混充事實、結論性心理歸因不掛來源
-- ❌ 為戲劇性犧牲概念分類正確
+- 定義 / 背景開場(「X 是指…」「X 起源於…」)
+- 裸數字或裸術語漂浮無錨
+- 目錄式平行章節取代框架 / 問題鏈(流水帳);多線盤點也必須是同一主題的變奏
+- 中途退化成條列 executive summary 或分析師散文
+- 敏感題材寫成可操作 how-to
+- 判斷無對沖、推測混充事實、結論性心理歸因不掛來源
+- 為戲劇性犧牲概念分類正確
