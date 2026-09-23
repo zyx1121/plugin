@@ -39,7 +39,6 @@ Only active agent-facing domains are exposed:
 - `mail`
 - `md2slide`
 - `nycu`
-- `ocr`
 - `parttime`
 - `pdf`
 - `pve`
@@ -108,7 +107,7 @@ make macOS tools work anywhere else.
 
 ## Current Tool Surface
 
-84 tools total:
+82 tools total:
 
 - `calendar_list_calendars`, `calendar_list_events`, `calendar_add_event`,
   `calendar_search_events`, `calendar_delete_event`
@@ -120,7 +119,6 @@ make macOS tools work anywhere else.
 - `md2slide_init`, `md2slide_build`
 - `nycu_setup`, `nycu_whoami`, `nycu_list_systems`, `nycu_list_events`,
   `nycu_logout`
-- `ocr_health`, `ocr_file`
 - `parttime_get_status`, `parttime_sign_in`, `parttime_sign_out`
 - `pdf_info`, `pdf_extract_text`, `pdf_extract_comments`, `pdf_compress`,
   `pdf_decrypt`, `pdf_merge`, `pdf_split`, `pdf_rotate`, `pdf_render`
