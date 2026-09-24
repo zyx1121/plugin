@@ -33,6 +33,7 @@ if _LIB not in _sys.path:
     _sys.path.insert(0, _LIB)
 
 import base64
+import ipaddress
 import json
 import os
 import re
@@ -271,20 +272,24 @@ def _remove_vm_firewall(vmid: int) -> bool:
 # the SDN SNAT into rules.v4, which then fight the daemons that rebuild them on
 # boot. Every forward we manage lives in the nat table (which carries no firewall
 # chains), so we refresh only the *nat block and leave the rest of rules.v4 — the
-# host's static *filter security rules — untouched. The SDN SNAT (`-j SNAT
-# --to-source`) is dropped since SDN re-adds it on boot.
+# host's static *filter security rules — untouched. Only the SDN's own SNAT
+# (exactly `-s <VM subnet> -o <uplink> -j SNAT --to-source <ip>`) is dropped, since the vnet post-up
+# re-adds it on boot. Every other SNAT is manual and must survive: the tailnet
+# subnet-router rule (`-s 100.64.0.0/10`) used to be swept up with it, so each
+# forward change silently deleted it from rules.v4 until the next reboot.
+_VM_SUBNET = str(ipaddress.ip_network(f"{GATEWAY_IP}/24", strict=False))
 _PERSIST_IPTABLES_SH = r"""
 F=/etc/iptables/rules.v4
 tmp=$(mktemp)
 [ -f "$F" ] && awk '/^\*nat$/{n=1; next} n&&/^COMMIT$/{n=0; next} !n' "$F" > "$tmp"
-iptables-save -t nat | grep -v 'j SNAT --to-source' >> "$tmp"
+iptables-save -t nat | awk -v src="$1" '!($1 == "-A" && $2 == "POSTROUTING" && $3 == "-s" && $4 == src && $5 == "-o" && $7 == "-j" && $8 == "SNAT" && $9 == "--to-source" && NF == 10)' >> "$tmp"
 mv "$tmp" "$F"
 """
 
 
 def _persist_iptables() -> None:
     """Persist the nat-table forwards to rules.v4 without capturing firewall/SDN chains."""
-    ssh_run(PVE_HOST, "sh", "-c", _PERSIST_IPTABLES_SH)
+    ssh_run(PVE_HOST, "sh", "-c", _PERSIST_IPTABLES_SH, "persist-iptables", _VM_SUBNET)
 
 
 def _find_forwards_to_ip(vm_ip: str) -> list[dict]:
