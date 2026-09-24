@@ -58,6 +58,7 @@ COMMIT
 SDN_SNAT = "-A POSTROUTING -s 10.10.10.0/24 -o vmbr0 -j SNAT --to-source 140.113.194.229"
 TAILNET_SNAT = "-A POSTROUTING -s 100.64.0.0/10 -o vmbr0 -j SNAT --to-source 140.113.194.229"
 REFLECTION = "-A POSTROUTING -s 10.10.10.0/24 -d 10.10.10.200/32 -p tcp -m multiport --dports 80,443 -j MASQUERADE"
+PORT_SNAT = "-A POSTROUTING -s 10.10.10.0/24 -o vmbr0 -p tcp -m tcp --dport 25 -j SNAT --to-source 140.113.194.229"
 FORWARD = "-A PREROUTING -p tcp -m tcp --dport 50104 -j DNAT --to-destination 10.10.10.104:22"
 
 LIVE_NAT = f"""*nat
@@ -69,6 +70,7 @@ LIVE_NAT = f"""*nat
 {SDN_SNAT}
 {TAILNET_SNAT}
 {REFLECTION}
+{PORT_SNAT}
 COMMIT
 """
 
@@ -93,6 +95,7 @@ with tempfile.TemporaryDirectory() as tmp:
 check("SDN SNAT is dropped", SDN_SNAT not in lines)
 check("tailnet SNAT survives", TAILNET_SNAT in lines)
 check("NAT reflection MASQUERADE survives", REFLECTION in lines)
+check("a narrower manual SNAT on the VM subnet survives", PORT_SNAT in lines)
 check("live forward is written", FORWARD in lines)
 check("stale nat block is replaced", "--dport 50999" not in out)
 check("*filter block is left untouched", out.startswith(FILTER_BLOCK))

@@ -273,7 +273,7 @@ def _remove_vm_firewall(vmid: int) -> bool:
 # boot. Every forward we manage lives in the nat table (which carries no firewall
 # chains), so we refresh only the *nat block and leave the rest of rules.v4 — the
 # host's static *filter security rules — untouched. Only the SDN's own SNAT
-# (`-s <VM subnet> -o <uplink> -j SNAT`) is dropped, since the vnet post-up
+# (exactly `-s <VM subnet> -o <uplink> -j SNAT --to-source <ip>`) is dropped, since the vnet post-up
 # re-adds it on boot. Every other SNAT is manual and must survive: the tailnet
 # subnet-router rule (`-s 100.64.0.0/10`) used to be swept up with it, so each
 # forward change silently deleted it from rules.v4 until the next reboot.
@@ -282,7 +282,7 @@ _PERSIST_IPTABLES_SH = r"""
 F=/etc/iptables/rules.v4
 tmp=$(mktemp)
 [ -f "$F" ] && awk '/^\*nat$/{n=1; next} n&&/^COMMIT$/{n=0; next} !n' "$F" > "$tmp"
-iptables-save -t nat | awk -v src="$1" '!($1 == "-A" && $2 == "POSTROUTING" && $3 == "-s" && $4 == src && $5 == "-o" && / -j SNAT /)' >> "$tmp"
+iptables-save -t nat | awk -v src="$1" '!($1 == "-A" && $2 == "POSTROUTING" && $3 == "-s" && $4 == src && $5 == "-o" && $7 == "-j" && $8 == "SNAT" && $9 == "--to-source" && NF == 10)' >> "$tmp"
 mv "$tmp" "$F"
 """
 
