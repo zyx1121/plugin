@@ -1,9 +1,4 @@
----
-name: release-engineering
-description: "Loki 的發版與版本標準 — SemVer + Conventional Commits + Release Please 的 release PR 流程,一套做法套到任何 repo(node / rust / python uv / tauri / generic). Use when wiring releases into a repo, cutting a release, or auditing how a repo versions and tags. Triggers on 'release', '發版', '版本號', 'tag', 'CI/CD', 'changelog', 'conventional commits', 'release please', 'bump', 'semver', '怎麼發版'. NOT 專案文件 / runbook 寫法 — 那是 project-docs."
----
-
-# release-engineering — how every repo here versions and ships
+# Release — how every repo here versions and ships
 
 One standard for every repo. Publishing is a merge, not a command: conventional
 commits land on `main`, Release Please keeps one open release PR carrying the
@@ -13,9 +8,10 @@ release, and attaches the artifact. Nothing is tagged by hand.
 Already covered elsewhere, not restated here:
 
 - Ship loop (commit, push, PR, CI green, squash merge, delete branch) is in
-  `CLAUDE.md`; this skill only adds what happens after the merge.
+  `CLAUDE.md`; this file only adds what happens after the merge. Issues, sprints
+  and the board are in `backlog.md`.
 - Scheme per artifact: SemVer for release / package / image, `vN` for API and
-  protocol schemas, git SHA for container tags. This skill mechanizes SemVer.
+  protocol schemas, git SHA for container tags. This file mechanizes SemVer.
 - `~/plugin` bumps `plugin.json` and `marketplace.json` by hand (see
   `skills/AGENTS.md`). It has no release PR.
 
