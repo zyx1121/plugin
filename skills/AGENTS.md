@@ -15,7 +15,7 @@
 4. 內容 = 能力句 + 觸發(+ 必要時 pushy clause / 負 scope)。
    - **不把 workflow / 架構步驟塞進 description**。實測(obra/superpowers):description 一旦摘要 workflow,Claude 會照 description 做而跳過 skill body。步驟寫進 body。
 5. 長度按 routing 成本分層,全部 < 1024 char。trivial slash 指令 ~120 char、貴的 intent router(project-docs / nextjs-dev)400–600 char。`description-short`(<50)/`description-long`(>500)是復盤時的抓取線(原生檢查,見 §改完)。
-6. 重疊 skill 互標負 scope 並指名替代:`NOT X — 那是 <skill>`,雙向都標。例:`paper-revise` ↔ `academic-sentence`、`project-docs` ↔ `release-engineering`。
+6. 重疊 skill 互標負 scope 並指名替代:`NOT X — 那是 <skill>`,雙向都標。例:`paper-revise` ↔ `academic-sentence`、`project-docs` ↔ `dev-workflow`。
 
 ## 範本
 
