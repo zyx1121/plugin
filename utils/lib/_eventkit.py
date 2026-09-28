@@ -39,7 +39,11 @@ def _entity(kind: Kind) -> int:
 
 
 def _request(store: Any, kind: Kind) -> bool:
-    """Ask once for full access (the first run on a machine); True when granted."""
+    """Ask for full access (the first run on a machine); True when granted.
+
+    Waits 25 s, inside the 30 s today-mod gives a read, so an unanswered prompt
+    ends in a failure envelope rather than a killed process; the next run asks again.
+    """
     done = threading.Event()
     answer = {"granted": False}
 
@@ -53,7 +57,7 @@ def _request(store: Any, kind: Kind) -> bool:
         request(completion)
     else:  # before macOS 14
         store.requestAccessToEntityType_completion_(_entity(kind), completion)
-    done.wait(120)
+    done.wait(25)
     return answer["granted"]
 
 
@@ -77,9 +81,12 @@ def store_for(kind: Kind) -> Any:
 
 
 def calendars(store: Any, kind: Kind, name: Optional[str] = None) -> list:
-    """The store's calendars (Reminders lists) of `kind`, only those titled `name` when given."""
+    """The store's calendars (Reminders lists) of `kind`, only those titled `name` when given.
+
+    Titles match ignoring case, as AppleScript's string comparison does.
+    """
     found = list(store.calendarsForEntityType_(_entity(kind)) or [])
-    return found if name is None else [c for c in found if c.title() == name]
+    return found if name is None else [c for c in found if (c.title() or "").casefold() == name.casefold()]
 
 
 def nsdate(dt: datetime) -> Any:
@@ -95,13 +102,18 @@ def local(date: Any) -> datetime:
 
 
 def due_of(reminder: Any) -> Optional[datetime]:
-    """A reminder's due moment, local; midnight for a date-only due; None without one."""
-    from Foundation import NSCalendar
+    """A reminder's due moment, local; midnight for a date-only due; None without one.
+
+    The components are read in their own calendar, else the Gregorian one, never
+    the system's: under a ROC or Buddhist system calendar the year would shift.
+    """
+    from Foundation import NSCalendar, NSCalendarIdentifierGregorian
 
     components = reminder.dueDateComponents()
     if components is None:
         return None
-    date = NSCalendar.currentCalendar().dateFromComponents_(components)
+    calendar = components.calendar() or NSCalendar.calendarWithIdentifier_(NSCalendarIdentifierGregorian)
+    date = calendar.dateFromComponents_(components)
     return local(date) if date is not None else None
 
 

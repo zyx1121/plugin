@@ -113,7 +113,7 @@ def events_starting(start_dt: datetime, end_dt: datetime, cal: Optional[str]) ->
     """(start, event) for each occurrence starting in [start_dt, end_dt], earliest first.
 
     A recurring event yields one row per occurrence, at that occurrence's date.
-    `cal` keeps every calendar with that title.
+    `cal` keeps every calendar with that title, ignoring case.
     """
     from _eventkit import calendars, local, nsdate, store_for
 
@@ -124,8 +124,9 @@ def events_starting(start_dt: datetime, end_dt: datetime, cal: Optional[str]) ->
         if not chosen:
             fail(f"no calendar named '{cal}'", hint="run `calendar show-cals` to see the calendar names", code=2)
     # EventKit matches events that overlap the range; the atom lists those that start in it.
+    # A second of slack each side keeps zero-length events at either edge.
     predicate = store.predicateForEventsWithStartDate_endDate_calendars_(
-        nsdate(start_dt), nsdate(end_dt + timedelta(seconds=1)), chosen,
+        nsdate(start_dt - timedelta(seconds=1)), nsdate(end_dt + timedelta(seconds=1)), chosen,
     )
     rows = []
     for event in store.eventsMatchingPredicate_(predicate) or []:
