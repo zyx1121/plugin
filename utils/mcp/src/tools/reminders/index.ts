@@ -4,7 +4,7 @@ import { envelopeOutput } from "../../core/schema.ts";
 import { scriptTool, type ToolboxTool } from "../../core/tool.ts";
 
 const script = "reminders.py";
-/** Reminders.app over AppleScript: macOS only, and the script itself runs under uv. */
+/** Reads go through EventKit (Reminders.app stays closed), writes through AppleScript: macOS only, and the script itself runs under uv. */
 const requires = ["platform:darwin", "binary:osascript", "binary:uv"];
 const envelope = true;
 const timeoutMs = 60000;

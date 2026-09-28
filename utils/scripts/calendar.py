@@ -1,12 +1,14 @@
 #!/usr/bin/env -S uv run --script
 # /// script
 # requires-python = ">=3.11"
-# dependencies = ["typer", "rich"]
+# dependencies = ["typer", "rich", "pyobjc-framework-EventKit; sys_platform == 'darwin'"]
 # ///
-"""Atomic Calendar.app operations via AppleScript.
+"""Atomic Calendar operations: reads via EventKit, writes via AppleScript.
 
-show-cals / list / add / search / delete. Dates are built locale-independently
-to avoid `date "..."` string parsing failing on non-English Macs.
+show-cals / list / search read through EventKit, so Calendar.app stays closed.
+add / delete drive Calendar.app over AppleScript. Dates are built
+locale-independently to avoid `date "..."` string parsing failing on
+non-English Macs.
 """
 from __future__ import annotations
 
@@ -107,27 +109,42 @@ def cal_clause(cal: Optional[str]) -> str:
     return f'calendar "{escape_as(cal)}"' if cal else 'first calendar whose writable is true'
 
 
+def events_starting(start_dt: datetime, end_dt: datetime, cal: Optional[str]) -> list:
+    """(start, event) for each occurrence starting in [start_dt, end_dt], earliest first.
+
+    A recurring event yields one row per occurrence, at that occurrence's date.
+    `cal` keeps every calendar with that title.
+    """
+    from _eventkit import calendars, local, nsdate, store_for
+
+    store = store_for("event")
+    chosen = None
+    if cal:
+        chosen = calendars(store, "event", cal)
+        if not chosen:
+            fail(f"no calendar named '{cal}'", hint="run `calendar show-cals` to see the calendar names", code=2)
+    # EventKit matches events that overlap the range; the atom lists those that start in it.
+    predicate = store.predicateForEventsWithStartDate_endDate_calendars_(
+        nsdate(start_dt), nsdate(end_dt + timedelta(seconds=1)), chosen,
+    )
+    rows = []
+    for event in store.eventsMatchingPredicate_(predicate) or []:
+        start = local(event.startDate())
+        if start_dt <= start <= end_dt:
+            rows.append((start, event))
+    rows.sort(key=lambda row: (row[0], row[1].calendar().title()))
+    return rows
+
+
 # ── show-cals ────────────────────────────────────────────────────
 @app.command(name="show-cals", help="List all calendars with writability.")
 def show_cals():
-    script = '''
-tell application "Calendar"
-    set output to ""
-    repeat with c in calendars
-        set w to writable of c
-        set output to output & (name of c) & "\t" & w & "<<<EOL>>>"
-    end repeat
-    return output
-end tell
-'''
-    raw = run_as(script)
-    data = []
-    for line in raw.split("<<<EOL>>>"):
-        line = line.strip()
-        parts = line.split("\t")
-        if len(parts) == 2:
-            name, w = parts
-            data.append({"name": name, "writable": w.lower() == "true"})
+    from _eventkit import calendars, store_for
+
+    data = [
+        {"name": c.title(), "writable": bool(c.allowsContentModifications())}
+        for c in calendars(store_for("event"), "event")
+    ]
 
     def human(rows, _meta):
         table = Table(title="Calendars", show_header=True)
@@ -152,45 +169,20 @@ def list_cmd(
     start_dt = parse_when(from_) if from_ else datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
     end_dt = parse_when(to) if to else start_dt + timedelta(days=7)
 
-    cal_filter = f'calendar "{escape_as(cal)}"' if cal else "every calendar"
-    script = f'''
-tell application "Calendar"
-    {as_date_block(start_dt, "rangeStart")}
-    {as_date_block(end_dt, "rangeEnd")}
-    set output to ""
-    set cals to {cal_filter}
-    repeat with c in cals
-        set evts to (events of c whose start date is greater than or equal to rangeStart and start date is less than or equal to rangeEnd)
-        repeat with e in evts
-            set esum to summary of e
-            set estart to (start date of e) as string
-            set ecal to name of c
-            try
-                set eloc to location of e
-                if eloc is missing value then set eloc to ""
-            on error
-                set eloc to ""
-            end try
-            set output to output & ecal & "\t" & estart & "\t" & esum & "\t" & eloc & "<<<EOL>>>"
-        end repeat
-    end repeat
-    return output
-end tell
-'''
-    raw = run_as(script)
-    rows = [l.strip() for l in raw.split("<<<EOL>>>") if l.strip()]
+    from _eventkit import apple_date
+
+    rows = events_starting(start_dt, end_dt, cal)
     if limit:
         rows = rows[:limit]
-    data = []
-    for line in rows:
-        parts = line.split("\t")
-        if len(parts) >= 3:
-            data.append({
-                "calendar": parts[0],
-                "start": parts[1],
-                "summary": parts[2],
-                "location": parts[3] if len(parts) > 3 else "",
-            })
+    data = [
+        {
+            "calendar": event.calendar().title(),
+            "start": apple_date(start),
+            "summary": event.title() or "",
+            "location": (event.location() or "").strip(),
+        }
+        for start, event in rows
+    ]
 
     start_label = start_dt.strftime("%Y-%m-%d")
     end_label = end_dt.strftime("%Y-%m-%d")
@@ -277,35 +269,16 @@ def search(
     start_dt = parse_when(from_) if from_ else datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
     end_dt = parse_when(to) if to else start_dt + timedelta(days=30)
 
-    cal_filter = f'calendar "{escape_as(cal)}"' if cal else "every calendar"
-    needle = escape_as(query)
-    script = f'''
-tell application "Calendar"
-    {as_date_block(start_dt, "rangeStart")}
-    {as_date_block(end_dt, "rangeEnd")}
-    set output to ""
-    set cals to {cal_filter}
-    repeat with c in cals
-        set evts to (events of c whose start date is greater than or equal to rangeStart and start date is less than or equal to rangeEnd and summary contains "{needle}")
-        repeat with e in evts
-            set esum to summary of e
-            set estart to (start date of e) as string
-            set ecal to name of c
-            set output to output & ecal & "\t" & estart & "\t" & esum & "<<<EOL>>>"
-        end repeat
-    end repeat
-    return output
-end tell
-'''
-    raw = run_as(script)
-    rows = [l.strip() for l in raw.split("<<<EOL>>>") if l.strip()]
+    from _eventkit import apple_date
+
+    needle = query.casefold()
+    rows = [(start, event) for start, event in events_starting(start_dt, end_dt, cal) if needle in (event.title() or "").casefold()]
     if limit:
         rows = rows[:limit]
-    data = []
-    for line in rows:
-        parts = line.split("\t")
-        if len(parts) >= 3:
-            data.append({"calendar": parts[0], "start": parts[1], "summary": parts[2]})
+    data = [
+        {"calendar": event.calendar().title(), "start": apple_date(start), "summary": event.title() or ""}
+        for start, event in rows
+    ]
 
     def human(events, _meta):
         if not events:

@@ -6,7 +6,7 @@ import { scriptTool, type ToolboxTool } from "../../core/tool.ts";
 const envelope = true;
 const timeoutMs = 70000;
 const script = "calendar.py";
-/** Calendar.app over AppleScript: macOS only, and the script itself runs under uv. */
+/** Reads go through EventKit (Calendar.app stays closed), writes through AppleScript: macOS only, and the script itself runs under uv. */
 const requires = ["platform:darwin", "binary:osascript", "binary:uv"];
 
 const read = { readOnlyHint: true, openWorldHint: false } as const;

@@ -1,12 +1,14 @@
 #!/usr/bin/env -S uv run --script
 # /// script
 # requires-python = ">=3.11"
-# dependencies = ["typer", "rich"]
+# dependencies = ["typer", "rich", "pyobjc-framework-EventKit; sys_platform == 'darwin'"]
 # ///
-"""Atomic Reminders.app operations via AppleScript.
+"""Atomic Reminders operations: reads via EventKit, writes via AppleScript.
 
-list / add / done / delete / show-lists. Dates are built locale-independently
-(set year/month/day individually rather than parsing strings).
+show-lists / list read through EventKit, so Reminders.app stays closed.
+add / done / delete drive Reminders.app over AppleScript. Dates are built
+locale-independently (set year/month/day individually rather than parsing
+strings).
 """
 from __future__ import annotations
 
@@ -109,18 +111,9 @@ def as_date_block(dt: datetime, var: str = "theDate") -> str:
 # ── show-lists ───────────────────────────────────────────────────
 @app.command(name="show-lists", help="List all Reminders lists (Inbox, custom lists, etc.).")
 def show_lists():
-    script = '''
-tell application "Reminders"
-    set output to ""
-    repeat with L in lists
-        set output to output & (name of L) & "<<<EOL>>>"
-    end repeat
-    return output
-end tell
-'''
-    raw = run_as(script)
-    names = [line.strip() for line in raw.split("<<<EOL>>>") if line.strip()]
-    data = [{"name": n} for n in names]
+    from _eventkit import calendars, store_for
+
+    data = [{"name": c.title()} for c in calendars(store_for("reminder"), "reminder")]
 
     def human(rows, _meta):
         table = Table(title="Reminders lists", show_header=True)
@@ -139,35 +132,33 @@ def list_cmd(
     show_done: bool = typer.Option(False, "--show-done", help="Include completed reminders."),
     limit: Optional[int] = typer.Option(None, "--limit", "-n", help="Max reminders to show."),
 ):
-    filt = "" if show_done else "whose completed is false"
-    script = f'''
-tell application "Reminders"
-    set output to ""
-    set theList to {list_clause(list_name)}
-    set theReminders to (reminders of theList {filt})
-    repeat with r in theReminders
-        set rname to name of r
-        try
-            set rdue to (due date of r) as string
-        on error
-            set rdue to ""
-        end try
-        set rdone to completed of r
-        set output to output & rname & "\t" & rdue & "\t" & rdone & "<<<EOL>>>"
-    end repeat
-    return output
-end tell
-'''
-    raw = run_as(script)
-    lines = [line.strip() for line in raw.split("<<<EOL>>>") if line.strip()]
+    from _eventkit import apple_date, calendars, due_of, fetch_reminders, store_for
+
+    store = store_for("reminder")
+    if list_name:
+        lists = calendars(store, "reminder", list_name)
+        if not lists:
+            fail(f"no Reminders list named '{list_name}'", hint="run `reminders show-lists` to see the list names", code=2)
+    else:
+        default = store.defaultCalendarForNewReminders()
+        if default is None:
+            fail("Reminders has no default list", hint="pass --list; run `reminders show-lists` to see the list names", code=2)
+        lists = [default]
+    if show_done:
+        predicate = store.predicateForRemindersInCalendars_(lists)
+    else:
+        predicate = store.predicateForIncompleteRemindersWithDueDateStarting_ending_calendars_(None, None, lists)
+    # EventKit has no list order to give; due ones first, soonest first.
+    rows = sorted(
+        ((due_of(r), r) for r in fetch_reminders(store, predicate)),
+        key=lambda row: (row[0] is None, row[0] or datetime.max, row[1].title() or ""),
+    )
     if limit:
-        lines = lines[:limit]
-    data = []
-    for line in lines:
-        parts = line.split("\t")
-        if len(parts) >= 3:
-            name, due, done = parts[0], parts[1], parts[2]
-            data.append({"name": name, "due": due, "done": done.lower() == "true"})
+        rows = rows[:limit]
+    data = [
+        {"name": r.title() or "", "due": apple_date(due) if due else "", "done": bool(r.isCompleted())}
+        for due, r in rows
+    ]
 
     def human(rows, _meta):
         if not rows:
