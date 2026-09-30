@@ -44,7 +44,7 @@ A local marketplace serves skill and agent edits live from the clone: `git pull`
 |--------|--------|
 | [`skills/`](skills/) | `academic-sentence` · `dev-workflow` · `nextjs-dev` · `paper-revise` · `project-docs` · `winlab-pptx` · `xiao-lin-shuo` |
 | [`agents/`](agents/) | `planner` · `surveyor` · `developer` · `reviewer` · `utils-promoter` |
-| [`utils/`](utils/) | MCP toolbox: calendar · mail · reminders · safari · screenshot · pdf · e3p · md2slide · gmaps · timetable · ubereats · nycu · parttime |
+| [`utils/`](utils/) | MCP toolbox: calendar · mail · reminders · safari · screenshot · pdf · md2slide · gmaps · ubereats |
 | [`decisions/`](decisions/) | ADR trail: every merge and retirement has a written why |
 
 The `utils` MCP server is bundled via `.mcp.json`: installing the plugin registers it, no separate `claude mcp add`. Tools land as `mcp__plugin_zyx_utils__<tool>`.
@@ -61,6 +61,12 @@ before updating zyx. Its 16 tool names and parameters are preserved; the MCP
 namespace changes from `plugin_zyx_utils` to `plugin_pve_pve`.
 Machine settings now live in `~/.config/pve/config.json`; see the new plugin's
 setup guide and [ADR-0012](decisions/ADR-0012-extract-pve.md).
+
+NYCU moved to [zyx1121/nycu](https://github.com/zyx1121/nycu) in zyx 0.26.0.
+Install `nycu@zyx1121`, migrate existing token files with its setup script, then
+update zyx. Its 21 portal, E3, timetable and attendance tools retain their short
+names and schemas; the provider namespace becomes `plugin_nycu_nycu`.
+See [ADR-0013](decisions/ADR-0013-extract-nycu.md) for the platform and credential boundaries.
 
 ## The Claude-native angle
 

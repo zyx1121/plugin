@@ -18,8 +18,8 @@ describe("native tool registry", () => {
   test("exposes only the selected agent-toolbox domains", () => {
     const domains = new Set(allTools.map((tool) => tool.name.split("_")[0]));
 
-    expect([...domains].sort()).toEqual(["calendar", "e3p", "gmaps", "mail", "md2slide", "nycu", "parttime", "pdf", "reminders", "safari", "screenshot", "timetable", "ubereats", "utils"]);
-    expect(allTools).toHaveLength(66);
+    expect([...domains].sort()).toEqual(["calendar", "gmaps", "mail", "md2slide", "pdf", "reminders", "safari", "screenshot", "ubereats", "utils"]);
+    expect(allTools).toHaveLength(45);
   });
 
   test("tool names are unique and prefixed by their domain", () => {
@@ -27,7 +27,7 @@ describe("native tool registry", () => {
     expect(new Set(names).size).toBe(names.length);
 
     for (const name of names) {
-      expect(name).toMatch(/^(calendar|e3p|gmaps|mail|md2slide|nycu|parttime|pdf|reminders|safari|screenshot|timetable|ubereats|utils)_/);
+      expect(name).toMatch(/^(calendar|gmaps|mail|md2slide|pdf|reminders|safari|screenshot|ubereats|utils)_/);
     }
   });
 });
@@ -82,10 +82,6 @@ describe("destructive tools are gated", () => {
   test("the known destructive surface is annotated as such", () => {
     const expected = [
       "calendar_delete_event",
-      "e3p_logout",
-      "nycu_logout",
-      "parttime_sign_in",
-      "parttime_sign_out",
       "reminders_delete",
       "safari_close_tab",
       "ubereats_dump_cookie",

@@ -2,14 +2,13 @@ import { describe, expect, test } from "bun:test";
 import { pushBoolFlag, pushFlag, pushPos } from "../src/core/argv.ts";
 import type { ToolboxTool } from "../src/core/tool.ts";
 import { calendarTools } from "../src/tools/calendar/index.ts";
-import { e3pTools } from "../src/tools/e3p/index.ts";
 import { pdfTools } from "../src/tools/pdf/index.ts";
 import { remindersTools } from "../src/tools/reminders/index.ts";
 import { safariTools } from "../src/tools/safari/index.ts";
 import { screenshotTools } from "../src/tools/screenshot/index.ts";
 import { ubereatsTools } from "../src/tools/ubereats/index.ts";
 
-const testTools = [...calendarTools, ...e3pTools, ...pdfTools, ...remindersTools, ...safariTools, ...screenshotTools, ...ubereatsTools];
+const testTools = [...calendarTools, ...pdfTools, ...remindersTools, ...safariTools, ...screenshotTools, ...ubereatsTools];
 
 function getTool(name: string): ToolboxTool {
   const tool = testTools.find((candidate) => candidate.name === name);
