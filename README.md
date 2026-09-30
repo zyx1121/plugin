@@ -44,7 +44,7 @@ A local marketplace serves skill and agent edits live from the clone: `git pull`
 |--------|--------|
 | [`skills/`](skills/) | `academic-sentence` · `dev-workflow` · `nextjs-dev` · `paper-revise` · `project-docs` · `winlab-pptx` · `xiao-lin-shuo` |
 | [`agents/`](agents/) | `planner` · `surveyor` · `developer` · `reviewer` · `utils-promoter` |
-| [`utils/`](utils/) | MCP toolbox: calendar · mail · reminders · safari · screenshot · pdf · pve · e3p · md2slide · gmaps · timetable · ubereats · nycu · parttime |
+| [`utils/`](utils/) | MCP toolbox: calendar · mail · reminders · safari · screenshot · pdf · e3p · md2slide · gmaps · timetable · ubereats · nycu · parttime |
 | [`decisions/`](decisions/) | ADR trail: every merge and retirement has a written why |
 
 The `utils` MCP server is bundled via `.mcp.json`: installing the plugin registers it, no separate `claude mcp add`. Tools land as `mcp__plugin_zyx_utils__<tool>`.
@@ -52,6 +52,15 @@ The `utils` MCP server is bundled via `.mcp.json`: installing the plugin registe
 > [!WARNING]
 > Do not also register the server user-scope: a same-named user-scope entry shadows the plugin one (ADR-0004 amendment).
 > First run resolves server deps via bun; warm up with `cd ~/plugin/utils/mcp && bun install`.
+
+## Independent plugins
+
+PVE moved to [zyx1121/pve](https://github.com/zyx1121/pve) in zyx 0.25.0.
+Install `pve@zyx1121` from [zyx1121/marketplace](https://github.com/zyx1121/marketplace)
+before updating zyx. Its 16 tool names and parameters are preserved; the MCP
+namespace changes from `plugin_zyx_utils` to `plugin_pve_pve`.
+Machine settings now live in `~/.config/pve/config.json`; see the new plugin's
+setup guide and [ADR-0012](decisions/ADR-0012-extract-pve.md).
 
 ## The Claude-native angle
 

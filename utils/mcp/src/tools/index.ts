@@ -7,7 +7,6 @@ import { md2slideTools } from "./md2slide/index.ts";
 import { nycuTools } from "./nycu/index.ts";
 import { parttimeTools } from "./parttime/index.ts";
 import { pdfTools } from "./pdf/index.ts";
-import { pveTools } from "./pve/index.ts";
 import { remindersTools } from "./reminders/index.ts";
 import { safariTools } from "./safari/index.ts";
 import { screenshotTools } from "./screenshot/index.ts";
@@ -24,7 +23,6 @@ export const allTools = [
   ...nycuTools,
   ...parttimeTools,
   ...pdfTools,
-  ...pveTools,
   ...remindersTools,
   ...safariTools,
   ...screenshotTools,
