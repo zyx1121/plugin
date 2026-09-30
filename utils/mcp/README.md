@@ -41,7 +41,6 @@ Only active agent-facing domains are exposed:
 - `nycu`
 - `parttime`
 - `pdf`
-- `pve`
 - `reminders`
 - `safari`
 - `screenshot`
@@ -54,7 +53,7 @@ the MCP surface.
 
 ## Naming Rules
 
-- Tool names are `domain_verb_object`, e.g. `pve_add_caddy`,
+- Tool names are `domain_verb_object`, e.g. `reminders_add`,
   `calendar_list_events`, `mail_compose_draft`.
 - One MCP tool should represent one agent intent. Do not expose generic
   `action` or `mode` multiplexers when the actions have different required
@@ -71,8 +70,7 @@ the MCP surface.
 Registration is host-aware. Each domain declares what the machine must provide
 (`src/core/requires.ts`), the server probes those requirements in parallel at
 startup, and only the tools that can actually run are registered. A Linux box
-never sees the AppleScript domains, and a machine with no `pve` alias in its SSH
-config never sees the 16 `pve_*` tools.
+never sees the macOS-only domains.
 
 Requirement kinds:
 
@@ -86,15 +84,11 @@ Requirement kinds:
 
 No check touches the network. The snapshot is taken once at startup and holds
 for the whole session, so a requirement states whether the host is *configured*
-for a tool, not whether the target answers this second: a laptop briefly off the
-tailnet is still a pve machine, and an unreachable host is the tool's own
-timeout to report. An unknown kind fails closed, every check is capped at 4 s,
+for a tool, not whether a remote service answers this second. An unreachable
+service is the tool's own timeout to report. An unknown kind fails closed, every check is capped at 4 s,
 results are memoised per requirement string, and a check that throws hides its
-tool rather than taking the server down. Startup logs the split to stderr:
-
-```text
-[utils-mcp] registered 54, hidden 16 (pve: ssh:pve)
-```
+tool rather than taking the server down. Startup logs the registered and hidden
+tool counts with failed requirements to stderr.
 
 `utils_capabilities` declares no requirements, so it is registered on every
 host. It reports platform/hostname/arch, the registered tool names, and each
@@ -107,7 +101,7 @@ make macOS tools work anywhere else.
 
 ## Current Tool Surface
 
-82 tools total:
+66 tools total:
 
 - `calendar_list_calendars`, `calendar_list_events`, `calendar_add_event`,
   `calendar_search_events`, `calendar_delete_event`
@@ -122,11 +116,6 @@ make macOS tools work anywhere else.
 - `parttime_get_status`, `parttime_sign_in`, `parttime_sign_out`
 - `pdf_info`, `pdf_extract_text`, `pdf_extract_comments`, `pdf_compress`,
   `pdf_decrypt`, `pdf_merge`, `pdf_split`, `pdf_rotate`, `pdf_render`
-- `pve_list_guests`, `pve_get_status`, `pve_start_guest`, `pve_stop_guest`,
-  `pve_destroy_guest`, `pve_clone_vm`, `pve_create_ct`,
-  `pve_list_forwards`, `pve_add_forward`, `pve_remove_forward`,
-  `pve_list_dns`, `pve_add_dns`, `pve_remove_dns`,
-  `pve_list_caddy`, `pve_add_caddy`, `pve_remove_caddy`
 - `reminders_list_lists`, `reminders_list`, `reminders_add`,
   `reminders_complete`, `reminders_delete`
 - `safari_get_url`, `safari_get_title`, `safari_get_text`,
@@ -139,6 +128,9 @@ make macOS tools work anywhere else.
 - `ubereats_fetch_receipts`, `ubereats_list_orders`,
   `ubereats_update_ledger`, `ubereats_dump_cookie`
 - `utils_capabilities`
+
+PVE's 16 tools moved to [zyx1121/pve](https://github.com/zyx1121/pve),
+installed as `pve@zyx1121`. They are no longer registered here.
 
 ## Registering With Clients
 

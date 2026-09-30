@@ -154,13 +154,13 @@ If smoke test fails, fix before committing. Do not commit broken code.
 
 Atoms an agent will call from inside a CC/Codex session (not just SSH/scripts/Noir) should ship wired into the MCP server in the same PR — don't leave that as follow-up work. There is no YAML manifest layer; each domain owns native zod schemas in TypeScript (`utils/mcp/src/tools/<domain>/index.ts`), registered via the `scriptTool({ name, description, inputSchema, script, envelope, timeoutMs, buildArgs })` helper (`utils/mcp/src/core/tool.ts`).
 
-- **New domain**: create `utils/mcp/src/tools/<name>/index.ts` exporting `<name>Tools: ToolboxTool[]` — read an existing domain of similar shape first (`pve/index.ts` for multi-subcommand, `reminders/index.ts` for a small flat one). Import it into `utils/mcp/src/tools/index.ts` and spread it into `allTools`.
+- **New domain**: create `utils/mcp/src/tools/<name>/index.ts` exporting `<name>Tools: ToolboxTool[]` — read an existing domain of similar shape first (`pdf/index.ts` for multi-subcommand, `reminders/index.ts` for a small flat one). Import it into `utils/mcp/src/tools/index.ts` and spread it into `allTools`.
 - **Existing domain** (`fix-existing`, or a new verb on a live atom): add the tool to that domain's `index.ts` directly.
-- Tool naming: `domain_verb_object` (e.g. `pve_add_caddy`) — one tool per agent intent, no `action`/`mode` multiplexers. Destructive tools must say so in the description and require an explicit confirm/yes input that maps to the underlying script's `--yes`/`--confirm` flag.
+- Tool naming: `domain_verb_object` (e.g. `calendar_add_event`) — one tool per agent intent, no `action`/`mode` multiplexers. Destructive tools must say so in the description and require an explicit confirm/yes input that maps to the underlying script's `--yes`/`--confirm` flag.
 - Update `utils/mcp/tests/tool-registry.test.ts`: for a new domain, add it to the sorted domain list and the name-prefix regex; either way, bump the `toHaveLength(N)` assertion by the tool count you added.
 - Validate: `bun test && bun run typecheck` in `utils/mcp`, run on the sandbox VM (`rsync` the clone to `sandbox:~/work/<branch>/`, then `ssh sandbox 'bash -lc "cd ~/work/<branch>/utils/mcp && bun install && bun test && bun run typecheck"'`). A bad schema or duplicate name fails the registry test, not a generic crash.
 - Update `utils/mcp/README.md`: add the new tool names under "Current Tool Surface" (and "Domains" for a new domain), and bump the "N tools total" count.
-- Skip this step for atoms that are inherently CLI-only (inherited stdio, plaintext-secret args, interactive-only) — `pve.py`'s `ssh` subcommand and `e3p.py`'s `login` subcommand are both precedents with no MCP tool; note the exclusion reason in the PR body instead.
+- Skip this step for atoms that are inherently CLI-only (inherited stdio, plaintext-secret args, interactive-only) — `e3p.py`'s `login` subcommand is a precedent with no MCP tool; note the exclusion reason in the PR body instead.
 - This only wires the tool into the toolbox source — it doesn't touch client-side registration (the plugin's `.mcp.json` auto-registers for Claude Code; Codex needs its own `config.toml` entry), which is a separate one-time step outside this agent's scope.
 
 ### 7. Commit

@@ -17,20 +17,6 @@ function outputSchemaOf(name: string) {
 }
 
 const SAMPLES: Record<string, unknown> = {
-  pve_list_guests: [
-    { vmid: 101, name: "example-vm", status: "running", mem_mb: 8192, type: "qm" },
-    { vmid: 200, name: "example-ct", status: "stopped", type: "lxc" },
-  ],
-  pve_list_forwards: { rules: ["Chain PREROUTING (policy ACCEPT)", "1    DNAT    tcp  --  anywhere  anywhere  tcp dpt:2201"] },
-  pve_list_dns: {
-    records: [{ ip: "10.0.0.1", host: "example.internal" }],
-    hosts_file: "/example/gateway/dns/hosts",
-  },
-  pve_list_caddy: {
-    domains: ["example.test"],
-    blocks: [{ domains: ["example.test"], upstreams: ["10.0.0.2:3000"], tls: false, routed: false }],
-    caddyfile: "/example/gateway/Caddyfile",
-  },
   safari_get_url: { url: "https://example.test/page" },
   safari_get_title: { title: "Example Page" },
   safari_list_tabs: [{ wt: "1/1", title: "Example Page", url: "https://example.test/page" }],
@@ -101,7 +87,7 @@ describe("Tier A output schemas", () => {
   });
 
   test("Tier B tools still name the envelope shell", () => {
-    const schema = outputSchemaOf("pve_get_status");
+    const schema = outputSchemaOf("calendar_list_events");
 
     expect(schema.safeParse({ data: { anything: true }, metadata: {} }).success).toBe(true);
   });
