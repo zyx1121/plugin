@@ -35,16 +35,12 @@ JSON-RPC channel. Tool logs must go to stderr.
 Only active agent-facing domains are exposed:
 
 - `calendar`
-- `e3p`
 - `mail`
 - `md2slide`
-- `nycu`
-- `parttime`
 - `pdf`
 - `reminders`
 - `safari`
 - `screenshot`
-- `timetable`
 - `ubereats`
 - `utils` (`utils_capabilities` only, always registered)
 
@@ -101,19 +97,13 @@ make macOS tools work anywhere else.
 
 ## Current Tool Surface
 
-66 tools total:
+45 tools total:
 
 - `calendar_list_calendars`, `calendar_list_events`, `calendar_add_event`,
   `calendar_search_events`, `calendar_delete_event`
-- `e3p_logout`, `e3p_whoami`, `e3p_list_courses`,
-  `e3p_list_assignments`, `e3p_list_due`, `e3p_get_submission`,
-  `e3p_list_grades`, `e3p_get_content`, `e3p_download_file`
 - `mail_list_accounts`, `mail_list_inbox`, `mail_search_messages`,
   `mail_read_message`, `mail_compose_draft`
 - `md2slide_init`, `md2slide_build`
-- `nycu_setup`, `nycu_whoami`, `nycu_list_systems`, `nycu_list_events`,
-  `nycu_logout`
-- `parttime_get_status`, `parttime_sign_in`, `parttime_sign_out`
 - `pdf_info`, `pdf_extract_text`, `pdf_extract_comments`, `pdf_compress`,
   `pdf_decrypt`, `pdf_merge`, `pdf_split`, `pdf_rotate`, `pdf_render`
 - `reminders_list_lists`, `reminders_list`, `reminders_add`,
@@ -123,14 +113,15 @@ make macOS tools work anywhere else.
   `safari_get_selection`, `safari_eval_js`
 - `screenshot_full`, `screenshot_area`, `screenshot_window`,
   `screenshot_region`, `screenshot_clipboard`
-- `timetable_list_semesters`, `timetable_search_courses`,
-  `timetable_lookup_courses`, `timetable_get_periods`
 - `ubereats_fetch_receipts`, `ubereats_list_orders`,
   `ubereats_update_ledger`, `ubereats_dump_cookie`
 - `utils_capabilities`
 
 PVE's 16 tools moved to [zyx1121/pve](https://github.com/zyx1121/pve),
 installed as `pve@zyx1121`. They are no longer registered here.
+
+NYCU's 21 portal, E3, timetable and attendance tools moved to
+[zyx1121/nycu](https://github.com/zyx1121/nycu), installed as `nycu@zyx1121`.
 
 ## Registering With Clients
 

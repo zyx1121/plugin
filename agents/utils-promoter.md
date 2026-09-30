@@ -160,7 +160,7 @@ Atoms an agent will call from inside a CC/Codex session (not just SSH/scripts/No
 - Update `utils/mcp/tests/tool-registry.test.ts`: for a new domain, add it to the sorted domain list and the name-prefix regex; either way, bump the `toHaveLength(N)` assertion by the tool count you added.
 - Validate: `bun test && bun run typecheck` in `utils/mcp`, run on the sandbox VM (`rsync` the clone to `sandbox:~/work/<branch>/`, then `ssh sandbox 'bash -lc "cd ~/work/<branch>/utils/mcp && bun install && bun test && bun run typecheck"'`). A bad schema or duplicate name fails the registry test, not a generic crash.
 - Update `utils/mcp/README.md`: add the new tool names under "Current Tool Surface" (and "Domains" for a new domain), and bump the "N tools total" count.
-- Skip this step for atoms that are inherently CLI-only (inherited stdio, plaintext-secret args, interactive-only) — `e3p.py`'s `login` subcommand is a precedent with no MCP tool; note the exclusion reason in the PR body instead.
+- Skip this step for atoms that are inherently CLI-only (inherited stdio, plaintext-secret args, interactive-only) — the standalone [NYCU plugin's E3 login script](https://github.com/zyx1121/nycu/blob/main/scripts/e3p.py) is a precedent with no MCP tool; note the exclusion reason in the PR body instead.
 - This only wires the tool into the toolbox source — it doesn't touch client-side registration (the plugin's `.mcp.json` auto-registers for Claude Code; Codex needs its own `config.toml` entry), which is a separate one-time step outside this agent's scope.
 
 ### 7. Commit
