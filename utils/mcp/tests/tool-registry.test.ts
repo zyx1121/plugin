@@ -18,8 +18,8 @@ describe("native tool registry", () => {
   test("exposes only the selected agent-toolbox domains", () => {
     const domains = new Set(allTools.map((tool) => tool.name.split("_")[0]));
 
-    expect([...domains].sort()).toEqual(["calendar", "gmaps", "mail", "md2slide", "pdf", "reminders", "safari", "screenshot", "ubereats", "utils"]);
-    expect(allTools).toHaveLength(45);
+    expect([...domains].sort()).toEqual(["gmaps", "md2slide", "pdf", "utils"]);
+    expect(allTools).toHaveLength(13);
   });
 
   test("tool names are unique and prefixed by their domain", () => {
@@ -27,7 +27,7 @@ describe("native tool registry", () => {
     expect(new Set(names).size).toBe(names.length);
 
     for (const name of names) {
-      expect(name).toMatch(/^(calendar|gmaps|mail|md2slide|pdf|reminders|safari|screenshot|ubereats|utils)_/);
+      expect(name).toMatch(/^(gmaps|md2slide|pdf|utils)_/);
     }
   });
 });
@@ -80,13 +80,7 @@ describe("destructive tools are gated", () => {
   });
 
   test("the known destructive surface is annotated as such", () => {
-    const expected = [
-      "calendar_delete_event",
-      "reminders_delete",
-      "safari_close_tab",
-      "ubereats_dump_cookie",
-      "ubereats_update_ledger",
-    ];
+    const expected: string[] = [];
     const actual = allTools
       .filter((tool) => tool.annotations.destructiveHint === true)
       .map((tool) => tool.name)

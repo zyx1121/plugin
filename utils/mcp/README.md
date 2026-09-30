@@ -34,14 +34,9 @@ JSON-RPC channel. Tool logs must go to stderr.
 
 Only active agent-facing domains are exposed:
 
-- `calendar`
-- `mail`
+- `gmaps`
 - `md2slide`
 - `pdf`
-- `reminders`
-- `safari`
-- `screenshot`
-- `ubereats`
 - `utils` (`utils_capabilities` only, always registered)
 
 Dormant utilities such as clipboard/json/uuid/tokens/notebooklm remain outside
@@ -49,8 +44,8 @@ the MCP surface.
 
 ## Naming Rules
 
-- Tool names are `domain_verb_object`, e.g. `reminders_add`,
-  `calendar_list_events`, `mail_compose_draft`.
+- Tool names are `domain_verb_object`, e.g. `pdf_info`,
+  `pdf_extract_text`, `md2slide_build`.
 - One MCP tool should represent one agent intent. Do not expose generic
   `action` or `mode` multiplexers when the actions have different required
   inputs.
@@ -97,24 +92,12 @@ make macOS tools work anywhere else.
 
 ## Current Tool Surface
 
-45 tools total:
+13 tools total:
 
-- `calendar_list_calendars`, `calendar_list_events`, `calendar_add_event`,
-  `calendar_search_events`, `calendar_delete_event`
-- `mail_list_accounts`, `mail_list_inbox`, `mail_search_messages`,
-  `mail_read_message`, `mail_compose_draft`
+- `gmaps_get_list`
 - `md2slide_init`, `md2slide_build`
 - `pdf_info`, `pdf_extract_text`, `pdf_extract_comments`, `pdf_compress`,
   `pdf_decrypt`, `pdf_merge`, `pdf_split`, `pdf_rotate`, `pdf_render`
-- `reminders_list_lists`, `reminders_list`, `reminders_add`,
-  `reminders_complete`, `reminders_delete`
-- `safari_get_url`, `safari_get_title`, `safari_get_text`,
-  `safari_list_tabs`, `safari_open_url`, `safari_close_tab`,
-  `safari_get_selection`, `safari_eval_js`
-- `screenshot_full`, `screenshot_area`, `screenshot_window`,
-  `screenshot_region`, `screenshot_clipboard`
-- `ubereats_fetch_receipts`, `ubereats_list_orders`,
-  `ubereats_update_ledger`, `ubereats_dump_cookie`
 - `utils_capabilities`
 
 PVE's 16 tools moved to [zyx1121/pve](https://github.com/zyx1121/pve),
@@ -122,6 +105,11 @@ installed as `pve@zyx1121`. They are no longer registered here.
 
 NYCU's 21 portal, E3, timetable and attendance tools moved to
 [zyx1121/nycu](https://github.com/zyx1121/nycu), installed as `nycu@zyx1121`.
+
+macOS automation (28 tools) and Uber Eats (4 tools) moved to
+[macos](https://github.com/zyx1121/macos) and
+[ubereats](https://github.com/zyx1121/ubereats), installed as
+`macos@zyx1121` and `ubereats@zyx1121`.
 
 ## Registering With Clients
 

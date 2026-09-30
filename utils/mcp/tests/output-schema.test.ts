@@ -17,38 +17,6 @@ function outputSchemaOf(name: string) {
 }
 
 const SAMPLES: Record<string, unknown> = {
-  safari_get_url: { url: "https://example.test/page" },
-  safari_get_title: { title: "Example Page" },
-  safari_list_tabs: [{ wt: "1/1", title: "Example Page", url: "https://example.test/page" }],
-  calendar_list_calendars: [
-    { name: "Example Calendar", writable: true },
-    { name: "Example Holidays", writable: false },
-  ],
-  reminders_list_lists: [{ name: "Example List" }],
-  mail_list_accounts: [{ name: "Example", user: "user@example.test", addresses: "user@example.test, alias@example.test" }],
-  ubereats_list_orders: [
-    { uuid: "00000000-0000-0000-0000-000000000001", completedAt: "2026-07-01T12:00:00.000Z", storeUuid: "00000000-0000-0000-0000-0000000000ff", creator: "Example Person", isCreator: true, numItems: 3, isCancelled: false },
-    { uuid: "00000000-0000-0000-0000-000000000002", completedAt: null, storeUuid: null, creator: null, isCreator: null, numItems: null, isCancelled: null },
-  ],
-  ubereats_fetch_receipts: {
-    out_dir: "/example/out",
-    index_file: "/example/out/index.json",
-    summary_file: "/example/out/summary.txt",
-    receipts: [{ uuid: "00000000-0000-0000-0000-000000000001", date: "2026-07-01", store: "Example Store", total: 480, people: 3, source: "receipt", file: "/example/out/0000.json" }],
-    skipped: ["00000000-0000-0000-0000-000000000003"],
-    total: 2,
-    with_details: 1,
-    from_order_list: 0,
-  },
-  ubereats_update_ledger: {
-    summary: "🧾 新增 1 筆團購欠款:",
-    new_debts: [{ order_uuid: "00000000-0000-0000-0000-000000000001", date: "2026-07-01", store: "Example Store", uber_name: "Example Person", items: "1x Example Item", amount: "160", paid: "no", paid_date: "", note: "" }],
-    unpaid_by_person: { "Example Person": 160 },
-    csv_dir: "/example/ledger",
-    debts_csv: "/example/ledger/debts.csv",
-    names_csv: "/example/ledger/names.csv",
-  },
-  ubereats_dump_cookie: { path: "/example/cookie.txt", cookies: 12, mode: 384 },
   pdf_info: {
     file: "/example/doc.pdf",
     pages: 3,
@@ -73,31 +41,10 @@ describe("Tier A output schemas", () => {
     });
   }
 
-  test("the truncation report is optional but accepted", () => {
-    const schema = outputSchemaOf("reminders_list_lists");
-
-    expect(schema.safeParse({ data: [{ name: "Example List" }], metadata: {} }).success).toBe(true);
-    expect(
-      schema.safeParse({
-        data: [{ name: "Example List" }],
-        metadata: {},
-        _truncation: { fields: ["data[0].name"], original_chars: 999, limit: 100 },
-      }).success,
-    ).toBe(true);
-  });
-
   test("Tier B tools still name the envelope shell", () => {
-    const schema = outputSchemaOf("calendar_list_events");
-
-    expect(schema.safeParse({ data: { anything: true }, metadata: {} }).success).toBe(true);
+    expect(outputSchemaOf("pdf_extract_text").safeParse({ data: { anything: true }, metadata: {} }).success).toBe(true);
   });
 
-  test("non-envelope tools declare the raw stream shell", () => {
-    const schema = outputSchemaOf("screenshot_full");
-
-    expect(schema.safeParse({ stdout: "", stderr: "", exit_code: 0 }).success).toBe(true);
-    expect(schema.safeParse({ data: {}, metadata: {} }).success).toBe(false);
-  });
 });
 
 /**
@@ -147,10 +94,5 @@ describe("failure paths satisfy their own output schema", () => {
     }
   }
 
-  test("raw-shell tools keep their streams on a non-zero exit", () => {
-    const result = mapScriptOutput(false, run({ stdout: "partial", stderr: "boom", exitCode: 3 }));
 
-    expect(result.structuredContent).toEqual({ stdout: "partial", stderr: "boom", exit_code: 3 });
-    expect(outputSchemaOf("screenshot_full").safeParse(result.structuredContent).success).toBe(true);
-  });
 });

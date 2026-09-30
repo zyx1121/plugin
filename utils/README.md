@@ -5,8 +5,7 @@ Loki's local MCP toolbox for agents — the `utils/` dir of
 archived `zyx1121/utils` repo (see `../decisions/ADR-0004-merge-utils.md`).
 
 `utils` exposes machine-local capabilities through a native stdio MCP server:
-Calendar, Mail, Reminders, Safari, screenshots, PDFs, Uber Eats, Google
-Maps lists, and other personal automation. The public interface is MCP. The
+PDFs, Google Maps lists and Markdown slide generation. The public interface is MCP. The
 scripts under `scripts/` are implementation atoms, not a supported human CLI
 surface.
 
@@ -16,7 +15,7 @@ The server lives in `mcp/` and uses `@modelcontextprotocol/sdk` directly. It
 exposes only active agent-facing domains:
 
 ```text
-calendar gmaps mail md2slide pdf reminders safari screenshot ubereats
+gmaps md2slide pdf
 ```
 
 Registration is host-aware: each domain declares what the machine must provide,
@@ -44,7 +43,12 @@ Codex / Claude Code installation.
 
 NYCU portal, E3, timetable and part-time attendance moved to
 [`nycu@zyx1121`](https://github.com/zyx1121/nycu) in zyx 0.26.0. Install it and run
-its private token migration before updating zyx; this toolbox now has 45 tools.
+its private token migration before updating zyx; this toolbox had 45 tools at that release.
+
+macOS automation and Uber Eats moved to
+[`macos@zyx1121`](https://github.com/zyx1121/macos) and
+[`ubereats@zyx1121`](https://github.com/zyx1121/ubereats) in zyx 0.27.0.
+Install both before updating zyx. This toolbox now has 13 tools.
 
 ## Tool contracts
 

@@ -16,10 +16,10 @@
 [![Claude Code plugin](https://img.shields.io/badge/Claude%20Code-plugin-d97757)](https://github.com/zyx1121/plugin) &nbsp;[![version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fzyx1121%2Fplugin%2Fmain%2F.claude-plugin%2Fplugin.json&query=%24.version&label=version&color=111111)](.claude-plugin/plugin.json) &nbsp;[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](#license)
 
 ```
-> "把下週三 10:00 的 lab meeting 加進行事曆，投影片照 winlab 格式開個底"
-  ⚡ calendar_add_event { title: "lab meeting", start: "…" }
+> "讀取論文 PDF 的資訊，投影片照 winlab 格式開個底"
+  ⚡ pdf_info { file: "paper.pdf" }
   ⚡ Skill: zyx:winlab-pptx
-✓ Event added · deck scaffolded the house way
+✓ PDF inspected · deck scaffolded the house way
 ```
 
 <sub>One prompt, two pillars: a machine-local MCP tool plus a house-style skill, same `zyx:*` namespace.</sub>
@@ -44,7 +44,7 @@ A local marketplace serves skill and agent edits live from the clone: `git pull`
 |--------|--------|
 | [`skills/`](skills/) | `academic-sentence` · `dev-workflow` · `nextjs-dev` · `paper-revise` · `project-docs` · `winlab-pptx` · `xiao-lin-shuo` |
 | [`agents/`](agents/) | `planner` · `surveyor` · `developer` · `reviewer` · `utils-promoter` |
-| [`utils/`](utils/) | MCP toolbox: calendar · mail · reminders · safari · screenshot · pdf · md2slide · gmaps · ubereats |
+| [`utils/`](utils/) | MCP toolbox: pdf · md2slide · gmaps |
 | [`decisions/`](decisions/) | ADR trail: every merge and retirement has a written why |
 
 The `utils` MCP server is bundled via `.mcp.json`: installing the plugin registers it, no separate `claude mcp add`. Tools land as `mcp__plugin_zyx_utils__<tool>`.
@@ -67,6 +67,15 @@ Install `nycu@zyx1121`, migrate existing token files with its setup script, then
 update zyx. Its 21 portal, E3, timetable and attendance tools retain their short
 names and schemas; the provider namespace becomes `plugin_nycu_nycu`.
 See [ADR-0013](decisions/ADR-0013-extract-nycu.md) for the platform and credential boundaries.
+
+macOS automation moved to [zyx1121/macos](https://github.com/zyx1121/macos)
+and Uber Eats moved to [zyx1121/ubereats](https://github.com/zyx1121/ubereats)
+in zyx 0.27.0. Install `macos@zyx1121` and `ubereats@zyx1121` before updating
+zyx. The 28 and 4 tool names and schemas are preserved, with provider namespaces
+`plugin_macos_macos` and `plugin_ubereats_ubereats`. Update today-mod to 0.3.0
+for its standalone Calendar, Reminders and E3 source paths. No Uber Eats cookie
+or ledger migration is needed. The remaining utils toolbox has 13 tools.
+See [ADR-0014](decisions/ADR-0014-extract-macos-ubereats.md).
 
 ## The Claude-native angle
 
