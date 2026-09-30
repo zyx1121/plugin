@@ -126,23 +126,13 @@ describe("declared requirements", () => {
     expect(unknown).toEqual([]);
   });
 
-  test("the macOS-only families are declared macOS-only", async () => {
-    const darwinOnly = ["calendar", "mail", "reminders", "safari", "screenshot", "ubereats"];
-
-    for (const tool of allTools) {
-      const family = tool.name.split("_")[0]!;
-      if (!darwinOnly.includes(family)) continue;
-      expect(tool.requires, `${tool.name} must be gated on macOS`).toContain("platform:darwin");
-    }
-  });
-
-  test("a Linux host keeps the portable families and loses the AppleScript ones", async () => {
+  test("a Linux host keeps every remaining portable family", async () => {
     const linux = hostWith(["platform:linux", "binary:uv", "binary:ssh", "ssh:pve"]);
 
     const { registered, hidden } = await selectRunnableTools(allTools, { check: linux });
     const families = (tools: string[]) => [...new Set(tools.map((name) => name.split("_")[0]))].sort();
 
     expect(families(registered.map((tool) => tool.name))).toEqual(["gmaps", "md2slide", "pdf", "utils"]);
-    expect(families(hidden.map((entry) => entry.tool))).toEqual(["calendar", "mail", "reminders", "safari", "screenshot", "ubereats"]);
+    expect(hidden).toEqual([]);
   });
 });

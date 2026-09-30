@@ -34,9 +34,9 @@ Dispatcher routes by name and `exec`s the file; the shebang decides what runs. C
 
 Examples to read before writing:
 
-- bash: `scripts/clipboard.sh`, `scripts/screenshot.sh`, `scripts/notify.sh`
+- bash: `scripts/clipboard.sh`, `scripts/notify.sh`
 - Python (single command): `scripts/uuid.py`, `scripts/tokens.py`
-- Python (multi-subcommand wrapping osascript): `scripts/keynote.py`, `scripts/reminders.py`, `scripts/calendar.py`, `scripts/mail.py`
+- Python (multi-subcommand wrapping osascript): `scripts/keynote.py` (macOS app scripts now belong in [zyx1121/macos](https://github.com/zyx1121/macos))
 
 Rule of thumb: if the op has more than one verb or any structured arg, reach for `.py` with typer — bash's case-statement subcommands and AppleScript's `on run argv` are both clumsy compared to typer.
 
@@ -154,9 +154,9 @@ If smoke test fails, fix before committing. Do not commit broken code.
 
 Atoms an agent will call from inside a CC/Codex session (not just SSH/scripts/Noir) should ship wired into the MCP server in the same PR — don't leave that as follow-up work. There is no YAML manifest layer; each domain owns native zod schemas in TypeScript (`utils/mcp/src/tools/<domain>/index.ts`), registered via the `scriptTool({ name, description, inputSchema, script, envelope, timeoutMs, buildArgs })` helper (`utils/mcp/src/core/tool.ts`).
 
-- **New domain**: create `utils/mcp/src/tools/<name>/index.ts` exporting `<name>Tools: ToolboxTool[]` — read an existing domain of similar shape first (`pdf/index.ts` for multi-subcommand, `reminders/index.ts` for a small flat one). Import it into `utils/mcp/src/tools/index.ts` and spread it into `allTools`.
+- **New domain**: create `utils/mcp/src/tools/<name>/index.ts` exporting `<name>Tools: ToolboxTool[]` — read an existing domain of similar shape first (`pdf/index.ts` for multi-subcommand, `gmaps/index.ts` for a small flat one). Import it into `utils/mcp/src/tools/index.ts` and spread it into `allTools`.
 - **Existing domain** (`fix-existing`, or a new verb on a live atom): add the tool to that domain's `index.ts` directly.
-- Tool naming: `domain_verb_object` (e.g. `calendar_add_event`) — one tool per agent intent, no `action`/`mode` multiplexers. Destructive tools must say so in the description and require an explicit confirm/yes input that maps to the underlying script's `--yes`/`--confirm` flag.
+- Tool naming: `domain_verb_object` (e.g. `pdf_extract_text`) — one tool per agent intent, no `action`/`mode` multiplexers. Destructive tools must say so in the description and require an explicit confirm/yes input that maps to the underlying script's `--yes`/`--confirm` flag.
 - Update `utils/mcp/tests/tool-registry.test.ts`: for a new domain, add it to the sorted domain list and the name-prefix regex; either way, bump the `toHaveLength(N)` assertion by the tool count you added.
 - Validate: `bun test && bun run typecheck` in `utils/mcp`, run on the sandbox VM (`rsync` the clone to `sandbox:~/work/<branch>/`, then `ssh sandbox 'bash -lc "cd ~/work/<branch>/utils/mcp && bun install && bun test && bun run typecheck"'`). A bad schema or duplicate name fails the registry test, not a generic crash.
 - Update `utils/mcp/README.md`: add the new tool names under "Current Tool Surface" (and "Domains" for a new domain), and bump the "N tools total" count.
