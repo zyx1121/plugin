@@ -108,9 +108,15 @@ the release branch, with `github.token`:
   if: steps.release.outputs.pr != ''
   env:
     GH_TOKEN: ${{ github.token }}
+    GH_REPO: ${{ github.repository }}
     BRANCH: ${{ fromJSON(steps.release.outputs.pr || '{}').headBranchName }}
   run: gh workflow run ci.yml --ref "$BRANCH"
 ```
+
+`GH_REPO` is required: the release job has no checkout, and without a git
+remote to read, gh stops with `fatal: not a git repository` before it sends
+the dispatch. Found on zyx1121/slide.winlab.tw#21; the step had never run on a
+real release pull request before.
 
 Two things this needs: the job holds `actions: write` on top of
 `contents: write` and `pull-requests: write`, and the repo's `ci.yml` carries a
