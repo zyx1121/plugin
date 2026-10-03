@@ -20,11 +20,13 @@ planner reply that never became an issue.
 
 ```bash
 bash ${CLAUDE_SKILL_DIR}/assets/labels.sh              # create or update the house labels
-bash ${CLAUDE_SKILL_DIR}/assets/labels.sh --prune      # also delete GitHub's 9 default labels
+bash ${CLAUDE_SKILL_DIR}/assets/labels.sh --prune      # also delete every non-house label
 ```
 
-Run it inside the repo. `--prune` is for a new repo; on an old repo, check
-`gh label list` first, because deleting a label strips it from every issue.
+Run it inside the repo. `--prune` keeps only the house labels below, so it
+also removes GitHub's defaults (including ones GitHub adds later, such as
+`accessibility`). It is for a new repo; on an old repo, check `gh label list`
+first, because deleting a label strips it from every issue.
 
 | Group | Labels | Rule |
 |---|---|---|
