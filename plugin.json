@@ -1,0 +1,22 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "zyx",
+  "version": "0.29.0",
+  "description": "zyx skills for slides, docs, academic writing, Next.js and the dev workflow.",
+  "author": { "name": "zyx1121", "url": "https://github.com/zyx1121" },
+  "homepage": "https://github.com/zyx1121/plugin",
+  "repository": "https://github.com/zyx1121/plugin",
+  "license": "MIT",
+  "keywords": ["skills", "slides", "docs", "writing", "nextjs", "codex", "claude-code"],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "zyx",
+        "shortDescription": "Loki's skills for slides, docs and writing",
+        "developerName": "zyx1121",
+        "category": "Productivity",
+        "capabilities": ["Read", "Write"]
+      }
+    }
+  }
+}
