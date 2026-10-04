@@ -1,6 +1,6 @@
 ---
 name: academic-sentence
-description: "Sentence-level academic writing formulas for English and Traditional Chinese — 語序 / topic-stress position / nominalization / passive voice / parallelism / 歐化中文病灶 / AI 腔偵測. Use when polishing a single sentence, not restructuring a paper. Triggers on 'SVO 語序', '這句話怎麼寫', '被動語態要不要用', '這句中文西化了', '翻譯腔', '句子太長怎麼拆', '改這句話', 'sentence structure', 'nominalization', 'topic position', 'given-new', 'AI 腔', 'AI slop', '抓 AI 寫作痕跡'. NOT whole-paper / reviewer-comment revision — that's paper-revise. NOT slide content — that's winlab-pptx."
+description: "Sentence-level academic writing formulas for English and Traditional Chinese: 語序 / topic-stress position / nominalization / passive voice / parallelism / 歐化中文病灶 / AI 腔偵測. Use when polishing a single sentence, not restructuring a paper. Triggers on 'SVO 語序', '這句話怎麼寫', '被動語態要不要用', '這句中文西化了', '翻譯腔', '句子太長怎麼拆', '改這句話', 'sentence structure', 'nominalization', 'topic position', 'given-new', 'AI 腔', 'AI slop', '抓 AI 寫作痕跡'. NOT whole-paper / reviewer-comment revision; that's paper-revise. NOT slide content; that's winlab-pptx."
 ---
 
 # academic-sentence:中英學術句子層級寫作公式

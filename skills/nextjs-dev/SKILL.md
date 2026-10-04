@@ -1,6 +1,6 @@
 ---
 name: nextjs-dev
-description: "Loki 的 Next.js 16 house style，從 16 個真實 repo 抽出來的個人慣例 — 開新專案就照這個 scaffold，也用來 review/audit 舊專案的一致性。Use when starting / writing a Next.js App Router project or reviewing a Next.js repo against the house style. Triggers on 'new next app', 'next 專案', 'scaffold next', '建 next 專案', 'review 我的 next 風格', 'App Router', 'server action', 'supabase ssr', 'tailwind v4', 'shadcn', 'shadcn init', 'shadcn registry', 'monorepo', 'turborepo', 'ui.zyx.tw', '我的 next 慣例'."
+description: "Loki 的 Next.js 16 house style，從 16 個真實 repo 抽出來的個人慣例: 開新專案就照這個 scaffold，也用來 review/audit 舊專案的一致性。Use when starting / writing a Next.js App Router project or reviewing a Next.js repo against the house style. Triggers on 'new next app', 'next 專案', 'scaffold next', '建 next 專案', 'review 我的 next 風格', 'App Router', 'server action', 'supabase ssr', 'tailwind v4', 'shadcn', 'shadcn init', 'shadcn registry', 'monorepo', 'turborepo', 'ui.zyx.tw', '我的 next 慣例'."
 ---
 
 # nextjs-dev — Loki 的 Next.js house style
@@ -29,7 +29,7 @@ description: "Loki 的 Next.js 16 house style，從 16 個真實 repo 抽出來�
 | 資料層 | Supabase + `@supabase/ssr` | dominant 12/16 [hard 若用 Supabase] |
 | Auth | Supabase Auth，gate 在 `proxy.ts`（Next 16 的 middleware 新名）；WinLab SSO 走 Keycloak OAuth、Google fallback | dominant [hard] |
 | 套件管理 | bun（`bun create` / `bun add` / `bunx`） | dominant 15/16 [hard] |
-| 主題 / 字型 | `next-themes`（class 策略）；`next/font/google`，house font = Geist + Geist_Mono | dominant [soft] |
+| 主題 / 字型 | 照 ui.zyx.tw DESIGN.md：`next-themes` dark first（`defaultTheme="dark"`、`enableSystem={false}`）；Inter → Noto Sans JP → Noto Sans TC，Geist Mono 只給 code；只用 80/24/16/14px | universal [hard] |
 | Lint | ESLint 9 flat config（`eslint.config.mjs` + `eslint-config-next`），不用 `.eslintrc` | universal 15/16 [hard] |
 
 刻意不用（review 看到要問為什麼）：app 表單裡的 `react-hook-form` / `zod`、`swr`、全域 store（`zustand`/`jotai`/`redux`）。
@@ -42,7 +42,7 @@ description: "Loki 的 Next.js 16 house style，從 16 個真實 repo 抽出來�
 
 - 單 app：`bun create next-app` → `bunx shadcn@latest init`。
 - monorepo（Turborepo）：`bunx shadcn@latest init` 選 Next.js (Monorepo)，產 `apps/web` + `packages/{ui,eslint-config,typescript-config}`，bun workspaces + turbo 全接好。加元件用 `bunx shadcn@latest add <name> --cwd packages/ui`。
-- zyx.tw 系列的 design system（ui.zyx.tw registry，2026-08 重練後）：基礎元件是 stock shadcn，由 CLI 擁有 `components/ui/`，不 fork。新專案用 base preset（`base-nova`、neutral）init，`components.json` 掛 `"registries": { "@zyx1121": "https://ui.zyx.tw/r/{name}.json" }`，再 `bunx shadcn@latest add @zyx1121/theme`（全灰階 + `--radius: 1rem`）。registry 只發佈 `theme`、`shimmering-text`、`theme-toggle`；shadcn 本身有的元件從 shadcn 拉，不進 registry。Base UI 與 radix 的 API 差異：`asChild` 改 `render` prop，ToggleGroup / Accordion 用 `multiple` boolean。
+- zyx.tw 系列的 design system（ui.zyx.tw registry，2026-08 重練後）：基礎元件是 stock shadcn，由 CLI 擁有 `components/ui/`，不 fork。新專案用 base preset（`base-nova`、neutral）init，`components.json` 掛 `"registries": { "@zyx1121": "https://ui.zyx.tw/r/{name}.json" }`，再 `bunx shadcn@latest add @zyx1121/theme`（全灰階 + `--radius: 1rem`）。registry 現有 item 以 https://ui.zyx.tw/agent-instructions.md 為準；shadcn 本身有的元件從 shadcn 拉，不進 registry。版面（四角、字級、字型）走 `task-web` skill 與線上 DESIGN.md（https://raw.githubusercontent.com/zyx1121/www.zyx.tw/main/apps/ui/DESIGN.md），本 skill 不重寫那些規則。Base UI 與 radix 的 API 差異：`asChild` 改 `render` prop，ToggleGroup / Accordion 用 `multiple` boolean。
 - 非 Next 的 workspace 成員（Bun service 等）才手加 package。
 
 ### monorepo 踩過的坑（[hard]，build 綠也驗不到，要實際跑 / 部署才現形）
@@ -72,9 +72,9 @@ description: "Loki 的 Next.js 16 house style，從 16 個真實 repo 抽出來�
 
 ## Conventions（[soft]）
 
-- bilingual：UI copy 繁中（zh-Hant），code 識別字與 commit message 英文。`<html lang="zh-Hant">`。
+- UI 語言照 DESIGN.md：對外 zyx.tw 站英文（`lang="en"`），寫給中文讀者的 app 用中文（`lang="zh-TW"`）並守 CJK 規則；code 識別字與 commit message 英文。
 - 主題：`next-themes`（`attribute="class"`、`enableSystem`、`suppressHydrationWarning`）。可選 `d` 熱鍵切換。
-- 字型：Geist + Geist_Mono 為底，zh-TW 配 Inter / Noto Sans TC。部分站把 mono 設成 body default（風格選擇，不強制）。
+- 字型：Inter（自架）→ Noto Sans JP → Noto Sans TC，Geist Mono 只給 code；細節與載入方式見 DESIGN.md Fonts。
 - env：raw `process.env` + non-null assert；commit `.env.example` 列出必要變數（舊 repo 常漏，新專案要補）。
 - observability（serious app）：Sentry，`instrumentation.ts` + `lib/observability` 的 `captureActionError`/`identifyUser`，每個 error branch 都打點。
 - testing（serious app）：vitest unit（colocate `*.test.ts`）+ Playwright e2e（`e2e/`）。門檻由 nycueats 立下。
@@ -89,7 +89,7 @@ description: "Loki 的 Next.js 16 house style，從 16 個真實 repo 抽出來�
 
 - Formatting：Prettier 3 + `prettier-plugin-tailwindcss`，`semi: true`、`singleQuote: false`、`tabWidth: 2`、`trailingComma: "es5"`、`printWidth: 80`、`tailwindFunctions: ["cn","cva"]`，跟 shadcn 生成檔收斂。加 `format` script、repo-wide 跑一次、CI 檢查，避免再 drift。
 - react-query：一等公民，不是 deprecated。預設資料路徑是 RSC 讀 + server actions 寫；client 互動 / realtime-heavy 的 app 用 `@tanstack/react-query`，搭配集中式 query-key factory（`hooks/query-keys.ts`）+ mutation `onSuccess` 按 top-level key invalidate。
-- dark mode 預設依受眾：內部 / 實驗室工具預設 `dark`，對外 / 消費者 app 預設 `light`，兩者都 `enableSystem`。
+- 每個 app 都 dark first：SSR `<html class="dark">`、`defaultTheme="dark"`、`enableSystem={false}`，light 用 toggle 或 `d` 熱鍵切換。
 
 ---
 
