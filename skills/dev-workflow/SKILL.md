@@ -1,6 +1,6 @@
 ---
 name: dev-workflow
-description: "Loki 的開發流程標準 — 從需求到發版一條鏈:GitHub Issues 當 backlog、Milestone 當 sprint、Projects 看板,接 Conventional Commits PR 與 Release Please 發版,一套做法套到任何 repo(node / rust / python uv / tauri / generic). Use when planning work into issues or sprints, setting up a repo's backlog or releases, cutting a release, or auditing how a repo plans, versions and tags. Triggers on 'backlog', 'scrum', 'sprint', 'github issue', 'milestone', '看板', '開 issue', 'release', '發版', '版本號', 'tag', 'CI/CD', 'changelog', 'conventional commits', 'release please', 'bump', 'semver', '怎麼發版'. NOT 專案文件 / runbook 寫法 — 那是 project-docs."
+description: "Loki 的開發流程標準: 從需求到發版一條鏈:GitHub Issues 當 backlog、Milestone 當 sprint、Projects 看板,接 Conventional Commits PR 與 Release Please 發版,一套做法套到任何 repo(node / rust / python uv / tauri / generic). Use when planning work into issues or sprints, setting up a repo's backlog or releases, cutting a release, or auditing how a repo plans, versions and tags. Triggers on 'backlog', 'scrum', 'sprint', 'github issue', 'milestone', '看板', '開 issue', 'release', '發版', '版本號', 'tag', 'CI/CD', 'changelog', 'conventional commits', 'release please', 'bump', 'semver', '怎麼發版'. NOT 專案文件 / runbook 寫法，那是 project-docs."
 ---
 
 # dev-workflow — one path from idea to release

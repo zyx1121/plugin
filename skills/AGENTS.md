@@ -1,4 +1,4 @@
-# skills/ — `description` frontmatter grammar
+# skills/: `description` frontmatter grammar
 
 > 這份只管 `~/plugin/skills/*/SKILL.md` 的 `description:` 欄位寫法(routing 表面),body 不在此限。
 > `~/plugin` 在本檔泛指 `zyx1121/plugin` repo 的本地 clone(實際路徑看 `~/.claude/settings.json` 的 `extraKnownMarketplaces.zyx.source.path`,Loki 的 Mac 上是 iCloud PARA `Projects/zyx1121/plugin`),skills 是 version-pinned cache 部署;改完 commit + bump `.claude-plugin/plugin.json`/`marketplace.json` version、push、開 PR,merge 後跑 `claude plugin update zyx@zyx` 才生效。
@@ -15,14 +15,15 @@
 4. 內容 = 能力句 + 觸發(+ 必要時 pushy clause / 負 scope)。
    - **不把 workflow / 架構步驟塞進 description**。實測(obra/superpowers):description 一旦摘要 workflow,Claude 會照 description 做而跳過 skill body。步驟寫進 body。
 5. 長度按 routing 成本分層,全部 < 1024 char。trivial slash 指令 ~120 char、貴的 intent router(project-docs / nextjs-dev)400–600 char。`description-short`(<50)/`description-long`(>500)是復盤時的抓取線(原生檢查,見 §改完)。
-6. 重疊 skill 互標負 scope 並指名替代:`NOT X — 那是 <skill>`,雙向都標。例:`paper-revise` ↔ `academic-sentence`、`project-docs` ↔ `dev-workflow`。
+6. 重疊 skill 互標負 scope 並指名替代:`NOT X，那是 <skill>`,雙向都標。例:`paper-revise` ↔ `academic-sentence`、`project-docs` ↔ `dev-workflow`。
+7. 不用破折號(`—`、`–`):能力句後接 scope 用 `: `,負 scope 用 `，那是` / `; that's`。Loki 的 GitHub 文件規則，skill 檔也在 GitHub 上。
 
 ## 範本
 
 ```yaml
-description: "<能力句,em-dash gloss 開頭> — <scope>. Use when <intent>. Triggers on '<t1>', '<t2>', '<中文觸發>'. [Skip / NOT <反例> — 那是 <other-skill>.]"
+description: "<能力句>: <scope>. Use when <intent>. Triggers on '<t1>', '<t2>', '<中文觸發>'. [Skip / NOT <反例>，那是 <other-skill>.]"
 ```
 
 ## 改完
 
-原生自檢(agent 直接照本檔檢查,無 linter 工具,ADR-0006):description 50–500 char(intent router 可到 600)且含具體 trigger、`name:` = 目錄名、body 非空、無 workflow 漏入 description、>90 天未動的 skill 順手檢視是否還需要 → 零 issue → commit + bump plugin version + push + PR。
+原生自檢(agent 直接照本檔檢查,無 linter 工具,ADR-0006):description 50–500 char(intent router 可到 600)且含具體 trigger、無破折號、`name:` = 目錄名、body 非空、無 workflow 漏入 description、>90 天未動的 skill 順手檢視是否還需要 → 零 issue → commit + bump plugin version + push + PR。

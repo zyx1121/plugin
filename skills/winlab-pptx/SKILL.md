@@ -1,6 +1,6 @@
 ---
 name: winlab-pptx
-description: "Loki 的唯一簡報 skill — 產 .pptx(NOT .key)涵蓋三類 deck:報告 / 技術簡報(lab talk / pitch / demo,英文高密度)、教學簡報(錄課 / 線上課程 / MOOC,中文低密度)、分鏡簡報(現場工作坊 / hands-on 課程,一頁一 beat 同圖差分)。Triggers on '做簡報', '做投影片', 'slide deck', 'presentation', 'powerpoint', 'pptx', '技術簡報', '實驗室簡報', 'lab talk', 'winlab slides', 'pptx 架構圖', '錄課', '教學簡報', '教學投影片', '線上課程投影片', '磨課師', 'MOOC', '工作坊簡報', 'hands-on 簡報', '分鏡簡報', 'workshop deck', '一頁一 beat', 'lessig', 'review 我的投影片', 'outline 一下', 'rewrite this deck'. NOT Markdown 成果報告 / 手冊 / runbook — 那是 project-docs. NOT 單句潤稿 — 那是 academic-sentence."
+description: "Loki 的唯一簡報 skill: 產 .pptx(NOT .key)涵蓋三類 deck:報告 / 技術簡報(lab talk / pitch / demo,英文高密度)、教學簡報(錄課 / 線上課程 / MOOC,中文低密度)、分鏡簡報(現場工作坊 / hands-on 課程,一頁一 beat 同圖差分)。Triggers on '做簡報', '做投影片', 'slide deck', 'presentation', 'powerpoint', 'pptx', '技術簡報', '實驗室簡報', 'lab talk', 'winlab slides', 'pptx 架構圖', '錄課', '教學簡報', '教學投影片', '線上課程投影片', '磨課師', 'MOOC', '工作坊簡報', 'hands-on 簡報', '分鏡簡報', 'workshop deck', '一頁一 beat', 'lessig', 'review 我的投影片', 'outline 一下', 'rewrite this deck'. NOT Markdown 成果報告 / 手冊 / runbook，那是 project-docs. NOT 單句潤稿，那是 academic-sentence."
 ---
 
 # WinLab pptx
@@ -30,7 +30,7 @@ description: "Loki 的唯一簡報 skill — 產 .pptx(NOT .key)涵蓋三類 dec
 
 ## §2 共用底線:WinLab 官方規範
 
-Source of truth 是 NYCU-WinLab/winlab-skills 的 `winlab-slides-guidelines`(https://github.com/NYCU-WinLab/winlab-skills,實驗室共識,RFC 2119)。以下是它的 MUST / MUST NOT,三類 deck 都守(例外見末),報告 deck 以此當 lab talk 驗收底線。官方更新就回來對齊。
+Source of truth 是 NYCU-WinLab/plugin 的 `winlab:slides` skill(https://github.com/NYCU-WinLab/plugin/tree/main/skills/slides,實驗室共識,RFC 2119;取代舊的 winlab-skills repo)。以下是它的 MUST / MUST NOT,三類 deck 都守(例外見末),報告 deck 以此當 lab talk 驗收底線。官方更新就回來對齊。
 
 - 標題:清楚表達該頁意圖、全 deck 唯一、直接對應主題;同主題一頁放不下用 `(1/2)` `(2/2)`。
 - Context before detail:先背景 / 動機 / 問題,再細節 / 方法 / 數字,不一上來丟實作或結果。每主題照 situation → problem → decision → outcome 鋪,連續 slide 因果接得上。
@@ -67,7 +67,7 @@ Source of truth 是 NYCU-WinLab/winlab-skills 的 `winlab-slides-guidelines`(htt
 
 ### Content slides
 
-- Title = 這頁的 claim 或 dash 句型,例 `Skill — instructions Claude can load on demand`。`Background` / `Details` / `Discussion` 這種空殼分類名禁用。
+- Title = 這頁的 claim 或冒號句型,例 `Skill: instructions Claude can load on demand`。不用破折號(Loki 的投影片規則)。`Background` / `Details` / `Discussion` 這種空殼分類名禁用。
 - Body 多數用 nested bullets;N 項並排比較用 `two-col` 或架構圖;檔案 / 目錄結構用 ASCII tree(`├── └── │` 等寬)整段塞進一個 bullet 的 text。
 - builder 沒有原生 table:N items × M dimensions 用 `two-col`(2 項)或畫成架構圖;真要表格就 render 後進 PowerPoint 手加,或擴 builder(TODO)。
 - 命名編碼行為:元件 / 實驗組 / baseline 的名字說明行為(`lazy-wake` vs `eager-wake`),不用 `config1` / `Method A`;定了全 deck 一致。
@@ -325,7 +325,7 @@ edge `kind` → 線型 + 箭頭(= 關係強度,與形狀正交):
 
 - [ ] 投影片英文(cover 姓名除外)
 - [ ] outline 每條是 section label;`current` 指對當前 section
-- [ ] 內容頁 title 是 claim / dash 句型,不是空殼分類名
+- [ ] 內容頁 title 是 claim / 冒號句型,不是空殼分類名;全 deck 無破折號
 - [ ] bullet `level` 正確(L0 句尾 `:`,L1+ 不加),同層同類
 
 教學 deck
