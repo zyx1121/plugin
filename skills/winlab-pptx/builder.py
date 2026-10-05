@@ -35,7 +35,7 @@ ACCENT = MSO_THEME_COLOR.ACCENT_1
 # citation footnote band (cm) — sits below the content box, above the NYCU footer
 CITE_Y, CITE_LEFT, CITE_W = 17.15, 1.5, 30.8
 
-# Master locks latin font to Calibri (no CJK glyphs). For Chinese teaching decks
+# Master locks latin font to Calibri (no CJK glyphs). For Chinese text
 # we add an East Asian typeface per run so CJK renders consistently on Office;
 # latin/numbers still inherit Calibri (brand untouched). Broadly available on Win+Mac Office.
 EA_FONT = "Microsoft JhengHei"
