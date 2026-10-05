@@ -1,36 +1,36 @@
 ---
 name: winlab-pptx
-description: "Loki 的唯一簡報 skill: 產 .pptx(NOT .key)涵蓋三類 deck:報告 / 技術簡報(lab talk / pitch / demo,英文高密度)、教學簡報(錄課 / 線上課程 / MOOC,中文低密度)、分鏡簡報(現場工作坊 / hands-on 課程,一頁一 beat 同圖差分)。Triggers on '做簡報', '做投影片', 'slide deck', 'presentation', 'powerpoint', 'pptx', '技術簡報', '實驗室簡報', 'lab talk', 'winlab slides', 'pptx 架構圖', '錄課', '教學簡報', '教學投影片', '線上課程投影片', '磨課師', 'MOOC', '工作坊簡報', 'hands-on 簡報', '分鏡簡報', 'workshop deck', '一頁一 beat', 'lessig', 'review 我的投影片', 'outline 一下', 'rewrite this deck'. NOT Markdown 成果報告 / 手冊 / runbook，那是 project-docs. NOT 單句潤稿，那是 academic-sentence."
+description: "Loki 的唯一簡報 skill: 產 .pptx(NOT .key)涵蓋兩類 deck:報告 / 技術簡報(lab talk / pitch / demo,英文高密度)、分鏡簡報(現場工作坊 / hands-on 課程,一頁一 beat 同圖差分)。Triggers on '做簡報', '做投影片', 'slide deck', 'presentation', 'powerpoint', 'pptx', '技術簡報', '實驗室簡報', 'lab talk', 'winlab slides', 'pptx 架構圖', '工作坊簡報', 'hands-on 簡報', '分鏡簡報', 'workshop deck', '一頁一 beat', 'lessig', 'review 我的投影片', 'outline 一下', 'rewrite this deck'. NOT Markdown 成果報告 / 手冊 / runbook，那是 project-docs. NOT 單句潤稿，那是 academic-sentence."
 ---
 
 # WinLab pptx
 
 只產 `.pptx`(沒有 `.key` 路線)。引擎是 `python-pptx` 把內容填進 `template.pptx` 母片:版式、配色、字型、logo、footer 全鎖在母片,agent 只灌文字和設層級,不從零畫。架構圖用 pptx 原生 block+line(可編輯 shape,不是嵌圖)。
 
-讀的順序 = 做的順序:§1 分類 → §2 共用底線 → §3A / §3B / §3C 擇一 → §4 落地引擎 → §5 Self-review。
+讀的順序 = 做的順序:§1 分類 → §2 共用底線 → §3A / §3C 擇一 → §4 落地引擎 → §5 Self-review。
 
 黃金標準是 `assets/kilo-sense-talk.pptx`(老闆認可的報告 deck,source 在 iCloud `Projects/zyx1121/sense/`)。落地預設(layout、字型、字色、架構圖樣式)都從它抽出;拿不準時 render 它來對。
 
 ## §1 先分類:目的 → deck 類型
 
-三類的密度、語言、標題、字級、節奏直接衝突,選錯整份走鐘。定了就只讀對應專章,§4 共用。
+兩類的密度、語言、標題、節奏直接衝突,選錯整份走鐘。定了就只讀對應專章,§4 共用。
 
-| | 報告 deck(技術簡報) | 教學 deck(教學簡報) | 分鏡 deck(工作坊簡報) |
-|---|---|---|---|
-| 場景 | lab talk / pitch / demo / 現場報告 | 錄課 / 線上課程影片 / MOOC | 現場工作坊 / hands-on(邊講邊操作) |
-| 語言 | 投影片英文 | 投影片中文(面向學生) | 英文短標題 + 中文一句 caption |
-| 密度 | 高,nested bullets 塞滿 | 低,一片一重點、≤6 行 | 極低,一頁一 beat、一句話 |
-| 標題 | claim / dash 句型 | 知識點名稱即可 | 英文短語,是節奏器不是內容 |
-| 頁數 | 正常 | 正常 | 傳統的 3–4 倍(翻頁即動畫) |
-| 專章 | §3A | §3B | §3C |
+| | 報告 deck(技術簡報) | 分鏡 deck(工作坊簡報) |
+|---|---|---|
+| 場景 | lab talk / pitch / demo / 現場報告 | 現場工作坊 / hands-on(邊講邊操作) |
+| 語言 | 投影片英文 | 英文短標題 + 中文一句 caption |
+| 密度 | 高,nested bullets 塞滿 | 極低,一頁一 beat、一句話 |
+| 標題 | claim / dash 句型 | 英文短語,是節奏器不是內容 |
+| 頁數 | 正常 | 傳統的 3–4 倍(翻頁即動畫) |
+| 專章 | §3A | §3C |
 
-教學 vs 分鏡的分界:錄影自播 = 教學,現場帶操作 = 分鏡。教學 deck 一頁撐 30–60 秒口白;分鏡 deck 一頁 ≤15 秒,節奏由翻頁製造。
+分鏡 deck 一頁 ≤15 秒,節奏由翻頁製造。
 
-母片是為報告 deck 做的(title 36 / body 24pt)。教學與分鏡 deck 的落地缺口見各章「落地限制」,別假裝母片預設就對。
+母片是為報告 deck 做的(title 36 / body 24pt)。分鏡 deck 的落地缺口見該章「落地限制」,別假裝母片預設就對。
 
 ## §2 共用底線:WinLab 官方規範
 
-Source of truth 是 NYCU-WinLab/plugin 的 `winlab:slides` skill(https://github.com/NYCU-WinLab/plugin/tree/main/skills/slides,實驗室共識,RFC 2119;取代舊的 winlab-skills repo)。以下是它的 MUST / MUST NOT,三類 deck 都守(例外見末),報告 deck 以此當 lab talk 驗收底線。官方更新就回來對齊。
+Source of truth 是 NYCU-WinLab/plugin 的 `winlab:slides` skill(https://github.com/NYCU-WinLab/plugin/tree/main/skills/slides,實驗室共識,RFC 2119;取代舊的 winlab-skills repo)。以下是它的 MUST / MUST NOT,兩類 deck 都守(例外見末),報告 deck 以此當 lab talk 驗收底線。官方更新就回來對齊。
 
 - 標題:清楚表達該頁意圖、全 deck 唯一、直接對應主題;同主題一頁放不下用 `(1/2)` `(2/2)`。
 - Context before detail:先背景 / 動機 / 問題,再細節 / 方法 / 數字,不一上來丟實作或結果。每主題照 situation → problem → decision → outcome 鋪,連續 slide 因果接得上。
@@ -42,8 +42,8 @@ Source of truth 是 NYCU-WinLab/plugin 的 `winlab:slides` skill(https://github.
 
 刻意偏離官方(其餘照守):
 
-1. 官方 SHOULD「每 bullet ≤1 行」是單一密度;我們按類別分:報告 deck 高密度 nested(撐不過一行才拆下一層)、教學 deck ≤6 行、分鏡 deck 一句話。
-2. 分鏡 deck 刻意違反「標題唯一」與「One topic, one slide」:同圖差分讓同標題 / 同主題跨數十頁,是節奏設計。報告 / 教學 deck 仍守。
+1. 官方 SHOULD「每 bullet ≤1 行」是單一密度;我們按類別分:報告 deck 高密度 nested(撐不過一行才拆下一層)、分鏡 deck 一句話。
+2. 分鏡 deck 刻意違反「標題唯一」與「One topic, one slide」:同圖差分讓同標題 / 同主題跨數十頁,是節奏設計。報告 deck 仍守。
 
 ## §3A 報告 deck(技術簡報)
 
@@ -109,24 +109,6 @@ Source of truth 是 NYCU-WinLab/plugin 的 `winlab:slides` skill(https://github.
 - Cover / outline / divider / 純 demo 頁可不寫;複雜論述頁建議寫
 - 對外分享(export 給聽眾)前通常清掉
 
-## §3B 教學 deck(教學簡報)
-
-給錄製課程影片,面向學生、搭配 6–10 分鐘短影片(每支 = 1 個知識點 + 1–2 個小 Quiz;單元切分不在本 skill 範圍)。投影片中文。
-
-### 五條規範
-
-1. 一張儘量 1 個重點:最高原則,其他四條服務它。判準:口白能不能用一句「這頁要講的是 ___」講完。塞兩個就拆兩張。
-2. 本文(不含標題)最多 6 行:一個 bullet 算一行,折行照算。超過就拆頁,不縮字硬塞。render QA 時逐張數。
-3. 字級 36–60pt:標題往上限(~54–60pt),內文 ~36pt,36pt 是內文下限。
-4. 關鍵詞上色 / 粗體:每張 1–2 個強調點,標太多等於沒標。
-5. 用圖取代文字:概念關係用架構圖引擎、步驟用流程、數據用圖表,文字降到一句 caption。
-
-### 落地限制
-
-- 母片 body 鎖 24pt,低於 36pt 下限:改 builder 字級常數 / 另備教學母片,或 render 後進 PowerPoint 放大。不交 24pt 的教學 deck。
-- builder 母片鎖字色 `#3297FC`,沒開放 inline 上色:關鍵詞進 PowerPoint 手動標,或擴 builder。
-- TODO:template 補教學版式、builder 加字級覆寫與 inline run 上色。
-
 ## §3C 分鏡 deck(工作坊簡報)
 
 給現場 hands-on 工作坊 / live 課程:講者在場、學員邊聽邊操作。翻頁本身就是動畫,頁數不是成本,單頁停留時間才是。一頁一個 beat、單頁 ≤15 秒,總頁數是傳統 deck 的 3–4 倍(225 頁 ≈ 傳統 60 頁的內容量)。師承 Lessig Method、高橋メソッド、assertion-evidence、Duarte 的 progressive disclosure。
@@ -167,13 +149,13 @@ Source of truth 是 NYCU-WinLab/plugin 的 `winlab:slides` skill(https://github.
 ### 維護代價
 
 - 底圖沒鎖定前不要開始複製頁;改版時列出「所有含此圖的頁」逐頁改
-- 幾乎不可轉印講義;要講義另出 §3B 式濃縮版
+- 幾乎不可轉印講義;要講義另出濃縮版
 
 ### 落地限制
 
 builder 目前產不出分鏡 deck:(a) 無「大標 + 置中圖 + 底部 caption」版式;(b) diagram 鎖白底黑字,無 per-box 顏色 override,做不了藍 / 橘差分;(c) caption inline 上色未開放。現行做法:本章當內容與分鏡規範(outline / 每頁 beat / caption 全文照本章產出),落地進 Keynote / PowerPoint 手做;或擴 builder(TODO:`beat` layout + box `color` override + inline run 上色)。
 
-## §4 落地引擎(報告 / 教學共用)
+## §4 落地引擎(報告 deck)
 
 ### Tooling
 
@@ -196,7 +178,7 @@ builder 目前產不出分鏡 deck:(a) 無「大標 + 置中圖 + 底部 caption
      --convert-to pdf --outdir /tmp out.pptx
    pdftoppm -jpeg -r 110 /tmp/out.pdf /tmp/slide
    ```
-   Read 每張 jpg,假設有問題:框內文字空 / 重疊 / 超框、連線穿過文字、框太擠、低對比、placeholder 殘留。教學 deck 另數本文行數(≤6)。改 spec 重跑,直到一輪掃不出新問題。
+   Read 每張 jpg,假設有問題:框內文字空 / 重疊 / 超框、連線穿過文字、框太擠、低對比、placeholder 殘留。改 spec 重跑,直到一輪掃不出新問題。
 5. 交付 `out.pptx`
 
 ### 母片 layout 契約(template.pptx)
@@ -313,7 +295,7 @@ edge `kind` → 線型 + 箭頭(= 關係強度,與形狀正交):
 
 共通
 
-- [ ] 類別(報告 / 教學 / 分鏡)沒選錯
+- [ ] 類別(報告 / 分鏡)沒選錯
 - [ ] cover:title + 日期 `YYYY/M/D` + 詹詠翔
 - [ ] §2 官方規範全過:標題唯一對題、context before detail、takeaway 一眼可見、同主題同頁、縮寫有全名、pipeline 附步驟
 - [ ] 跑過 render QA 至少一輪,每張看過圖
@@ -327,13 +309,6 @@ edge `kind` → 線型 + 箭頭(= 關係強度,與形狀正交):
 - [ ] outline 每條是 section label;`current` 指對當前 section
 - [ ] 內容頁 title 是 claim / 冒號句型,不是空殼分類名;全 deck 無破折號
 - [ ] bullet `level` 正確(L0 句尾 `:`,L1+ 不加),同層同類
-
-教學 deck
-
-- [ ] 投影片中文,每張 1 個重點(口白一句講得完)
-- [ ] 本文 ≤6 行(折行照算)
-- [ ] 內文 ≥36pt(不是母片預設 24pt)、標題 ≤60pt
-- [ ] 每張 1–2 個關鍵詞上色 / 粗體;能用圖的地方沒堆字
 
 分鏡 deck
 
