@@ -1,54 +1,77 @@
 ---
 name: photo-realism
-description: "Make AI-generated images read as real photos with a two-stage pattern: pre-processing specialises the generation prompt through a fixed slot skeleton, and optional post-processing measures 3 photo statistics (highlight R-B, near-black ratio, grain sigma) against a same-condition real reference and fixes only the ones that are off, via a bundled script. Use when generating photorealistic images, fixing the plastic or waxy AI look, or deciding whether an AI image needs grading or grain. Triggers on 'AI 生圖', '塑膠感', '去 AI 感', '像真的', '寫實', '像照片', '加顆粒', '後處理', 'photorealistic', 'AI look', 'plastic skin', 'film grain', 'make it look real'. NOT illustration, anime or deliberately stylised art."
+description: "Default for EVERY image or video generation request: the output must read as a real photo or real footage that nobody can tell was generated, even when the content is absurd (a cow on the subway, a medieval vending machine, a supermarket underwater). Covers the prompt slot skeleton, inspection and optional post-processing (a script matching grain, black level and highlight colour to a real reference). Load it before calling any image tool and before writing prompts the user pastes into Flow, Veo or Midjourney. Triggers on '生圖', '畫一張', '做張圖', '出圖', '生成圖片', '生影片', '寫 prompt', '分鏡 prompt', '塑膠感', '去 AI 感', '像真的', 'generate an image', 'make a picture', 'image prompt', 'photorealistic', 'AI look'. Skip only when the user explicitly asks for a drawn style (illustration, anime, icon, diagram, logo)."
 ---
 
 # Photo Realism
 
-The AI look comes from excess perfection: waxed skin, flattering even light, dead-centre composition, candy colours, uniform sharpness and no sensor noise. The fix is to put the imperfections of a real camera and a real scene back.
+Every generated image or video is photoreal by default: it must pass as something a real camera captured. Absurd content is welcome; the absurdity lives in what is in front of the camera, never in how it was captured.
 
-There is no fixed answer. The pattern is fixed; every value inside it comes from the case.
+The AI look comes from excess perfection: waxed skin, flattering even light, dead-centre composition, candy colours, uniform sharpness, no sensor noise, and a staged, advertising feel. The fix is to put the imperfections of a real camera, a real operator and a real place back.
 
-## The Pattern
+The pattern is fixed; every value inside it comes from the case.
 
-1. **Anchor the case**: decide who shot it and under what light (device, light source, time, indoor or outdoor). Every later value derives from this anchor.
-2. **Pre-processing (always)**: specialise the prompt by filling the slot skeleton below with values from the anchor.
-3. **Gate**: look at the result at 100%. If it already reads as a photo, stop. Post-processing is optional.
-4. **Post-processing (only when needed)**: measure the 3 statistics against a real reference shot under the same anchor, and fix only the ones that are visibly off.
-5. **Eyes over numbers**: if a stat now matches but the image looks worse, revert that step.
+## Workflow
 
-Structural errors (hands, text, light direction, reflections, impossible geometry) are not fixable by either stage's grading. Regenerate or inpaint them.
+1. **Anchor the case**: decide who shot it, with what, and under what light (device, operator, light source, time, place). Every later value derives from this anchor.
+2. **Write the prompt** with the slot skeleton below. For absurd content, also apply the absurd-content rules.
+3. **Generate** with whatever tool the session has. When the user generates by hand (Flow, Veo, Midjourney), the deliverable is the prompt itself, one per shot.
+4. **Inspect** at full size against the checklist. Regenerate (change the prompt or the seed) for structural failures.
+5. **Post-process only if needed** (see Stage 2). Skip it when the image already passes.
 
-## Stage 1: Pre-processing (Prompt Specialisation)
+## Stage 1: The Prompt
 
-Slot skeleton, in this order:
+Slot skeleton, in this order, written as plain descriptive sentences rather than a keyword list:
 
 ```
-[capture device], [scene and subject], [light source and direction], [composition], [imperfections and lived-in details]
+[capture device and operator], [place and time], [subject and action], [light source and direction], [composition and framing], [imperfections and lived-in details]
 ```
 
 | Slot | What to write | Example values |
 |---|---|---|
-| Capture device | The camera that implies a colour, noise and depth-of-field signature | `candid iPhone snapshot`, `handheld phone photo, night mode`, `35mm film, Fujifilm Superia` |
-| Scene and subject | Concrete, local, ordinary | `middle-aged man in a small noodle shop` |
-| Light | One named source with a direction, never "good lighting" | `afternoon window light from the left`, `overcast`, `shop signs and wet pavement reflections` |
-| Composition | Break the centred, everything-sharp default | `off-center`, `shallow depth of field`, `foreground partly cut off`, `slightly tilted` |
-| Imperfections | Texture and disorder that real scenes have | `visible pores, stubble, stray hair, wrinkled shirt`, `clutter, puddles, uneven signage` |
+| Capture | A device that implies colour, noise and depth of field, plus who is holding it | `candid phone photo taken by a commuter`, `security camera footage`, `news photo`, `2000s CCD point-and-shoot with flash`, `35mm film snapshot` |
+| Place and time | Concrete, local, ordinary, with a time of day | `inside a crowded Taipei MRT car on a weekday morning` |
+| Subject and action | What is happening, stated flatly | `a full-size dairy cow stands in the aisle` |
+| Light | One named source with a direction and its flaws | `flat fluorescent ceiling light, slightly greenish`, `afternoon window light from the left`, `on-camera flash, hard shadow behind` |
+| Composition | Break the centred, everything-sharp default | `shot from a seated position, off-center`, `subject partly cut off by the frame edge`, `blurred shoulder in the foreground`, `slightly tilted` |
+| Imperfections | Texture, wear and disorder | `scuff marks on the floor, mud on its legs, smudged windows, worn seat fabric, slight motion blur` |
 
 Rules:
 
-- Drop polish words: `masterpiece`, `8k`, `ultra detailed`, `hyperrealistic`, `perfect skin`. They push towards a retouched render.
-- Natural daylight and a single source reveal texture; flat studio light hides it.
-- Negative prompts are model-specific. Some guides put `JPEG artifacts` in the negative while others add compression on purpose; pick by the capture device in the anchor, not by habit.
-- When the generator takes a seed, fix it while iterating on the prompt so only the prompt changes.
+- Drop polish words: `realistic`, `hyperrealistic`, `masterpiece`, `8k`, `highly detailed`, `cinematic`, `perfect`. They push towards a retouched advertising render.
+- Name the light source; never write "good lighting" or "dramatic lighting".
+- Write the prompt in English unless the tool is known to do better in another language. Text that must appear in the image goes in quotes.
+- Negative prompts are model-specific. Choose them from the capture device in the anchor (a CCD look wants compression and noise, a DSLR look does not).
+- When the tool takes a seed, fix it while iterating so only the prompt changes.
 
-## Gate: Is Post-processing Needed?
+## Absurd Content
 
-Skip post-processing when the image already reads as a photo at 100% crop. Post-processing helps most with plastic skin and surfaces that are too clean. It does little for scenes whose light and structure are already right; adding grain to a bright, sunny scene often makes it look like a dim-light phone shot instead.
+The camera does not know the scene is absurd. Everything except the one impossible element follows ordinary physics and ordinary life.
 
-## Stage 2: Post-processing (Script)
+- **State the absurd element as plain fact** in the subject slot. No adjectives like "surreal", "whimsical", "fantasy", "magical" or "bizarre"; they switch the model into concept-art mode.
+- **Put it in a mundane place** with mundane clutter: a commuter train, a convenience store, a car park, a school corridor.
+- **Pick a witness device**: phone snapshot, CCTV, dashcam, news photo, amateur CCD. Documentary capture makes the impossible believable; studio capture makes it look staged.
+- **Anchor it physically**: contact shadows, weight on the floor, dirt or water where it touches the world, reflections in nearby glass, correct scale against people and objects.
+- **Bystanders react like real people**: most ignore it or film it on their phones, one or two lean away. No crowd of amazed faces turned to camera.
+- **Keep one absurd element per shot.** Stacking several pushes the result into fantasy.
 
-`scripts/realism.ts` (Bun + sharp). The stats:
+Tested 2026-10-07 on qwen-image-2.1, same seed: `A cow riding the Taipei MRT, realistic, highly detailed, 8k` produced a staged advertising shot with the cow outside the train. The skeleton prompt (commuter phone photo, fluorescent light, off-center, blurred shoulder, passengers ignoring it, mud on its legs) produced a believable snapshot of a cow inside the car.
+
+## Inspection Checklist
+
+Regenerate when any of these fail; post-processing cannot fix them:
+
+1. Hands, faces, text and signage are coherent.
+2. Light direction and shadows agree across every object.
+3. Reflections and contact points exist and match.
+4. Scale is right against people and known objects.
+5. It does not look staged: no centred hero pose, no studio light, no eye contact from the whole crowd.
+
+## Stage 2: Post-processing (Optional)
+
+Use it when the image passes the checklist but still feels too clean, typically plastic skin or spotless surfaces. It does little for scenes whose light and structure are already right, and grain on a bright sunny scene makes it look like a dim-light phone shot instead.
+
+`scripts/realism.ts` (Bun + sharp) measures 3 stats:
 
 | Stat | Measures | Depends on |
 |---|---|---|
@@ -56,49 +79,31 @@ Skip post-processing when the image already reads as a photo at 100% crop. Post-
 | `black` near-black ratio | share of pixels with luma < 16: the depth of the shadows | Scene brightness: night scenes reach 30-40%, soft daylight sits near 0%, film looks lift the black point |
 | `grain` grain sigma | std of high-pass luma in the flattest regions: sensor noise | Light level and resolution: more in low light, less in bright light, much less after downscaling |
 
-None has a universal target. On 2026-10-07, 8 real photos spanned `rb` -12 to +42, `black` 0% to 34%, and `grain` 0.1 to 1.2 (downscaled to 1024 px). Always take targets from a reference.
+None has a universal target: 8 real photos spanned `rb` -12 to +42, `black` 0% to 34%, `grain` 0.1 to 1.2. Take targets from a real reference shot under the same anchor (light, device, roughly the same framing); the script downscales it to the AI image size so grain compares at the same scale.
 
-### Steps
+Set up once, outside any synced or plugin directory (Bun's auto-install hangs on sharp's native binary):
 
-1. Find a real reference photo with the same anchor (light, device, roughly the same framing). The script downscales it to the AI image size so grain compares at the same scale.
-2. Set up once, outside any synced or plugin directory:
+```bash
+mkdir -p ~/work/realism && cp <skill-dir>/scripts/realism.ts ~/work/realism/ && cd ~/work/realism && bun add sharp
+```
 
-   ```bash
-   mkdir -p ~/work/realism && cp <skill-dir>/scripts/realism.ts ~/work/realism/ && cd ~/work/realism && bun add sharp
-   ```
+Run:
 
-3. Diff, fix, compare:
+```bash
+bun realism.ts diff ai.png ref.jpg                       # which stats are off, and the targets
+bun realism.ts fix ai.png out.png --ref ref.jpg          # fixes only the flagged stats
+bun realism.ts fix ai.png out.png - 0.02 2.5             # explicit targets, "-" skips a step
+bun realism.ts compare ai.png out.png cmp.jpg 380 250    # full frames on top, 100% crops below
+```
 
-   ```bash
-   bun realism.ts diff ai.png ref.jpg                  # which stats are off, and the targets
-   bun realism.ts fix ai.png out.png --ref ref.jpg     # fixes only the flagged stats
-   bun realism.ts compare ai.png out.png cmp.jpg 380 250   # full frames on top, 100% crops below
-   ```
+`diff` flags a stat when `rb` differs by more than 8, `black` is under half or over double the reference (and more than 0.5 points apart), or the reference has at least 0.5 more grain. Grain is only added, never removed. Without a reference, pick explicit targets from the "Depends on" column and judge by eye.
 
-4. Look at `cmp.jpg`. Override any step by hand with explicit targets, `-` skips a step:
+The script works in a fixed order (tone, colour, grain): a shadow-only toe curve for `black` (a linear levels cut darkens the whole frame), a highlight-weighted R/B shift for `rb`, and sensor-like grain (stronger in shadows) calibrated against the metric.
 
-   ```bash
-   bun realism.ts fix ai.png out.png - 0.02 2.5   # keep the light colour, set black and grain
-   ```
+Pitfalls:
 
-`diff` flags a stat when `rb` differs by more than 8, `black` is under half or over double the reference (and more than 0.5 points apart), or the reference has at least 0.5 more grain. Grain is only ever added, never removed. Without a reference, use the "Depends on" column to pick explicit targets and judge by eye.
-
-### What the Script Does
-
-Order is fixed: tone, then colour, then grain.
-
-- `black`: a shadow-only toe curve (values under 96) found by binary search. It deepens or lifts shadows without moving midtones.
-- `rb`: shifts R up and B down, weighted to the top of the tonal range, in 2 passes.
-- `grain`: clumped luma noise with a little chroma noise, stronger in the shadows like a sensor; the amplitude is calibrated against the metric until it hits the target.
-
-## Pitfalls
-
-- A fixed target breaks scenes. Forcing `rb` to +6 on a sunny kitchen (+37) or a neon alley (+39) makes them wrong.
-- A linear levels cut to raise `black` darkens the whole frame. The script uses a shadow toe for this reason.
-- JPEG re-encoding eats grain: q92 halved the measured grain of an untouched image. Write `.png`; `.jpg` output is q97 4:4:4.
-- Downscaled or heavily processed reference photos (stock sites) read very low on grain. Prefer an original-resolution reference, or treat its grain as a floor.
-- Matching all 3 numbers does not make an image real, and it does not defeat forensic detection (frequency analysis, C2PA). It only removes what the eye reads as fake.
-
-## Provenance
-
-Built from a 2026-10-07 experiment: 3 scenes (portrait, sunny kitchen, night alley) from qwen-image-2.1, measured against 8 real photos. The portrait gained the most; the alley needed nothing; the kitchen showed that grain on a bright scene hurts. Prompt guidance is the consensus of public realism guides (realism anchors, named light, candid capture, written imperfections).
+- A fixed target breaks scenes: forcing `rb` to +6 on a sunny kitchen (+37) or a neon alley (+39) makes them wrong.
+- JPEG re-encoding eats grain (q92 halved it on an untouched image). Write `.png`; `.jpg` output is q97 4:4:4.
+- Stock-site reference photos are downscaled and processed, so their grain reads very low. Prefer an original-resolution reference.
+- For video, apply the look in post on clean footage (generate clean, no grain, no grading), then add noise and grading per shot so the shots match.
+- Matching the stats removes what the eye reads as fake; it does not defeat forensic detection (frequency analysis, C2PA).
