@@ -67,6 +67,11 @@ description: "Loki 的 Next.js 16 house style，從 16 個真實 repo 抽出來�
 10. Server action 寫入範式：`app/<route>/actions.ts` 開頭 `"use server"`：`await createClient()` → `getUser()` → auth/validation 失敗 early-return `{ error }` → mutate → `revalidatePath()`/`redirect()` → `return { success }`。讀取走 async Server Component。
 11. 表單：native `<form>` + `FormData` + handler 裡手刻驗證（trim/required/regex），不上 `react-hook-form`/`zod`。錯誤用回傳 `{ error } | { success }` 或 sonner toast 表面化，不 throw。
 12. Next 16 async dynamic APIs：`params` 型別是 `Promise<{...}>` 要 `await`（或 `React.use()`）；auth/data 頁 pin `export const dynamic = 'force-dynamic'`、碰 fs/cookie 的 route handler pin `export const runtime = 'nodejs'`。
+13. [perf] 動態頁要預載：Next 16 對沒有 `loading.js` 的動態路由（讀 cookie、`force-dynamic` 的每人頁面）**預設不 prefetch**，點下去才打 server，切頁就卡一下（`docs/01-app/02-guides/prefetching.md`）。app shell / 導覽 / 麵包屑的 `<Link>` 一律 `prefetch`（等同 `prefetch={true}`，抓整條路由、留 `staleTimes.static` 5 分鐘）。指向 route handler 的連結（`/sign-in` 這種會開始登入流程的）不 prefetch。驗證要用 `next start`（dev 不 prefetch）：載入後 Network 有其他頁的 `_rsc`、點擊時 0 請求。
+14. [multi-user] 多人同時用的頁面要即時更新，不能靠使用者重新整理（Loki 2026-10-09：「有人新增訂餐要馬上看到」）。prefetch 讓別人的修改最多晚 5 分鐘，所以兩件事一起做：
+    - Supabase app：`supabase.channel().on("postgres_changes", ...)` → `router.refresh()`（或 react-query invalidate）。
+    - 純 Postgres app：每個寫入走同一個入口（action 層），成功後 `select pg_notify('<app>_changes', <action name>)`；server 單一 `LISTEN` 連線 fan-out；`GET /api/events` 用 SSE 推（要登入、payload 只帶 action 名、25 秒 ping、`x-accel-buffering: no`）；shell 放一個 client `EventSource` → debounce 300 ms → `router.refresh()`（也會清掉 prefetch 快取）；斷線重連後補一次 refresh。參考 NYCU-WinLab/portal `lib/actions/changes.ts`、`app/api/events/route.ts`、`components/live-refresh.tsx`。
+15. [perf] 頁面慢先量再改：server span（OTel → Sensorium）、網路（`curl -w` 看 connect / TTFB）、client（是否 prefetch、進場動畫是否每次切頁重播）分開量，找到慢在哪一段才動手。不憑感覺上快取。
 
 ---
 
@@ -79,6 +84,7 @@ description: "Loki 的 Next.js 16 house style，從 16 個真實 repo 抽出來�
 - observability（serious app）：Sentry，`instrumentation.ts` + `lib/observability` 的 `captureActionError`/`identifyUser`，每個 error branch 都打點。
 - testing（serious app）：vitest unit（colocate `*.test.ts`）+ Playwright e2e（`e2e/`）。門檻由 nycueats 立下。
 - design-led app：寫 `DESIGN.md` 定 design contract，用語意 token（`bg-surface-card`、`rounded-card`、命名 radius scale）勝過裸 Tailwind scale 值。
+- `cacheComponents` 預設關：每人頁面的資料本來就不能放 server 共用快取，開了要拆 `dynamic` export、把讀 cookie 包進 Suspense、`new Date()` 會擋 build；prefetch + `revalidatePath` + 即時更新已涵蓋體感。只有 server 時間真的長、或有跨使用者共用的資料時才評估。
 - agent entrypoint：`AGENTS.md`（+ `CLAUDE.md` 用 `@AGENTS.md` import），指向 `node_modules/next/dist/docs/` 當版本真相。
 - cookie 加固（跨子網域 auth）：過濾 invalid-UTF8 cookie（`Buffer.from` try/catch）、>3500 bytes 警告、prod 設 `domain` + `sameSite: 'lax'` + `secure`。
 - README：ASCII-art banner + 固定 section 結構（對齊 `zyx1121/.github` template）。
