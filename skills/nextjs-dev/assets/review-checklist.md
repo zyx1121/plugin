@@ -23,12 +23,13 @@ review 報告按 dimension 分組，每個 finding 標 `[hard]`/`[soft]` + 一�
 
 - [ ] 沒有 `tailwind.config.*`？theme 在 `app/globals.css`（`@import "tailwindcss"` + `@theme inline`）？
 - [ ] color tokens 用 oklch、有 `:root` + `.dark`？`postcss.config.mjs` 只掛 `@tailwindcss/postcss`？
-- [ ] `cn()` 在 `lib/utils.ts` 且實際被 import 使用？`cva` 只在 `components/ui`？
-- **flag**：還有 `tailwind.config.js`（= Tailwind v3 殘留或誤裝）、HEX 色硬寫、`clsx`/`tailwind-merge`/`cva` 裝了沒用（dead scaffold dep）、`cn` 缺失。
+- [ ] `cn()` 來自 registry 的 `utils` 項目(登記了自訂字級)，不是手寫 `twMerge(clsx())`？`cva` 只在 `components/ui`？
+- **flag**：還有 `tailwind.config.js`（= Tailwind v3 殘留或誤裝）、HEX 色硬寫、`clsx`/`tailwind-merge`/`cva` 裝了沒用（dead scaffold dep）、`cn` 缺失、手寫 `cn` 遇到 `text-body` 這類自訂字級會被吃掉。
 
 ## 4. 元件組織 [soft]
 
-- [ ] `components/ui/` 放 shadcn primitives、feature 元件平放或 colocate？
+- [ ] `components/ui/` 放 registry 元件(`@zyx1121` 或 `@winlab`)，不是 stock shadcn 副本？feature 元件平放或 colocate？
+- [ ] `components.json` 有登記 registry，`globals.css` 跟 registry 的 base 一致(沒有 `--card`、`--popover`、`--secondary`、`--sidebar-*` 這類已刪 token)？
 - [ ] `components.json` 的 alias 指向真實存在的檔（特別是 `@/lib/utils`）？
 - [ ] headless 用 unified `radix-ui` / `@base-ui/react`，不是一堆 `@radix-ui/react-*` scoped 包？
 - **flag**：`components.json` alias 指向不存在的檔、scoped radix 包散落（舊式，新專案收斂成 unified）、全平鋪沒有 `ui/` 分層（小站可接受）。
@@ -51,7 +52,7 @@ review 報告按 dimension 分組，每個 finding 標 `[hard]`/`[soft]` + 一�
 
 ## 7. Auth [hard / 含 security]
 
-- [ ] gate 在 `proxy.ts`（不是 `middleware.ts`）？呼叫 `getUser()`、有 `publicPaths` allowlist？
+- [ ] gate 在 `proxy.ts`（不是 `middleware.ts`）？有 `publicPaths` allowlist？每次導覽不打網路(Supabase 用 `getClaims()` + 非對稱金鑰，不是 `getUser()`)？
 - [ ] [security] OAuth callback 有 open-redirect guard（`next.startsWith('/') && !startsWith('//')`）？
 - [ ] 跨子網域：cookie 有加固（UTF-8 filter / size warn / domain / sameSite lax / secure）？
 - **flag**：legacy `middleware.ts`（建議改名 `proxy.ts`）、缺 open-redirect guard（漏洞，一律 flag）、auth 只靠 RLS 沒有 app-layer 檢查。
@@ -74,17 +75,26 @@ review 報告按 dimension 分組，每個 finding 標 `[hard]`/`[soft]` + 一�
 - [ ] auth/data 頁 `dynamic = 'force-dynamic'`、fs/cookie route handler `runtime = 'nodejs'`？
 - **flag**：同步存取 `params`（Next 16 會壞）、該 pin dynamic/runtime 沒 pin。
 
-## 11. Tooling [hard lint / soft format]
+## 11. 效能 [hard]
+
+- [ ] app shell / 導覽 / 麵包屑的 `<Link>` 有 `prefetch`(動態頁沒有 `loading.js` 時預設不預載)？
+- [ ] 多人同時用的頁面有即時更新(Supabase realtime 或 pg_notify + SSE → `router.refresh()`)？
+- [ ] PDF、轉檔、OCR 這類重活在子程序或佇列裡，有時間與記憶體上限？
+- [ ] 大型 client 套件(three.js、編輯器、地圖)用 `next/dynamic`？公開內容頁是 static 或 ISR？
+- [ ] 有 OTel 送 Sensorium，慢的時候查得到是哪一段？
+- **flag**：導覽連結沒 prefetch、多人頁靠重新整理、請求裡同步解析大檔、首頁 bundle 帶整包 3D、沒有任何 span。
+
+## 12. Tooling [hard lint / soft format]
 
 - [ ] ESLint 9 flat config（`eslint.config.mjs` + `eslint-config-next`）？沒有 `.eslintrc`？
 - [ ] 套件管理用 bun（`bun.lock`）？
 - [ ] Prettier 3 + `prettier-plugin-tailwindcss`，雙引號 + 分號，且 repo-wide 跑過、CI 有檢查？
 - **flag**：legacy `.eslintrc`、npm/pnpm（除非有理由）、無 formatter 或引號/分號 drift、有 `.prettierrc` 但沒 repo-wide 跑。
 
-## 12. 收尾衛生 [soft]
+## 13. 收尾衛生 [soft]
 
 - [ ] 沒有 create-next-app 殘留（預設 README/metadata、`public/*.svg`、未動的 scaffold）？
-- [ ] 有 `.env.example`？README 有 banner + 結構？serious app 有 Sentry + 測試？
+- [ ] 有 `.env.example`？README 有 banner + 結構？serious app 有 OTel + 測試？
 - **flag**：scaffold 殘留、缺 `.env.example`、UI app 卻用 inline `style={{}}` 不用 Tailwind。
 
 ---
@@ -109,7 +119,7 @@ review 報告按 dimension 分組，每個 finding 標 `[hard]`/`[soft]` + 一�
 
 - universal（16/16）：App Router 無 src、Tailwind v4 無 config、kebab 檔名、ESLint flat config。
 - dominant（多數 + 全部最新）：bun、shadcn、Supabase `@supabase/ssr`、`proxy.ts` auth、next-themes。
-- emerging（只有最新幾個，但是該走的方向）：RSC + server actions、unified/base-ui headless、Sentry + 測試、生成型別 + in-repo migrations。
+- emerging（只有最新幾個，但是該走的方向）：RSC + server actions、自有 registry 元件、OTel + 測試、生成型別 + in-repo migrations、prefetch + 即時更新。
 - security（無視 prevalence，一律對齊）：open-redirect guard、不用 `using(true)`、admin client 不外洩。
 
 review 時：universal/dominant 偏離直接 flag；emerging 沒跟上標「可升級到新方向」；security 當 bug 處理。
