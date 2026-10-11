@@ -28,7 +28,7 @@ skill、agent 和工具以前分散在不同 repo，每台機器裝到的組合�
 ## 功能
 
 - **Skill**：簡報、專案文件、學術寫作、Next.js、開發流程與寫實生圖 prompt 的自家規則。
-- **Worker agent**：`planner`、`surveyor`、`developer`、`reviewer` 回傳結構化報告，不是聊天。`reviewer` 先嘗試反駁，主張才算數。
+- **Worker agent**：`planner`、`surveyor`、`developer`、`reviewer` 回傳結構化報告，不是聊天。`reviewer` 先嘗試反駁，主張才算數。`surveyor` 與 `reviewer` 用 Admiralty Code 替每項說法評等。
 - **utils MCP server**：13 個工具，處理 PDF、Google 地圖清單與 Markdown 投影片。plugin 會自動註冊這個 server。
 - **依主機註冊工具**：server 只註冊這台機器能跑的工具，其餘由 `utils_capabilities` 回報。
 
@@ -65,6 +65,7 @@ Codex 只拿得到 skill：從 [zyx1121/marketplace](https://github.com/zyx1121/
 | `bun` | utils MCP server |
 | `uv` | PDF、投影片與地圖腳本 |
 | `gs`(Ghostscript) | 只有 `pdf_compress` 需要 |
+| [admiralty-code](https://github.com/zyx1121/admiralty-code) plugin | `surveyor` 與 `reviewer` 回報裡的評等 |
 
 不需要任何密鑰。把本機 clone 當 marketplace，`git pull` 後就能拿到 skill 的修改：`claude plugin marketplace add <clone>`，再跑 `claude plugin update zyx@zyx`。
 

@@ -26,7 +26,7 @@ Skills, agents and tools used to live in separate repos. Each machine then had a
 ## Features
 
 - **Skills**: house rules for slides, project docs, academic writing, Next.js, the dev workflow and photorealistic image prompts.
-- **Worker agents**: `planner`, `surveyor`, `developer` and `reviewer` return structured reports, not chat. `reviewer` tries to refute a claim before it counts.
+- **Worker agents**: `planner`, `surveyor`, `developer` and `reviewer` return structured reports, not chat. `reviewer` tries to refute a claim before it counts. `surveyor` and `reviewer` grade each claim with the Admiralty Code.
 - **utils MCP server**: 13 tools for PDFs, Google Maps lists and Markdown slides. The plugin registers the server for you.
 - **Host-aware tools**: the server registers only the tools that this machine can run, and `utils_capabilities` reports the rest.
 
@@ -63,6 +63,7 @@ To add a tool, give a script to the `utils-promoter` agent. It writes a PEP 723 
 | `bun` | the utils MCP server |
 | `uv` | the PDF, slide and Maps scripts |
 | `gs` (Ghostscript) | `pdf_compress` only |
+| [admiralty-code](https://github.com/zyx1121/admiralty-code) plugin | grades in `surveyor` and `reviewer` reports |
 
 No secrets. A local clone as the marketplace serves skill edits after `git pull`: `claude plugin marketplace add <clone>`, then `claude plugin update zyx@zyx`.
 
