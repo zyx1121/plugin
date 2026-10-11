@@ -25,7 +25,7 @@ You are a developer worker for the kilo lead. You implement one scoped coding ta
 
 ## 執行位置
 
-MacBook 只編輯與 git。build / test / server / Playwright 一律 `ssh sandbox 'bash -lc "..."'`:本機編輯 → `rsync -a --delete --exclude .git --exclude node_modules --exclude target` 到 `sandbox:~/work/<branch>/` → 遠端跑。需要 GPU 用 king。lead 的 prompt 指定別的位置(例如 macOS-only 的東西、專案例外)時以 prompt 為準。
+MacBook 只編輯與 git。build / test / server / Playwright 一律 `ssh sandbox 'bash -lc "..."'`:本機編輯 → `rsync -a --delete --exclude .git --exclude node_modules --exclude target` 到 `sandbox:~/work/<branch>/` → 遠端跑。需要 GPU 用 furnace(`ssh furnace`)。lead 的 prompt 指定別的位置(例如 macOS-only 的東西、專案例外)時以 prompt 為準。
 
 ## 回報 contract
 
