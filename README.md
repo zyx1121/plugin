@@ -47,8 +47,8 @@ Codex gets the skills only: install `zyx@zyx1121` from [zyx1121/marketplace](htt
 
 | Part | Contents |
 |------|----------|
-| [skills/](skills/) | `academic-sentence`, `create-verify`, `dev-workflow`, `dual-review`, `nextjs-dev`, `paper-revise`, `photo-realism`, `project-docs`, `winlab-pptx`, `xiao-lin-shuo` |
-| [agents/](agents/) | `planner`, `surveyor`, `developer`, `reviewer`, `utils-promoter` |
+| [skills/](skills/) | `academic-sentence`, `alint`, `create-verify`, `dev-workflow`, `dual-review`, `nextjs-dev`, `paper-revise`, `photo-realism`, `project-docs`, `winlab-pptx`, `xiao-lin-shuo` |
+| [agents/](agents/) | `planner`, `surveyor`, `developer`, `reviewer`, `alint`, `utils-promoter` |
 | [utils/](utils/) | MCP tools: `pdf_*` (9), `md2slide_init`, `md2slide_build`, `gmaps_get_list`, `utils_capabilities` |
 | [decisions/](decisions/) | ADRs for each merge, extraction and retirement |
 
@@ -76,7 +76,7 @@ No secrets. A local clone as the marketplace serves skill edits after `git pull`
 
 Facts for coding agents and LLM tools. The rules for changing the code are in [AGENTS.md](AGENTS.md).
 
-- **Summary**: Claude Code plugin `zyx` with 10 skills, 5 worker agents and a bundled stdio MCP server (`utils`, 13 tools).
+- **Summary**: Claude Code plugin `zyx` with 11 skills, 6 worker agents and a bundled stdio MCP server (`utils`, 13 tools).
 - **Type**: plugin
 - **Interfaces**: skills `zyx:<skill>`, agents `zyx:<agent>`, MCP tools `mcp__plugin_zyx_utils__<tool>`
 - **Install**: `claude plugin marketplace add zyx1121/plugin && claude plugin install zyx@zyx`
