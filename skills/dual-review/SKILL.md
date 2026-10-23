@@ -41,6 +41,8 @@ Claude, through the Agent tool:
 - `subagent_type: zyx:reviewer`, with the intent paragraph, the acceptance
   criteria, the risk level, the round number and the CI state.
 - State where to run tests (the sandbox by default) in the prompt.
+- If the repo has a verify skill (`.claude/skills/verify/SKILL.md`), point
+  the reviewer at it so it drives the real app the same way.
 
 ## 3. Sort the findings
 
