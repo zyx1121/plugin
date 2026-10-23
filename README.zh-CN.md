@@ -28,7 +28,7 @@ skill、agent 和工具以前分散在不同 repo，每台机器装到的组合�
 ## 功能
 
 - **Skill**：幻灯片、项目文档、学术写作、Next.js、开发流程与写实生图 prompt 的自家规则。
-- **Worker agent**：`planner`、`surveyor`、`developer`、`reviewer` 返回结构化报告，不是聊天。`reviewer` 先尝试反驳，结论才算数。`surveyor` 与 `reviewer` 用 Admiralty Code 给每条说法评级。
+- **Worker agent**：`planner`、`surveyor`、`developer`、`reviewer` 返回结构化报告，不是聊天。`reviewer` 先尝试反驳，结论才算数；高风险改动由 `dual-review` skill 再加一份 Codex 审查。`surveyor` 与 `reviewer` 用 Admiralty Code 给每条说法评级。
 - **utils MCP server**：13 个工具，处理 PDF、Google 地图列表与 Markdown 幻灯片。plugin 会自动注册这个 server。
 - **按主机注册工具**：server 只注册这台机器能运行的工具，其余由 `utils_capabilities` 报告。
 
@@ -49,7 +49,7 @@ Codex 只能获得 skill：从 [zyx1121/marketplace](https://github.com/zyx1121/
 
 | 部分 | 内容 |
 |------|------|
-| [skills/](skills/) | `academic-sentence`、`dev-workflow`、`nextjs-dev`、`paper-revise`、`photo-realism`、`project-docs`、`winlab-pptx`、`xiao-lin-shuo` |
+| [skills/](skills/) | `academic-sentence`、`dev-workflow`、`dual-review`、`nextjs-dev`、`paper-revise`、`photo-realism`、`project-docs`、`winlab-pptx`、`xiao-lin-shuo` |
 | [agents/](agents/) | `planner`、`surveyor`、`developer`、`reviewer`、`utils-promoter` |
 | [utils/](utils/) | MCP 工具：`pdf_*`(9 个)、`md2slide_init`、`md2slide_build`、`gmaps_get_list`、`utils_capabilities` |
 | [decisions/](decisions/) | 每次合并、拆分与退役的 ADR |

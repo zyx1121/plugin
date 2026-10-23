@@ -26,7 +26,7 @@ Skills, agents and tools used to live in separate repos. Each machine then had a
 ## Features
 
 - **Skills**: house rules for slides, project docs, academic writing, Next.js, the dev workflow and photorealistic image prompts.
-- **Worker agents**: `planner`, `surveyor`, `developer` and `reviewer` return structured reports, not chat. `reviewer` tries to refute a claim before it counts. `surveyor` and `reviewer` grade each claim with the Admiralty Code.
+- **Worker agents**: `planner`, `surveyor`, `developer` and `reviewer` return structured reports, not chat. `reviewer` tries to refute a claim before it counts, and the `dual-review` skill pairs it with a Codex review for high-risk changes. `surveyor` and `reviewer` grade each claim with the Admiralty Code.
 - **utils MCP server**: 13 tools for PDFs, Google Maps lists and Markdown slides. The plugin registers the server for you.
 - **Host-aware tools**: the server registers only the tools that this machine can run, and `utils_capabilities` reports the rest.
 
@@ -47,7 +47,7 @@ Codex gets the skills only: install `zyx@zyx1121` from [zyx1121/marketplace](htt
 
 | Part | Contents |
 |------|----------|
-| [skills/](skills/) | `academic-sentence`, `dev-workflow`, `nextjs-dev`, `paper-revise`, `photo-realism`, `project-docs`, `winlab-pptx`, `xiao-lin-shuo` |
+| [skills/](skills/) | `academic-sentence`, `dev-workflow`, `dual-review`, `nextjs-dev`, `paper-revise`, `photo-realism`, `project-docs`, `winlab-pptx`, `xiao-lin-shuo` |
 | [agents/](agents/) | `planner`, `surveyor`, `developer`, `reviewer`, `utils-promoter` |
 | [utils/](utils/) | MCP tools: `pdf_*` (9), `md2slide_init`, `md2slide_build`, `gmaps_get_list`, `utils_capabilities` |
 | [decisions/](decisions/) | ADRs for each merge, extraction and retirement |
@@ -76,7 +76,7 @@ No secrets. A local clone as the marketplace serves skill edits after `git pull`
 
 Facts for coding agents and LLM tools. The rules for changing the code are in [AGENTS.md](AGENTS.md).
 
-- **Summary**: Claude Code plugin `zyx` with 8 skills, 5 worker agents and a bundled stdio MCP server (`utils`, 13 tools).
+- **Summary**: Claude Code plugin `zyx` with 9 skills, 5 worker agents and a bundled stdio MCP server (`utils`, 13 tools).
 - **Type**: plugin
 - **Interfaces**: skills `zyx:<skill>`, agents `zyx:<agent>`, MCP tools `mcp__plugin_zyx_utils__<tool>`
 - **Install**: `claude plugin marketplace add zyx1121/plugin && claude plugin install zyx@zyx`
