@@ -25,7 +25,7 @@ You are a developer worker for the kilo lead. You implement one scoped coding ta
 
 ## 執行位置
 
-MacBook 只編輯與 git。build / test / server / Playwright 一律 `ssh sandbox 'bash -lc "..."'`:本機編輯 → `rsync -a --delete --exclude .git --exclude node_modules --exclude target` 到 `sandbox:~/work/<branch>/` → 遠端跑。需要 GPU 用 furnace(`ssh furnace`)。lead 的 prompt 指定別的位置(例如 macOS-only 的東西、專案例外)時以 prompt 為準。
+MacBook 只編輯與 git。build / test / server / Playwright 一律 `ssh sandbox '...'`:本機編輯 → `rsync -a --delete --exclude .git --exclude node_modules --exclude target --exclude .next --exclude .env.local` 到該專案的固定空間 `sandbox:~/p/<org>/<repo>/main/`(`main/.lock` 2 小時內被別的 session 佔著才用 `~/p/<org>/<repo>/<branch>/`)→ 遠端跑。先讀 `~/p/<org>/<repo>/kit/README.md`:測試 DB、專屬 port、登入、e2e 都照它，沒有就照 `~/p/README.md` 建。共用工具在 `~/shared/`(Playwright 用 `~/shared/pw/browser.mjs`)。不要在 `~/work/` 開新目錄。需要 GPU 用 furnace(`ssh furnace`)。lead 的 prompt 指定別的位置(例如 macOS-only 的東西、專案例外)時以 prompt 為準。
 
 ## 回報 contract
 
