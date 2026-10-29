@@ -36,8 +36,10 @@ Ask Loki only what none of them show.
   app, library. Pick the primary one and list the rest.
 - **Run**: the repo's own dev command, ports, env vars, seed data, sign-in.
 - **Where**: the sandbox by default (`ssh sandbox`, code synced with
-  `rsync -a --delete --exclude .git --exclude node_modules` into
-  `~/work/<repo>/`). GPU work runs on furnace. A macOS-only app runs on the
+  `rsync -a --delete --exclude .git --exclude node_modules --exclude .env.local`
+  into the project space `~/p/<org>/<repo>/main/`). State that is not in git
+  (env file, test DB, login helper, mocks) lives in `~/p/<org>/<repo>/kit/`,
+  described by `kit/README.md`; the layout is in `~/p/README.md`. GPU work runs on furnace. A macOS-only app runs on the
   MacBook; say so in the skill.
 - **Drive**: existing harnesses first (Playwright specs, test clients, curl
   calls, an MCP client). Then a generic recipe: Playwright headless on the
@@ -64,7 +66,7 @@ Sections, each filled from the interview with real commands, not placeholders:
   tool names. Prefer stable handles: ARIA roles and names, data attributes,
   route paths, prompt strings.
 - **Evidence**: what to capture and where. Default location on the sandbox:
-  `~/work/verify/<repo>/<run-id>/`. The proof standard:
+  `~/p/<org>/<repo>/kit/evidence/<run-id>/`. The proof standard:
   - Use the real user path, not internal setters or test-only endpoints.
   - Capture the action and the resulting state, not only the final screen.
   - Check side effects (rows, files, mail, writes to other systems) with a
