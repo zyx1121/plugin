@@ -35,6 +35,26 @@ tool.
 Run the script where the repo's git history is, which is the MacBook clone or
 the sandbox copy with `.git`. It is read-only and needs only Node 22.
 
+## In CI
+
+`--ci` prints a GitHub annotation per finding and exits 1 when a `grep` rule
+hits. The reusable workflow `zyx1121/.github/.github/workflows/alint.yml`
+runs it on every pull request of a repo that calls it, so the `grep` half
+blocks the merge on its own. CI cannot dispatch the agent: the `model` rules
+show as notices, and step 2 above still runs before the PR.
+
+A repo adds the gate with one file:
+
+```yaml
+# .github/workflows/alint.yml
+name: alint
+on:
+  pull_request:
+jobs:
+  alint:
+    uses: zyx1121/.github/.github/workflows/alint.yml@main
+```
+
 ## Rule files
 
 One Markdown file per rule. Front matter keys:
