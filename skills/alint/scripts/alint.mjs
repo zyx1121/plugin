@@ -4,8 +4,10 @@
 // same id), runs every `engine: grep` rule on the added lines, and lists the
 // `engine: model` rules that apply to the changed files. Prints JSON.
 //
-//   node alint.mjs [--base main] [--repo .]
+//   node alint.mjs [--base main] [--repo .] [--ci]
 //
+// --ci also prints GitHub annotations and exits 1 on any grep finding. CI can
+// not dispatch the model rules, so it only lists them as a notice.
 // No dependencies: Node 22 or later.
 import { execFileSync } from "node:child_process";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
@@ -19,6 +21,7 @@ const opt = (name, fallback) => {
 };
 const repo = opt("repo", ".");
 const base = opt("base", "main");
+const ci = args.includes("--ci");
 const skillRules = join(dirname(fileURLToPath(import.meta.url)), "..", "rules");
 
 /** `**` crosses folders, `*` does not, `{a,b}` picks one. */
@@ -123,6 +126,18 @@ export function run({ rules, diff, exists }) {
   return { changed, grep: findings, model };
 }
 
+/** GitHub workflow commands for a result: an error per grep finding. */
+export function annotations({ grep, model }) {
+  const esc = (text) => text.replace(/%/g, "%25").replace(/\r/g, "%0D").replace(/\n/g, "%0A");
+  const lines = grep.map(
+    (f) => `::error file=${f.file},line=${f.line},title=alint ${f.rule}::${esc(f.text)}`
+  );
+  for (const rule of model) {
+    lines.push(`::notice title=alint ${rule.id}::model rule, run the zyx:alint agent on ${rule.files.length} file(s)`);
+  }
+  return lines;
+}
+
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const byId = new Map();
   for (const rule of [...loadRules(skillRules), ...loadRules(join(repo, ".alint", "rules"))]) {
@@ -160,4 +175,8 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     exists: (path) => existsSync(join(repo, path)),
   });
   console.log(JSON.stringify({ base, mergeBase, ...result }, null, 2));
+  if (ci) {
+    for (const line of annotations(result)) console.log(line);
+    if (result.grep.length > 0) process.exitCode = 1;
+  }
 }

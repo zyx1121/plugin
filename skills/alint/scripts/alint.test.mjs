@@ -4,7 +4,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
 
-import { addedLines, globToRegExp, parseRule, run } from "./alint.mjs";
+import { addedLines, annotations, globToRegExp, parseRule, run } from "./alint.mjs";
 
 const rulesDir = join(import.meta.dirname, "..", "rules");
 const rules = readdirSync(rulesDir).map((name) =>
@@ -86,4 +86,16 @@ test("model rules list only the changed files they cover", () => {
   assert.deepEqual(byId["ui-copy-no-filler"], ["app/page.tsx"]);
   assert.deepEqual(byId["github-english"], ["app/page.tsx"]);
   assert.deepEqual(byId["markdown-image-exfil"], ["app/page.tsx"]);
+});
+
+test("ci annotations: an error per grep finding, a notice per model rule", () => {
+  const out = run({
+    rules,
+    diff: diff("app/page.tsx", "<p>a \u00b7 b</p>"),
+    exists: () => false,
+  });
+  const lines = annotations(out);
+  assert.equal(lines.filter((l) => l.startsWith("::error ")).length, 1);
+  assert.ok(lines[0].startsWith("::error file=app/page.tsx,line=11,title=alint no-dash-separators::"));
+  assert.equal(lines.filter((l) => l.startsWith("::notice ")).length, out.model.length);
 });
