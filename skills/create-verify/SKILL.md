@@ -44,7 +44,8 @@ Ask Loki only what none of them show.
 - **Drive**: existing harnesses first (Playwright specs, test clients, curl
   calls, an MCP client). Then a generic recipe: Playwright headless on the
   sandbox for web, a tmux session for CLI and TUI, plain HTTP for services.
-  Peck is for Loki-facing visual checks, not for the scripted drive.
+  For quick checks while building, use `pw` on the sandbox (a warm headless
+  Chromium; `pw help` lists the commands). The scripted drive stays in files.
 - **Observe**: screenshots, terminal transcripts, response bodies, logs, exit
   codes, database rows, and spans in sensorium when the app sends OTel.
 - **Isolate**: can two instances run side by side (ports, data dirs)? If not,
