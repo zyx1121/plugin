@@ -28,7 +28,7 @@ description: "Loki 的唯一簡報 skill: 產 .pptx(NOT .key)涵蓋三類 deck:�
 
 母片是為報告 deck 做的(title 36 / body 24pt)。分鏡 deck 的落地缺口見該章「落地限制」,別假裝母片預設就對。
 
-第三類:主管 deck(給主管、行政、大眾)。全中文、幾乎不用 bullet、一頁一張圖卡,專章 §3D。2026-11 起老闆要求未來簡報儘量用這套母版,拿不準類別時先問聽眾是誰:技術同儕走 §3A,其餘走 §3D。
+第三類:主管 deck(給主管、行政、大眾)。全中文、幾乎不用 bullet、一頁一張圖卡,專章 §3D。2026-11 起老闆要求未來簡報儘量照他新簡報的樣子做。我們只學版型,檔案一律用本目錄清洗過的 `template.pptx`,不用他的母版(layout 重複、名稱雜、內容框畫死在 layout 上)。拿不準類別時先問聽眾是誰:技術同儕走 §3A,其餘走 §3D。
 
 ## §2 共用底線:WinLab 官方規範
 
@@ -159,7 +159,7 @@ builder 目前產不出分鏡 deck:(a) 無「大標 + 置中圖 + 底部 caption
 
 ## §3D 主管 deck(中文圖卡簡報)
 
-給非技術聽眾。黃金標準是老闆的 `2026 主管會議 AI 分享.pptx`(2026-11-11,母版 `WinLabTheme`)加上我們的統一樣式版。老闆的版型照用,細節照 §4T 的 tokens 做得更整齊。
+給非技術聽眾。版型參考是老闆的 `2026 主管會議 AI 分享.pptx`(2026-11-11)。母版用我們的 `template.pptx`,細節照 §4T 的 tokens 做得更整齊。拿到別人母版做的 deck,先 `rebase.py` 換到乾淨母版再處理。
 
 ### 版式契約
 
@@ -171,18 +171,18 @@ builder 目前產不出分鏡 deck:(a) 無「大標 + 置中圖 + 底部 caption
 - 結尾:`QA and Thank You` 版面。
 - 示範:介紹頁之後接一頁影片頁,標題寫 `<產品>:影片導覽`。
 
-### 母版 layout(2026 版)
+### 母版 layout(沿用 `template.pptx`)
 
 | 用途 | layout 名 | placeholder |
 |---|---|---|
-| 封面、分段頁 | `1_Title` | title, subTitle=1 |
-| 內容頁 | `3_Title and Content` | title, body=1 |
-| 章節頁 | `3_Section Header` | title, body=1 |
-| 兩欄 | `4_Two Content` | title, body=1(左), 2(右) |
-| 比較 | `8_Comparison` | title, 標題 13 / 15, 圖片 1 / 2 |
-| 結尾 | `9_QA and Thank You` | 無 |
+| 封面、分段頁、結尾 Q&A | `Title` | title=0, body=1 |
+| 內容頁 | `Title & Bullets` | title=0;圖卡頁不放 body placeholder |
+| 章節頁 | `Section` | title=0 |
+| 兩欄 | `Two Columns` | title=0, body=1(左), 21(右) |
 
-`builder.py` 還不認這套母版(layout 名與 idx 都不同,也沒有卡片與表格)。現行做法:用產生器直接畫 shape,或在既有 deck 上改,最後一律跑 §4T 的 lint。
+- 圖卡頁只留 title,其餘用 shape 畫。空的 body placeholder 要刪掉,否則編輯畫面會露出提示文字。
+- 老闆母版的對應:`1_Title`、`9_QA and Thank You` → `Title`;`3_Title and Content`、`4_Title and Content`、自訂版面 → `Title & Bullets`;`3_Section Header` → `Section`;`4_Two Content`、`8_Comparison` → `Two Columns`。`rebase.py` 照這張表自動換。
+- `builder.py` 還沒有卡片與表格的 renderer。現行做法:用產生器直接畫 shape,或在既有 deck 上改,最後一律跑 §4T 的 lint。
 
 ### 圖卡寫法
 
@@ -335,7 +335,7 @@ edge `kind` → 線型 + 箭頭(= 關係強度,與形狀正交):
 | 圓角 | 固定 12 pt;膠囊標籤半圓。PowerPoint 存的是短邊比例,要換算:`adj = 12 / 短邊 × 100000` |
 | 字級 | 32 標題、28 小標、24 內文、20 次要、18 最小;36 只給封面與分段頁 |
 | 行距 | 100%;段前 0 / 4 / 8 / 16 pt |
-| 內容區 | x 64 到 896、y 94 到 490(pt,16:9 960 × 540);母版外框是 50 到 910、78 到 507 |
+| 內容區 | x 64 到 896、y 94 到 490(pt,16:9 960 × 540);任何 shape 不得超出 50 到 910、78 到 507 |
 | 間距 | 元件間 16、有箭頭的間隔 32、卡片內距 16;文字內距是 4 的倍數 |
 | badge | 32 pt 圓、主色底、白色粗體 20 pt |
 | 圖示 | 24(行內)、32(卡片)、48(主視覺) |
@@ -348,9 +348,11 @@ edge `kind` → 線型 + 箭頭(= 關係強度,與形狀正交):
 uv run lint_tokens.py deck.pptx          # 表外數值逐頁列出,有 error 就 exit 1
 uv run lint_tokens.py deck.pptx --warn   # 另列內距、badge、圖示尺寸
 uv run restyle.py in.pptx out.pptx       # 把既有 deck 的樣式改成 tokens,另存新檔,不動位置
+uv run rebase.py in.pptx out.pptx        # 把 slide 換到乾淨的 template.pptx,刪掉空的 body placeholder
 ```
 
 - lint 只查 slide,不查母版與 layout(那是模板的事)。
+- 順序:restyle → 重排 → rebase → lint。rebase 保留 slide、講稿、影片,只換 master、layout、theme。
 - restyle 只改樣式;位置、間距、對齊要在產生器裡照 tokens 算,或手調後再 lint。
 - 交付前 lint 必須 0 error;插圖頁的標線超出外框這類例外,在回報裡逐條列出。
 - 驗外觀用 PowerPoint 匯出 PDF 再轉圖(AppleScript `save ... as save as PDF`,存到 PowerPoint 的 container 目錄不會跳授權視窗);LibreOffice 用替代字型,文字換行不可信。
