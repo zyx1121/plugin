@@ -26,7 +26,7 @@ description: "Loki 的唯一簡報 skill: 產 .pptx(NOT .key)涵蓋三類 deck:�
 
 分鏡 deck 一頁 ≤15 秒,節奏由翻頁製造。
 
-母片是為報告 deck 做的(title 36 / body 24pt)。分鏡 deck 的落地缺口見該章「落地限制」,別假裝母片預設就對。
+母片是為報告 deck 做的(title 32 / body 24pt)。分鏡 deck 的落地缺口見該章「落地限制」,別假裝母片預設就對。
 
 第三類:主管 deck(給主管、行政、大眾)。全中文、幾乎不用 bullet、一頁一張圖卡,專章 §3D。2026-11 起老闆要求未來簡報儘量照他新簡報的樣子做。我們只學版型,檔案一律用本目錄清洗過的 `template.pptx`,不用他的母版(layout 重複、名稱雜、內容框畫死在 layout 上)。拿不準類別時先問聽眾是誰:技術同儕走 §3A,其餘走 §3D。
 
@@ -240,7 +240,7 @@ master txStyles 寫死(= kilo-sense-talk 的真實值,`colors.py` 抽出):
 
 - 字型 `Calibri`(title + body),覆蓋 theme fontScheme 的 Helvetica;實際渲染是 Calibri。
 - 中文:Calibri 沒 CJK 字形,builder 對每個 run 補 East Asian 字型(`EA_FONT`,預設 `Microsoft JhengHei`),中文走 JhengHei、英數仍走 Calibri。Mac 上播要換就改 builder 頂部 `EA_FONT`(如 `PingFang TC`)。
-- 標題 / 內文字色 `#3297FC`(亮藍),title 36pt / body 24pt,placeholder 文字繼承,builder 不另設。
+- 標題 / 內文字色 `#0B5EA8`(深藍,= tokens 的主色),title 32pt / body 24pt,placeholder 文字繼承,builder 不另設。2026-11-11 Loki 定:照老闆新樣式,從亮藍 `#3297FC` 36pt 改過來;`assets/kilo-sense-talk.pptx` 還是舊的亮藍,只拿來對版式與密度。
 - 架構圖框內字 builder 強制純黑(autoshape 不繼承 body style,預設白字)。
 - theme `accent1 = #4F81BD`(較深的藍)用於架構圖框線 / 連線。
 
