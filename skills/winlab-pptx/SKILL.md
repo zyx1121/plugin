@@ -1,19 +1,19 @@
 ---
 name: winlab-pptx
-description: "Loki 的唯一簡報 skill: 產 .pptx(NOT .key)涵蓋兩類 deck:報告 / 技術簡報(lab talk / pitch / demo,英文高密度)、分鏡簡報(現場工作坊 / hands-on 課程,一頁一 beat 同圖差分)。Triggers on '做簡報', '做投影片', 'slide deck', 'presentation', 'powerpoint', 'pptx', '技術簡報', '實驗室簡報', 'lab talk', 'winlab slides', 'pptx 架構圖', '工作坊簡報', 'hands-on 簡報', '分鏡簡報', 'workshop deck', '一頁一 beat', 'lessig', 'review 我的投影片', 'outline 一下', 'rewrite this deck'. NOT Markdown 成果報告 / 手冊 / runbook，那是 project-docs. NOT 單句潤稿，那是 academic-sentence."
+description: "Loki 的唯一簡報 skill: 產 .pptx(NOT .key)涵蓋三類 deck:報告 / 技術簡報(lab talk / pitch / demo,英文高密度)、分鏡簡報(現場工作坊 / hands-on 課程,一頁一 beat 同圖差分)、主管簡報(給非技術聽眾,中文、圖卡為主,照 design tokens)。Triggers on '做簡報', '做投影片', 'slide deck', 'presentation', 'powerpoint', 'pptx', '技術簡報', '實驗室簡報', 'lab talk', 'winlab slides', 'pptx 架構圖', '工作坊簡報', 'hands-on 簡報', '分鏡簡報', 'workshop deck', '一頁一 beat', 'lessig', 'review 我的投影片', 'outline 一下', 'rewrite this deck', '主管簡報', '主管會議', '簡報 token', 'pptx lint', '統一樣式'. NOT Markdown 成果報告 / 手冊 / runbook，那是 project-docs. NOT 單句潤稿，那是 academic-sentence."
 ---
 
 # WinLab pptx
 
 只產 `.pptx`(沒有 `.key` 路線)。引擎是 `python-pptx` 把內容填進 `template.pptx` 母片:版式、配色、字型、logo、footer 全鎖在母片,agent 只灌文字和設層級,不從零畫。架構圖用 pptx 原生 block+line(可編輯 shape,不是嵌圖)。
 
-讀的順序 = 做的順序:§1 分類 → §2 共用底線 → §3A / §3C 擇一 → §4 落地引擎 → §5 Self-review。
+讀的順序 = 做的順序:§1 分類 → §2 共用底線 → §3A / §3C / §3D 擇一 → §4 落地引擎 → §4T Design tokens → §5 Self-review。
 
 黃金標準是 `assets/kilo-sense-talk.pptx`(老闆認可的報告 deck,source 在 iCloud `Projects/zyx1121/sense/`)。落地預設(layout、字型、字色、架構圖樣式)都從它抽出;拿不準時 render 它來對。
 
 ## §1 先分類:目的 → deck 類型
 
-兩類的密度、語言、標題、節奏直接衝突,選錯整份走鐘。定了就只讀對應專章,§4 共用。
+報告與分鏡兩類的密度、語言、標題、節奏直接衝突,選錯整份走鐘。定了就只讀對應專章,§4 共用。
 
 | | 報告 deck(技術簡報) | 分鏡 deck(工作坊簡報) |
 |---|---|---|
@@ -27,6 +27,8 @@ description: "Loki 的唯一簡報 skill: 產 .pptx(NOT .key)涵蓋兩類 deck:�
 分鏡 deck 一頁 ≤15 秒,節奏由翻頁製造。
 
 母片是為報告 deck 做的(title 36 / body 24pt)。分鏡 deck 的落地缺口見該章「落地限制」,別假裝母片預設就對。
+
+第三類:主管 deck(給主管、行政、大眾)。全中文、幾乎不用 bullet、一頁一張圖卡,專章 §3D。2026-11 起老闆要求未來簡報儘量用這套母版,拿不準類別時先問聽眾是誰:技術同儕走 §3A,其餘走 §3D。
 
 ## §2 共用底線:WinLab 官方規範
 
@@ -155,6 +157,43 @@ Source of truth 是 NYCU-WinLab/plugin 的 `winlab:slides` skill(https://github.
 
 builder 目前產不出分鏡 deck:(a) 無「大標 + 置中圖 + 底部 caption」版式;(b) diagram 鎖白底黑字,無 per-box 顏色 override,做不了藍 / 橘差分;(c) caption inline 上色未開放。現行做法:本章當內容與分鏡規範(outline / 每頁 beat / caption 全文照本章產出),落地進 Keynote / PowerPoint 手做;或擴 builder(TODO:`beat` layout + box `color` override + inline run 上色)。
 
+## §3D 主管 deck(中文圖卡簡報)
+
+給非技術聽眾。黃金標準是老闆的 `2026 主管會議 AI 分享.pptx`(2026-11-11,母版 `WinLabTheme`)加上我們的統一樣式版。老闆的版型照用,細節照 §4T 的 tokens 做得更整齊。
+
+### 版式契約
+
+- 語言:全中文;產品名、專有名詞保留英文。
+- 標題:主張句或冒號句(`Carrel:跟 AI 說一聲,30 秒拿到機器`),32 pt 粗體置中,由母版決定。
+- 內容區:一頁只放一個東西,卡片組、流程、表格、插圖或影片擇一。不用巢狀 bullet。
+- 小標(可選):內容區頂端一行 28 pt,寫這頁在方法上的位置(`先搞懂流程`、`再將 AI 融入流程`)。
+- 分段:用封面版面當分段頁(上方單位名、下方主題),不放 Outline 頁。
+- 結尾:`QA and Thank You` 版面。
+- 示範:介紹頁之後接一頁影片頁,標題寫 `<產品>:影片導覽`。
+
+### 母版 layout(2026 版)
+
+| 用途 | layout 名 | placeholder |
+|---|---|---|
+| 封面、分段頁 | `1_Title` | title, subTitle=1 |
+| 內容頁 | `3_Title and Content` | title, body=1 |
+| 章節頁 | `3_Section Header` | title, body=1 |
+| 兩欄 | `4_Two Content` | title, body=1(左), 2(右) |
+| 比較 | `8_Comparison` | title, 標題 13 / 15, 圖片 1 / 2 |
+| 結尾 | `9_QA and Thank You` | 無 |
+
+`builder.py` 還不認這套母版(layout 名與 idx 都不同,也沒有卡片與表格)。現行做法:用產生器直接畫 shape,或在既有 deck 上改,最後一律跑 §4T 的 lint。
+
+### 圖卡寫法
+
+- 卡片:圓角矩形,白底或淺藍底,1.5 pt 框線;重點卡片用主色實心加白字。
+- 序號:32 pt 圓形 badge,放卡片左上,距邊 16 pt。
+- 圖示:單色線條圖示,只用 24 / 32 / 48 pt 三種尺寸;同一頁同一層級用同一尺寸。
+- 流程:卡片之間留 32 pt,箭頭起點與終點貼齊兩邊框線的中點。
+- 對比:「以前」用灰階(`neutral_fill` / `neutral_line`),「現在」用藍色。
+- 狀態色(紅、綠、橘)只表示狀態,不拿來裝飾。
+- 給大眾看的示意圖不寫 IP 與術語,用 anatomy skill 的等角插圖畫真實場景。
+
 ## §4 落地引擎(報告 deck)
 
 ### Tooling
@@ -282,6 +321,41 @@ edge `kind` → 線型 + 箭頭(= 關係強度,與形狀正交):
 - 流程 / pipeline 類圖附步驟描述(WinLab 官方):edge 標序號,或 box text / `note` 寫清每步在做什麼。純拓撲圖免。
 - 連線只連水平 / 垂直相鄰最乾淨;要斜跨就調 col/row 讓它們相鄰。
 
+## §4T Design tokens(三類 deck 的圖卡都適用)
+
+單一來源是本目錄的 `tokens.json`。改數值只改它,lint 與 restyle 都讀它。2026-11-11 量老闆的 deck:填色 53 種、線寬 12 種、圓角 13 種,原因是每頁各自取值;所以數值一律從表裡拿。
+
+| 類別 | token |
+|---|---|
+| 顏色 | 主色 `0B5EA8`、強調 `3297FC`、淺底 `EAF5FF`、淺線 `BDD7F5`、內文 `000000`、次要 `595959`、白 `FFFFFF` |
+| 灰階 | 底 `F2F2F2`、線 `A6A6A6`(只給「以前」「停用」這類對比) |
+| 狀態 | 紅 `C62828` / `FFEBEE`、綠 `2E7D32` / `E8F5E9`、橘 `F79646` |
+| 文字用藍 | 一律主色;強調色只給線、圖示、填色(亮藍字在白底對比不足) |
+| 線寬 | 1.5 pt(框線、箭頭、連線)、0.75 pt(表格、分隔線) |
+| 圓角 | 固定 12 pt;膠囊標籤半圓。PowerPoint 存的是短邊比例,要換算:`adj = 12 / 短邊 × 100000` |
+| 字級 | 32 標題、28 小標、24 內文、20 次要、18 最小;36 只給封面與分段頁 |
+| 行距 | 100%;段前 0 / 4 / 8 / 16 pt |
+| 內容區 | x 64 到 896、y 94 到 490(pt,16:9 960 × 540);母版外框是 50 到 910、78 到 507 |
+| 間距 | 元件間 16、有箭頭的間隔 32、卡片內距 16;文字內距是 4 的倍數 |
+| badge | 32 pt 圓、主色底、白色粗體 20 pt |
+| 圖示 | 24(行內)、32(卡片)、48(主視覺) |
+| 箭頭 | 直線加三角頭(`w="lg" len="lg"`);不用塊狀箭頭 |
+| 陰影 | 不用 |
+
+### 檢查與轉換
+
+```bash
+uv run lint_tokens.py deck.pptx          # 表外數值逐頁列出,有 error 就 exit 1
+uv run lint_tokens.py deck.pptx --warn   # 另列內距、badge、圖示尺寸
+uv run restyle.py in.pptx out.pptx       # 把既有 deck 的樣式改成 tokens,另存新檔,不動位置
+```
+
+- lint 只查 slide,不查母版與 layout(那是模板的事)。
+- restyle 只改樣式;位置、間距、對齊要在產生器裡照 tokens 算,或手調後再 lint。
+- 交付前 lint 必須 0 error;插圖頁的標線超出外框這類例外,在回報裡逐條列出。
+- 驗外觀用 PowerPoint 匯出 PDF 再轉圖(AppleScript `save ... as save as PDF`,存到 PowerPoint 的 container 目錄不會跳授權視窗);LibreOffice 用替代字型,文字換行不可信。
+- 實測(2026-11-11 老闆 deck):原檔 822 error,restyle 後 32,重排 8 頁後 21(剩封面與插圖頁)。
+
 ### 雷區(實測踩過)
 
 - autoshape 預設字色是白的:builder 已對框文字強制純黑;自己加 shape 記得設 `font.color.rgb`。
@@ -295,13 +369,20 @@ edge `kind` → 線型 + 箭頭(= 關係強度,與形狀正交):
 
 共通
 
-- [ ] 類別(報告 / 分鏡)沒選錯
+- [ ] 類別(報告 / 分鏡 / 主管)沒選錯
 - [ ] cover:title + 日期 `YYYY/M/D` + 詹詠翔
 - [ ] §2 官方規範全過:標題唯一對題、context before detail、takeaway 一眼可見、同主題同頁、縮寫有全名、pipeline 附步驟
 - [ ] 跑過 render QA 至少一輪,每張看過圖
 - [ ] 架構圖每個 box / edge `kind` 對應真實語意差異,自動 legend 能解碼全圖
 - [ ] Old before new、代稱先定義;命名編碼行為、支線有掛起宣告、數字有參照系、重點預告在內容之前
 - [ ] 對外分享前清掉不需要的 speaker notes
+
+主管 deck
+
+- [ ] 全中文,每頁一個圖卡 / 流程 / 表格 / 影片,沒有巢狀 bullet
+- [ ] 標題是主張句或冒號句;分段用封面版面;結尾 Q&A 版面
+- [ ] `lint_tokens.py` 0 error,例外逐條列在回報
+- [ ] 用 PowerPoint 匯出的圖逐頁看過,不是 LibreOffice
 
 報告 deck
 
