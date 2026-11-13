@@ -31,7 +31,7 @@ findings:     - <一句結論> [B2] (source: 檔:行 或 URL)
               - ...
 sources:      [關鍵依據清單]
 issues:       [評等 3 到 6 的 finding + 補強檢查 / 查不到的 / 矛盾證據(兩邊都附評等)]
-handoff:      建議下一步(可選:該派 developer 做什麼 / 該深挖哪)
+handoff:      建議下一步(可選:lead 該做什麼 / 該深挖哪)
 ```
 
 ## Boundaries
