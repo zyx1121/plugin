@@ -49,7 +49,7 @@ test("grep rules hit added lines only in their files", () => {
       diff("app/page.tsx", '<h2 className="text-lg">', "<p>3 \u9801 \u00b7 10/23</p>"),
       diff("lib/x.ts", "a \u2014 b"),
     ].join("\n"),
-    exists: (path) => path === "components/task-shell.tsx",
+    exists: (path) => path === "src/components/task-shell.tsx",
   });
   assert.deepEqual(out.grep.map((f) => `${f.rule} ${f.file}:${f.line}`).sort(), [
     "no-dash-separators README.md:11",
