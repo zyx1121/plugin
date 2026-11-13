@@ -1,4 +1,4 @@
-# Release — how every repo here versions and ships
+# Release: how every repo here versions and ships
 
 One standard for every repo. Publishing is a merge, not a command: conventional
 commits land on `main`, Release Please keeps one open release PR carrying the
@@ -12,8 +12,8 @@ Already covered elsewhere, not restated here:
   and the board are in `backlog.md`.
 - Scheme per artifact: SemVer for release / package / image, `vN` for API and
   protocol schemas, git SHA for container tags. This file mechanizes SemVer.
-- `~/plugin` bumps `plugin.json` and `marketplace.json` by hand (see
-  `skills/AGENTS.md`). It has no release PR.
+- The `zyx1121/plugin` repo bumps its version files by hand. Its `AGENTS.md`
+  lists them. It has no release PR.
 
 ---
 

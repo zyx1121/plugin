@@ -1,6 +1,6 @@
 ---
 name: academic-sentence
-description: "Sentence-level academic writing formulas for English and Traditional Chinese: 語序 / topic-stress position / nominalization / passive voice / parallelism / 歐化中文病灶. Use when polishing a single sentence, not restructuring a paper. Triggers on 'SVO 語序', '這句話怎麼寫', '被動語態要不要用', '這句中文西化了', '翻譯腔', '句子太長怎麼拆', '改這句話', 'sentence structure', 'nominalization', 'topic position', 'given-new'. NOT whole-paper / reviewer-comment revision; that's paper-revise. NOT slide content; that's winlab-pptx. NOT AI-sounding copy; that's human-voice."
+description: "Sentence-level academic writing formulas for English and Traditional Chinese: 語序 / topic-stress position / nominalization / passive voice / parallelism / 歐化中文病灶. Use when polishing a single sentence, not restructuring a paper. Triggers on 'SVO 語序', '這句話怎麼寫', '被動語態要不要用', '這句中文西化了', '翻譯腔', '句子太長怎麼拆', '改這句話', 'sentence structure', 'nominalization', 'topic position', 'given-new', 'STE100', 'simplified technical english'. NOT whole-paper / reviewer-comment revision; that's paper-revise. NOT slide content; that's winlab-pptx. NOT AI-sounding copy; that's human-voice."
 ---
 
 # academic-sentence:中英學術句子層級寫作公式
@@ -11,7 +11,7 @@ description: "Sentence-level academic writing formulas for English and Tradition
 
 1. 英文句用「英文」節,中文句用「中文」節;中英夾雜(WinLab 簡報 / 報告常見)兩節都過,分開處理
 2. 改完核對三件事:主詞動詞有沒有黏近?句尾(stress position)是不是要讀者記住的新資訊?有沒有裸 this / it?
-3. 規則衝突時(例如被動語態),回到「舊資訊在前、新資訊在後」判斷
+3. 英文先照規則 10 的 STE100 預設寫;規則衝突時(例如被動語態),回到「舊資訊在前、新資訊在後」判斷
 
 ---
 
@@ -60,7 +60,7 @@ this 後接名詞(this trend / this approach),不單獨當代名詞用。
 (source: Strunk & White, *The Elements of Style*, Rule 15)
 
 ### 7. 句子長度沒有字數鐵律
-常見的「15–25 字」查無具名來源,且跟真實論文矛盾。
+常見的「15 到 25 字」查無具名來源,且跟真實論文矛盾。
 
 > Gopen & Swan 原文:「We have seen 10-word sentences that are virtually impenetrable and … 100-word sentences that flow effortlessly to their points of resolution. A sentence is too long when it has more viable candidates for stress positions than there are stress positions available.」
 
@@ -73,6 +73,22 @@ however / therefore / for example 選錯比不用還糟:讀者會去找一個不
 `make assumption`→`assume`、`is a function of`→`depends on`、`utilizes`→`uses`、`there is/there are` 開頭句幾乎都能改寫成主詞+主動動詞。
 
 (source: Schulzrinne, writing-style.html / writing-bugs.html)
+
+### 10. STE100 當預設,given-new 當例外
+ASD-STE100(Simplified Technical English)是寫技術英文的預設寫法。先照它寫,再用規則 2 與 4 判斷這句要不要破例。
+
+| STE100 預設 | 什麼時候破例 |
+|---|---|
+| 主動語態,寫出誰做了動作 | 施動者是舊資訊或不重要,被動能把新資訊留在句尾(規則 4) |
+| 敘述句超過 25 字、指令句超過 20 字就回頭看 | 句子有清楚的 stress position 就可以長(規則 7);這是檢查線,不是上限 |
+| 連續名詞最多 3 個 | 領域固定術語(`software defined networking`)照寫 |
+| 用動詞,不凍成名詞(`analyze`,不寫 `perform an analysis of`) | 名詞本身就是這句的主題(規則 3) |
+| 一個東西一個名字,全文不換同義詞 | 無 |
+| 指令一句一個動作,動詞開頭 | 論文正文不是指令,只用在步驟、演算法說明與 README |
+
+沒有主動被動的比例目標。「主動 75%」這類數字查無來源。
+
+(source: ASD-STE100 Simplified Technical English;例外判準出自 Gopen & Swan)
 
 ---
 
@@ -113,7 +129,7 @@ however / therefore / for example 選錯比不用還糟:讀者會去找一個不
 
 ## 反教條 / 查無不要信的規則
 
-- 句子字數上限(英文「15–25 字」、中文「不超過 X 字」):查無具名來源;中文教學只有「宜短不宜長」的質性建議
+- 句子字數上限(英文「15 到 25 字」、中文「不超過 X 字」):查無具名來源;中文教學只有「宜短不宜長」的質性建議
 - 同段重複 however 會讓論證變脆弱:查無具名學術來源,是內容農場產物
 - 「予以」是贅詞:查無,公文用語表列它為規範用詞,沒人主張刪
-- 「一律用主動語態」:Gopen & Swan 明講是死教條,判準是 given-new
+- 「一律用主動語態」與「主動要佔幾成」:Gopen & Swan 明講是死教條。主動是預設(規則 10),given-new 決定例外

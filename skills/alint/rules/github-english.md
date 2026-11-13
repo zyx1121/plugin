@@ -2,14 +2,15 @@
 id: github-english
 engine: model
 files: ["**/*.{md,mdx,ts,tsx,js,mjs,jsx,go,py,rs,sh,yml,yaml,sql,swift}"]
-exclude: ["**/*.zh-TW.md", "**/*.zh-CN.md", "**/locales/**", "**/i18n/**"]
+exclude: ["**/*.zh-TW.md", "**/*.zh-CN.md", "**/locales/**", "**/i18n/**", "**/skills/**/*.md", "skills/**/*.md", "agents/*.md"]
 source: CLAUDE.md Style (GitHub output is English)
 ---
 
 Everything that lands on GitHub is English: README and docs, code comments,
 commit-facing text. Flag added Chinese in code comments, docs and config
 comments. Chinese is correct in user-facing UI strings of a zh-Hant app, in
-translated README files, in test fixtures that check Chinese input, and in
+translated README files, in test fixtures that check Chinese input, in the
+bodies of skills and agents written for a Chinese reader, and in
 skill trigger phrases.
 
 ## Bad

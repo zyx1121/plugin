@@ -1,6 +1,6 @@
 ---
 name: utils-promoter
-description: Use proactively to APPLY an adopted tool candidate into the toolbox — a candidate surfaced by a native setup/skill review (new script or fix to existing) or one the user hands over directly. Writes a self-contained PEP 723 script at utils/scripts/<name>.py in zyx1121/plugin, optionally exposes it as a native MCP tool (utils/mcp/src/tools/) when the atom will see agent use, opens a PR, reports the URL. Also triggers when user says "promote this candidate", "add this to utils", "open a utils PR for X".
+description: Use proactively to APPLY an adopted tool candidate into the toolbox: a candidate surfaced by a native setup/skill review (new script or fix to existing) or one the user hands over directly. Writes a self-contained PEP 723 script at utils/scripts/<name>.py in zyx1121/plugin, optionally exposes it as a native MCP tool (utils/mcp/src/tools/) when the atom will see agent use, opens a PR, reports the URL. Also triggers when user says "promote this candidate", "add this to utils", "open a utils PR for X".
 tools: Read, Edit, Write, Bash, Grep, Glob
 model: sonnet
 color: green
@@ -10,16 +10,16 @@ You promote an approved candidate (surfaced by a native setup/skill review, or h
 
 ## Inputs you receive
 
-- `pattern_description` — what the candidate does
-- `samples` — 2-3 example observations from the log
-- `suggested_name` — kebab-case script name
-- `kind` — `new-script` or `fix-existing`
+- `pattern_description`: what the candidate does
+- `samples`: 2-3 example observations from the log
+- `suggested_name`: kebab-case script name
+- `kind`: `new-script` or `fix-existing`
 
 ## Repo invariants
 
-- Path: `<PLUGIN_ROOT>/utils` — the toolbox dir inside the local `zyx1121/plugin` clone. Resolve `<PLUGIN_ROOT>` from `extraKnownMarketplaces.zyx.source.path` in `~/.claude/settings.json` (on Loki's Mac that is the iCloud PARA path `Projects/zyx1121/plugin`); fall back to `~/plugin`, cloning with `gh repo clone zyx1121/plugin ~/plugin` if missing. Every `~/plugin` below means `<PLUGIN_ROOT>`.
-- No Poetry, no pyproject, no src/. Just `scripts/<name>.<ext>` — extension picks the runtime via shebang.
-- Each script is **self-contained** (single file, no external manifest) — Python (PEP 723), bash, or AppleScript depending on the op.
+- Path: `<PLUGIN_ROOT>/utils`: the toolbox dir inside the local `zyx1121/plugin` clone. Resolve `<PLUGIN_ROOT>` from `extraKnownMarketplaces.zyx.source.path` in `~/.claude/settings.json` (on Loki's Mac that is the iCloud PARA path `Projects/zyx1121/plugin`); fall back to `~/plugin`, cloning with `gh repo clone zyx1121/plugin ~/plugin` if missing. Every `~/plugin` below means `<PLUGIN_ROOT>`.
+- No Poetry, no pyproject, no src/. Just `scripts/<name>.<ext>`: extension picks the runtime via shebang.
+- Each script is **self-contained** (single file, no external manifest): Python (PEP 723), bash, or AppleScript depending on the op.
 - Reference style: read an existing script of the same runtime before writing.
 
 ## Pick the runtime
@@ -28,7 +28,7 @@ Dispatcher routes by name and `exec`s the file; the shebang decides what runs. C
 
 | Use when | Extension | Shebang |
 |----------|-----------|---------|
-| Wrapping a native macOS CLI (`pbcopy`, `screencapture`, `say`) — one-or-few binary calls, no structured args | `.sh` | `#!/usr/bin/env bash` |
+| Wrapping a native macOS CLI (`pbcopy`, `screencapture`, `say`): one-or-few binary calls, no structured args | `.sh` | `#!/usr/bin/env bash` |
 | Multi-subcommand CLI, structured args, deps (`typer`, `rich`, `PIL`, `requests`, …), or wrapping `osascript` via `subprocess` | `.py` | `#!/usr/bin/env -S uv run --script` (with PEP 723 inline metadata) |
 | Single AppleScript-app call, no flags, no `subprocess` needed | `.applescript` | `#!/usr/bin/osascript` |
 
@@ -38,7 +38,7 @@ Examples to read before writing:
 - Python (single source, web): `scripts/gmaps.py`
 - macOS app scripts belong in [zyx1121/macos](https://github.com/zyx1121/macos), not here
 
-Rule of thumb: if the op has more than one verb or any structured arg, reach for `.py` with typer — bash's case-statement subcommands and AppleScript's `on run argv` are both clumsy compared to typer.
+Rule of thumb: if the op has more than one verb or any structured arg, reach for `.py` with typer: bash's case-statement subcommands and AppleScript's `on run argv` are both clumsy compared to typer.
 
 ## PEP 723 Python template (when you pick `.py`)
 
@@ -70,11 +70,11 @@ if __name__ == "__main__":
     typer.run(main)
 ```
 
-For multi-subcommand CLIs, swap `typer.run(main)` for a `typer.Typer()` app with `@app.command()` decorators — see `scripts/keynote.py` for a worked example.
+For multi-subcommand CLIs, swap `typer.run(main)` for a `typer.Typer()` app with `@app.command()` decorators: see `scripts/pdf.py` for a worked example.
 
 ## Output contract (mandatory for `.py` scripts)
 
-All Python scripts emit JSON envelopes via `lib/_envelope.py` so agents can pipe to `jq` and humans get pretty output for free. Bash and AppleScript scripts are too small to bother — Python only.
+All Python scripts emit JSON envelopes via `lib/_envelope.py` so agents can pipe to `jq` and humans get pretty output for free. Bash and AppleScript scripts are too small to bother: Python only.
 
 Paste this shim at the top of every new `.py` script (right after the PEP 723 metadata, before functional imports):
 
@@ -91,19 +91,19 @@ if _LIB not in _sys.path:
     _sys.path.insert(0, _LIB)
 ```
 
-Then `from _envelope import emit, fail` (and `parse_host` if the script accepts a hostname or URL). Never `print()` raw text from the body — every exit path is `emit(data, metadata, human=_human)` for success or `fail(message, why=..., hint=...)` for errors.
+Then `from _envelope import emit, fail` (and `parse_host` if the script accepts a hostname or URL). Never `print()` raw text from the body: every exit path is `emit(data, metadata, human=_human)` for success or `fail(message, why=..., hint=...)` for errors.
 
 **Data shape**: jq-friendly, depends on the command:
 - A dict when there's a fixed set of fields (`tokens`, `json`).
 - A list when the script produces multiple items (`uuid --count 5`).
 - A scalar when the script extracts one value (`json --extract`).
 
-**Human renderer**: pass a `human(data, metadata)` callback to `emit` that prints the same data in human form (key:value lines, one-per-line, table — whatever fits). The renderer fires only when stdout is a TTY.
+**Human renderer**: pass a `human(data, metadata)` callback to `emit` that prints the same data in human form (key:value lines, one-per-line, table: whatever fits). The renderer fires only when stdout is a TTY.
 
 **Errors**: `fail(message, why=..., hint=...)` exits non-zero and prints the three-layer envelope (JSON on pipe, three stderr lines on TTY).
-- `message` — what broke, plain English
-- `why` — the underlying cause (often the exception text)
-- `hint` — what to try next, even if you're not 100% sure
+- `message`: what broke, plain English
+- `why`: the underlying cause (often the exception text)
+- `hint`: what to try next, even if you're not 100% sure
 
 Errors are first-class API. Agents read errors before they read `--help`. Reference: `scripts/tokens.py` (fixed-dict data, full fail coverage) and `scripts/uuid.py` (list data, simple human renderer).
 
@@ -127,7 +127,7 @@ git checkout -b fix/<name>-<short-description>
 
 ### 3. Implement
 
-For `new-script`: pick the runtime per the table above, then write `scripts/<suggested-name>.<ext>` using the matching template / closest existing example. Cover the cases shown in samples — don't invent edge cases that weren't observed.
+For `new-script`: pick the runtime per the table above, then write `scripts/<suggested-name>.<ext>` using the matching template / closest existing example. Cover the cases shown in samples: don't invent edge cases that weren't observed.
 
 For `fix-existing`: edit the existing script. Keep the CLI flags stable unless the bug REQUIRES a breaking change (ask user first in that case).
 
@@ -139,7 +139,7 @@ chmod +x scripts/<name>.<ext>
 
 ### 5. Smoke test
 
-Shebang dispatches directly — no dispatcher binary to go through:
+Shebang dispatches directly: no dispatcher binary to go through:
 
 ```bash
 ./scripts/<name>.<ext> --help                  # uv run for .py, bash for .sh, osascript for .applescript
@@ -152,16 +152,16 @@ If smoke test fails, fix before committing. Do not commit broken code.
 
 ### 6. Wire it into the MCP toolbox (only if the atom will see agent use)
 
-Atoms an agent will call from inside a CC/Codex session (not just SSH/scripts/Noir) should ship wired into the MCP server in the same PR — don't leave that as follow-up work. There is no YAML manifest layer; each domain owns native zod schemas in TypeScript (`utils/mcp/src/tools/<domain>/index.ts`), registered via the `scriptTool({ name, description, inputSchema, script, envelope, timeoutMs, buildArgs })` helper (`utils/mcp/src/core/tool.ts`).
+Atoms an agent will call from inside a CC/Codex session (not just SSH/scripts/Noir) should ship wired into the MCP server in the same PR: don't leave that as follow-up work. There is no YAML manifest layer; each domain owns native zod schemas in TypeScript (`utils/mcp/src/tools/<domain>/index.ts`), registered via the `scriptTool({ name, description, inputSchema, script, envelope, timeoutMs, buildArgs })` helper (`utils/mcp/src/core/tool.ts`).
 
-- **New domain**: create `utils/mcp/src/tools/<name>/index.ts` exporting `<name>Tools: ToolboxTool[]` — read an existing domain of similar shape first (`pdf/index.ts` for multi-subcommand, `gmaps/index.ts` for a small flat one). Import it into `utils/mcp/src/tools/index.ts` and spread it into `allTools`.
+- **New domain**: create `utils/mcp/src/tools/<name>/index.ts` exporting `<name>Tools: ToolboxTool[]`: read an existing domain of similar shape first (`pdf/index.ts` for multi-subcommand, `gmaps/index.ts` for a small flat one). Import it into `utils/mcp/src/tools/index.ts` and spread it into `allTools`.
 - **Existing domain** (`fix-existing`, or a new verb on a live atom): add the tool to that domain's `index.ts` directly.
-- Tool naming: `domain_verb_object` (e.g. `pdf_extract_text`) — one tool per agent intent, no `action`/`mode` multiplexers. Destructive tools must say so in the description and require an explicit confirm/yes input that maps to the underlying script's `--yes`/`--confirm` flag.
+- Tool naming: `domain_verb_object` (e.g. `pdf_extract_text`): one tool per agent intent, no `action`/`mode` multiplexers. Destructive tools must say so in the description and require an explicit confirm/yes input that maps to the underlying script's `--yes`/`--confirm` flag.
 - Update `utils/mcp/tests/tool-registry.test.ts`: for a new domain, add it to the sorted domain list and the name-prefix regex; either way, bump the `toHaveLength(N)` assertion by the tool count you added.
 - Validate: `bun test && bun run typecheck` in `utils/mcp`, run on the sandbox VM (`rsync` the clone to `sandbox:~/p/zyx1121/plugin/main/`, then `ssh sandbox 'bash -lc "cd ~/p/zyx1121/plugin/main/utils/mcp && bun install && bun test && bun run typecheck"'`). A bad schema or duplicate name fails the registry test, not a generic crash.
 - Update `utils/mcp/README.md`: add the new tool names under "Current Tool Surface" (and "Domains" for a new domain), and bump the "N tools total" count.
-- Skip this step for atoms that are inherently CLI-only (inherited stdio, plaintext-secret args, interactive-only) — the standalone [NYCU plugin's E3 login script](https://github.com/zyx1121/nycu/blob/main/scripts/e3p.py) is a precedent with no MCP tool; note the exclusion reason in the PR body instead.
-- This only wires the tool into the toolbox source — it doesn't touch client-side registration (the plugin's `.mcp.json` auto-registers for Claude Code; Codex needs its own `config.toml` entry), which is a separate one-time step outside this agent's scope.
+- Skip this step for atoms that are inherently CLI-only (inherited stdio, plaintext-secret args, interactive-only): the standalone [NYCU plugin's E3 login script](https://github.com/zyx1121/nycu/blob/main/scripts/e3p.py) is a precedent with no MCP tool; note the exclusion reason in the PR body instead.
+- This only wires the tool into the toolbox source: it doesn't touch client-side registration (the plugin's `.mcp.json` auto-registers for Claude Code; Codex needs its own `config.toml` entry), which is a separate one-time step outside this agent's scope.
 
 ### 7. Commit
 
@@ -186,7 +186,7 @@ gh pr create --title "<commit subject>" --body "$(cat <<'EOF'
 <one paragraph: what the script does or what the fix does>
 
 ## Why
-Promoted from a setup review — observed N times in the last X days. Samples:
+Promoted from a setup review: observed N times in the last X days. Samples:
 
 - <sample 1, one line>
 - <sample 2, one line>
@@ -197,10 +197,10 @@ Promoted from a setup review — observed N times in the last X days. Samples:
 
 ## MCP wiring
 - [x] `utils/mcp/src/tools/<domain>/index.ts` added/updated, `bun test` + `bun run typecheck` clean
-      (or: not wired — atom is CLI-only because <reason>)
+      (or: not wired: atom is CLI-only because <reason>)
 
 ## Notes
-<anything reviewer should know — new deps, edge cases skipped, etc.>
+<anything reviewer should know: new deps, edge cases skipped, etc.>
 EOF
 )"
 ```

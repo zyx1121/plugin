@@ -1,6 +1,6 @@
 ---
 name: photo-realism
-description: "Default for EVERY image or video generation request: the output must read as a real photo or real footage that nobody can tell was generated, even when the content is absurd (a cow on the subway, a medieval vending machine, a supermarket underwater). Covers the prompt slot skeleton, inspection and optional post-processing (a script matching grain, black level and highlight colour to a real reference). Load it before calling any image tool and before writing prompts the user pastes into Flow, Veo or Midjourney. Triggers on '生圖', '畫一張', '做張圖', '出圖', '生成圖片', '生影片', '寫 prompt', '分鏡 prompt', '塑膠感', '去 AI 感', '像真的', 'generate an image', 'make a picture', 'image prompt', 'photorealistic', 'AI look'. Skip only when the user explicitly asks for a drawn style (illustration, anime, icon, diagram, logo). NOT the script, pacing or review of a whole video; that's video."
+description: "Default for EVERY image or video generation request: the output must read as a real photo or real footage that nobody can tell was generated, even when the content is absurd. Load it before calling any image tool and before writing prompts the user pastes into Flow, Veo or Midjourney. Triggers on '生圖', '畫一張', '出圖', '生成圖片', '生影片', '寫 prompt', '分鏡 prompt', '塑膠感', '去 AI 感', '像真的', 'generate an image', 'photorealistic', 'AI look'. Skip only when the user explicitly asks for a drawn style (illustration, anime, icon, diagram, logo). NOT the script, pacing or review of a whole video; that's video."
 ---
 
 # Photo Realism
