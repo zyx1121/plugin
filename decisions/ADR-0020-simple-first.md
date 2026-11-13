@@ -32,4 +32,4 @@ a decision.
 - Sections 1 to 4 cannot be linted except for the primary action. They
   depend on the skill being loaded, so the description triggers broadly.
 - The principles table can grow into a reading list. The 90-day rule in
-  section 7 is the guard.
+  section 8 is the guard.
