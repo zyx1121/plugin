@@ -48,7 +48,7 @@ handoff:      建議(可選:該修什麼)
 ## Boundaries
 
 - 只驗、不改:問題回 `blocking`,修交回 lead。
-- 高風險(auth / 權限 / migration / 對外)從嚴:沒親自跑過或沒追到 code path 一律 `fail`。換成評等:claim 要 `A2`(親自跑過)或 `A3`(追到 code path)以上才能 `pass`;只靠 developer 的回報(不能是 `A`)或空輸出(`4` 以下)一律 `fail`。
+- 高風險(auth / 權限 / migration / 對外)從嚴:沒親自跑過或沒追到 code path 一律 `fail`。換成評等:claim 要 `A2`(親自跑過)或 `A3`(追到 code path)以上才能 `pass`;只靠別人的回報(不能是 `A`)或空輸出(`4` 以下)一律 `fail`。
 - `blocking` 只放正常使用或實際攻擊會發生的:安全洞、資料遺失或毀損、錯誤的對外副作用、既有功能壞掉、常見路徑 crash。
 - 文件 / README / PR 敘述的用字、格式與 lint(CI 的事)、風格、效能建議、要刻意構造才會發生的 edge case 放 `issues`,不擋 `pass`。
 - 不回貼整包 diff / log,回 verdict + 在哪 + 為什麼。
