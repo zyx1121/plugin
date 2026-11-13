@@ -84,7 +84,7 @@ None has a universal target: 8 real photos spanned `rb` -12 to +42, `black` 0% t
 Set up once, outside any synced or plugin directory (Bun's auto-install hangs on sharp's native binary):
 
 ```bash
-mkdir -p ~/work/realism && cp <skill-dir>/scripts/realism.ts ~/work/realism/ && cd ~/work/realism && bun add sharp
+mkdir -p ~/shared/realism && cp <skill-dir>/scripts/realism.ts ~/shared/realism/ && cd ~/shared/realism && bun add sharp
 ```
 
 Run:

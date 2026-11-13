@@ -1,6 +1,6 @@
 ---
 name: nextjs-dev
-description: "Loki 的 Next.js 16 house style，從 16 個真實 repo 抽出來的個人慣例: 開新專案就照這個 scaffold，也用來 review/audit 舊專案的一致性。Use when starting / writing a Next.js App Router project or reviewing a Next.js repo against the house style. Triggers on 'new next app', 'next 專案', 'scaffold next', '建 next 專案', 'review 我的 next 風格', 'App Router', 'server action', 'supabase ssr', 'tailwind v4', 'shadcn', 'shadcn init', 'shadcn registry', 'monorepo', 'turborepo', 'ui.zyx.tw', '我的 next 慣例'."
+description: "Loki 的 Next.js 16 house style，從 16 個真實 repo 抽出來的個人慣例: 開新專案就照這個 scaffold，也用來 review/audit 舊專案的一致性。Use when starting / writing a Next.js App Router project or reviewing a Next.js repo against the house style. Triggers on 'new next app', 'next 專案', 'scaffold next', '建 next 專案', 'review 我的 next 風格', 'App Router', 'server action', 'supabase ssr', 'tailwind v4', 'shadcn', 'shadcn init', 'shadcn registry', 'monorepo', 'turborepo', 'ui.zyx.tw', '我的 next 慣例'. NOT 頁面該放什麼、該砍什麼，那是 simple-first. NOT 個人小工具與臨時網頁的模板，那是 task-web."
 ---
 
 # nextjs-dev: Loki 的 Next.js house style

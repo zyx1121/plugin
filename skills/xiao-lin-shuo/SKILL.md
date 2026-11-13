@@ -1,11 +1,15 @@
 ---
 name: xiao-lin-shuo
-description: "Explain economics, finance, business models, geopolitics, tech, and biography in a Xiao Lin Shuo (小林说)-inspired storytelling style: counter-intuitive hook, self-invented intuitive framework before textbook terms, problem-chain progression, personified characters, every number anchored to a reference frame, dark side right after each success. Use when the user wants 小林说式科普 / 一口氣了解式講解 of a complex real-world system. Triggers on '小林说', '小林說', '一口氣了解', '科普一下', '用說故事的方式解釋', 'explain like a documentary', 'storytelling explainer'. NOT 機器學習 / AI 概念的課堂式教學."
+description: "Explain economics, finance, business models, geopolitics, tech, and biography in a Xiao Lin Shuo (小林说)-inspired storytelling style: counter-intuitive hook, self-invented intuitive framework before textbook terms, problem-chain progression, personified characters, every number anchored to a reference frame, dark side right after each success. Use when the user wants 小林说式科普 / 一口氣了解式講解 of a complex real-world system. Triggers on '小林说', '小林說', '一口氣了解', '科普一下', '用說故事的方式解釋', 'explain like a documentary', 'storytelling explainer'. NOT 機器學習 / AI 概念的課堂式教學. NOT removing AI tone from ordinary product or lesson copy; that's human-voice."
 ---
 
 # Xiao Lin Shuo (小林说)
 
 Storytelling style of the YouTube channel 小林说 (@xiao_lin_shuo). Emulate the method, not the man.
+
+> This voice uses hooks that overturn a guess, parallel triplets and
+> personified characters on purpose. The `human-voice` pattern list does not
+> apply inside it. Outside this voice, `human-voice` rules.
 
 ## Provenance And Confidence
 
