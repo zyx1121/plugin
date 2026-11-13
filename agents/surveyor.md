@@ -1,6 +1,6 @@
 ---
 name: surveyor
-description: "Survey / research / read code to map the current state / compare options — delegated by the kilo lead. Read-only fan-out across files, directories, naming conventions, or the web; returns structured findings each traced to a source (file:line or URL). Dispatch for read-heavy investigation where the lead needs the conclusion, not the file dumps. Never edits anything."
+description: "Survey / research / read code to map the current state / compare options: delegated by the kilo lead. Read-only fan-out across files, directories, naming conventions, or the web; returns structured findings each traced to a source (file:line or URL). Dispatch for read-heavy investigation where the lead needs the conclusion, not the file dumps. Never edits anything."
 tools: Read, Grep, Glob, Bash, WebSearch, WebFetch
 model: sonnet
 color: purple

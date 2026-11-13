@@ -21,7 +21,7 @@ description: "Loki 的唯一簡報 skill: 產 .pptx(NOT .key)涵蓋三類 deck:�
 | 語言 | 投影片英文 | 英文短標題 + 中文一句 caption |
 | 密度 | 高,nested bullets 塞滿 | 極低,一頁一 beat、一句話 |
 | 標題 | claim / dash 句型 | 英文短語,是節奏器不是內容 |
-| 頁數 | 正常 | 傳統的 3–4 倍(翻頁即動畫) |
+| 頁數 | 正常 | 傳統的 3 到 4 倍(翻頁即動畫) |
 | 專章 | §3A | §3C |
 
 分鏡 deck 一頁 ≤15 秒,節奏由翻頁製造。
@@ -32,13 +32,13 @@ description: "Loki 的唯一簡報 skill: 產 .pptx(NOT .key)涵蓋三類 deck:�
 
 ## §2 共用底線:WinLab 官方規範
 
-Source of truth 是 NYCU-WinLab/plugin 的 `winlab:slides` skill(https://github.com/NYCU-WinLab/plugin/tree/main/skills/slides,實驗室共識,RFC 2119;取代舊的 winlab-skills repo)。以下是它的 MUST / MUST NOT,兩類 deck 都守(例外見末),報告 deck 以此當 lab talk 驗收底線。官方更新就回來對齊。
+Source of truth 是 NYCU-WinLab/marketplace 的 `academic:slides-lint` skill(`plugins/academic/skills/slides-lint`,實驗室共識,RFC 2119)。以下是它的 MUST / MUST NOT,兩類 deck 都守(例外見末),報告 deck 以此當 lab talk 驗收底線。官方更新就回來對齊。
 
 - 標題:清楚表達該頁意圖、全 deck 唯一、直接對應主題;同主題一頁放不下用 `(1/2)` `(2/2)`。
 - Context before detail:先背景 / 動機 / 問題,再細節 / 方法 / 數字,不一上來丟實作或結果。每主題照 situation → problem → decision → outcome 鋪,連續 slide 因果接得上。
 - Make the point obvious:每頁 takeaway 一眼可見(claim 標題 / 粗體 / 色 / callout / 頂部一句結論),不埋進密集段落、表格 cell 或長 bullet 末。
 - One topic, one slide:同主題的介紹 + 結論放同一頁;不把同內容拆多頁、不換標題重講、不把不相關主題塞一頁。
-- Bullet 階層:層級關係清楚(§3A 的 L0–L3)。
+- Bullet 階層:層級關係清楚(§3A 的 L0 到 L3)。
 - 縮寫:所有英文縮寫給全名(官方 SHOULD:在前段 slide 的 title 或 L0 bullet 給)。
 - 流程圖 / pipeline:附步驟描述(見 §4 架構圖)。
 
@@ -75,7 +75,7 @@ Source of truth 是 NYCU-WinLab/plugin 的 `winlab:slides` skill(https://github.
 - 命名編碼行為:元件 / 實驗組 / baseline 的名字說明行為(`lazy-wake` vs `eager-wake`),不用 `config1` / `Method A`;定了全 deck 一致。
 - 資訊不裸奔:定義 / 公式 / 架構圖 / 數據圖後接一句「這代表…」;圖表由講者指認特徵(「注意 t=30 這裡驟降 = hibernation 觸發」);數字給參照系(`8GB → 4.8GB,同機多跑一倍 agent`),不裸給百分比。
 
-#### Bullet hierarchy(L0–L3,寫進 `bullets[].level`)
+#### Bullet hierarchy(L0 到 L3,寫進 `bullets[].level`)
 
 | Level | 角色 | 範例 |
 |-------|------|------|
@@ -113,14 +113,14 @@ Source of truth 是 NYCU-WinLab/plugin 的 `winlab:slides` skill(https://github.
 
 ## §3C 分鏡 deck(工作坊簡報)
 
-給現場 hands-on 工作坊 / live 課程:講者在場、學員邊聽邊操作。翻頁本身就是動畫,頁數不是成本,單頁停留時間才是。一頁一個 beat、單頁 ≤15 秒,總頁數是傳統 deck 的 3–4 倍(225 頁 ≈ 傳統 60 頁的內容量)。師承 Lessig Method、高橋メソッド、assertion-evidence、Duarte 的 progressive disclosure。
+給現場 hands-on 工作坊 / live 課程:講者在場、學員邊聽邊操作。翻頁本身就是動畫,頁數不是成本,單頁停留時間才是。一頁一個 beat、單頁 ≤15 秒,總頁數是傳統 deck 的 3 到 4 倍(225 頁 ≈ 傳統 60 頁的內容量)。師承 Lessig Method、高橋メソッド、assertion-evidence、Duarte 的 progressive disclosure。
 
 黃金標準是 `Claude Code CLI 理念與實作`(MTK 課程 deck,iCloud `Projects/nycu-winlab/mediatek.winlab.tw/Claude Code CLI 理念與實作.pptx`)。
 
 ### 版式契約(每頁三段)
 
 - 上:英文短標題(特大、粗黑),短語即可(`Assemble the Context` / `Too Bad!`),不用完整 claim 句
-- 中:一張圖(架構差分圖 / terminal 截圖 / 迷因擇一);沒圖的純文字 beat 頁置中 1–3 短句
+- 中:一張圖(架構差分圖 / terminal 截圖 / 迷因擇一);沒圖的純文字 beat 頁置中 1 到 3 短句
 - 下:中文一句 caption。這行才是 deck 的 script,抽掉講者要能靠它自讀。每頁必寫、只寫一句、關鍵詞上色
 
 ### 視覺語意(全 deck 一致)
@@ -133,7 +133,7 @@ Source of truth 是 NYCU-WinLab/plugin 的 `winlab:slides` skill(https://github.
 
 1. 一頁一動作:把 build 動畫拆成獨立頁,一頁只推進一件事(一個元件登場、一條線亮起、一個問題拋出)。
 2. 同圖差分:一張底圖跨數十頁,只換 highlight 與周邊小標籤。底圖元素位置永不移動(觀眾的空間記憶是資產),新元件在最初版就留好位。
-3. 提問頁當鉤子:每 3–5 頁插一頁純提問(`What's in Context?` / `Why This Time?`),答案永遠不跟問題同頁。
+3. 提問頁當鉤子:每 3 到 5 頁插一頁純提問(`What's in Context?` / `Why This Time?`),答案永遠不跟問題同頁。
 4. 停頓點標時間:`Hands-on Time` 與 `Break` 頁標分鐘數(5 / 15 / 25 min);學員的操作指令逐字放在頁上。
 5. 模板化重複:重複段落(如多個 checkpoint)走固定模板:痛點 → Good Idea → Goal → Steps → 驗證。
 
@@ -266,7 +266,7 @@ master txStyles 寫死(= kilo-sense-talk 的真實值,`colors.py` 抽出):
 ]}
 ```
 
-- `bullets[].level` 0–3 直接寫,bullet 也可以是純字串(= level 0)。
+- `bullets[].level` 0 到 3 直接寫,bullet 也可以是純字串(= level 0)。
 - `notes`(任何 layout)寫進原生 presenter notes,播放時只有講者看得到;逐字講稿型 deck 放整段口白。它跟 `diagram` 的 `note`(架構圖底部附註)是兩個欄位。
 - `cite`(任何 layout)= `[{label, url}, …]`:內容框下方、頁尾上方渲染一行小灰字「來源:label｜label」,完整 `label: url` 自動 append 到該頁 notes。一頁 ≤3 條且 label 短,否則 word-wrap 擠到頁尾帶。diagram 頁底部已有 legend,不掛 `cite`(會撞)。
 
@@ -397,6 +397,6 @@ uv run rebase.py in.pptx out.pptx        # 把 slide 換到乾淨的 template.pp
 
 - [ ] 每頁一個 beat(口白 ≤15 秒),每頁有中文一句 caption、連起來能自讀
 - [ ] 藍 = 已知、橘 = 焦點,每頁只有橘在動;差分序列底圖位置全程沒動
-- [ ] 提問頁與答案頁分開,每 3–5 頁一個鉤子;Hands-on / Break 標分鐘數、指令逐字在頁上
+- [ ] 提問頁與答案頁分開,每 3 到 5 頁一個鉤子;Hands-on / Break 標分鐘數、指令逐字在頁上
 - [ ] 迷因 ≤5 張且抽掉不影響內容
 - [ ] 地圖圖開場出現、逐段補標籤、結尾合體;結尾收在能力進化

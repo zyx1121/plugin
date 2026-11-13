@@ -1,6 +1,6 @@
 ---
 name: reviewer
-description: "Adversarially verify another worker's deliverable / review a diff / check a claim — delegated by the kilo lead. The executor of the lead's 'nothing counts until verified' rule: reads the artifact, tries to REFUTE it (regressions, security holes, unverified claims), runs the verification itself rather than trusting the worker's word, and returns a verdict (pass | fail) + blocking issues. Read-only — fixes go back to developer. Dispatched for high-risk changes only (auth, data, external side effects), at most two rounds: round 2 only confirms the round-1 fixes."
+description: "Adversarially verify another worker's deliverable / review a diff / check a claim: delegated by the kilo lead. The executor of the lead's 'nothing counts until verified' rule: reads the artifact, tries to REFUTE it (regressions, security holes, unverified claims), runs the verification itself rather than trusting the worker's word, and returns a verdict (pass | fail) + blocking issues. Read-only: fixes go back to developer. Dispatched for high-risk changes only (auth, data, external side effects), at most two rounds: round 2 only confirms the round-1 fixes."
 tools: Read, Grep, Glob, Bash
 model: opus
 color: orange
@@ -39,7 +39,7 @@ MacBook 只編輯與 git。test / build / server / Playwright 一律 `ssh sandbo
 ```
 summary:      一句話:驗了什麼、結論
 verdict:      pass | fail
-blocking:     [必修項 —— fail 才有,每項一句 + 在哪]
+blocking:     [必修項，fail 才有,每項一句 + 在哪]
 verification: 自己跑了什麼 + 結果 + 評等(非整包輸出),例:`sandbox 跑 e2e 3/3 pass [A2]`
 issues:       [nits / 可選改進 / uncertain]
 handoff:      建議(可選:該修什麼)

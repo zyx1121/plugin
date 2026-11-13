@@ -1,4 +1,4 @@
-# Backlog — issues, sprints, and the board
+# Backlog: issues, sprints, and the board
 
 Every piece of planned work is a GitHub issue. A sprint is a milestone. The
 board is a GitHub Project. Nothing lives in a local `BACKLOG.md`, a chat, or a

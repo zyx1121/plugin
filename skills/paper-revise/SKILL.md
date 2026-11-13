@@ -3,7 +3,7 @@ name: paper-revise
 description: "Academic paper revision checklist for IEEE / ACM conference papers: terminology consistency, abbreviation expansion, structural forward-references, over-claim avoidance, reviewer mindset patterns. Use when revising a paper against reviewer or advisor comments. Triggers on '/paper-revise', '改 reviewer comments', '回應審稿意見', '老師說要改 paper', 'revise paper', 'paper revision checklist', '改 paper'. NOT sentence-level SVO / nominalization / passive-voice deep rules; that's academic-sentence."
 ---
 
-# /paper-revise — academic paper review checklist
+# /paper-revise: academic paper review checklist
 
 收到 reviewer / 指導老師的意見後改 paper 用。IEEE / ACM conference 風格底色：動手前先用下面 10 條 self-audit，動完再對一次。
 
