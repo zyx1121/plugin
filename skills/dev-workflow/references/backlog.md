@@ -35,8 +35,9 @@ first, because deleting a label strips it from every issue.
 | Size | `size:S`, `size:M`, `size:L` | exactly one, set at planning |
 | Other | `blocked` | waiting on something outside the repo; say what in a comment |
 
-Size is the only estimate. S fits in half a day, M in a day, L in two to three
-days. Anything bigger is split before it enters a sprint.
+Size is the only estimate, and it counts scope, not time. S touches 1 or 2
+files, M up to about 5, L more than 5 or more than 1 module. Anything bigger
+is split before it enters a sprint.
 
 ### 2. Issue and PR templates
 

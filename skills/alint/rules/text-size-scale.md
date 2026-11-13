@@ -2,15 +2,17 @@
 id: text-size-scale
 engine: grep
 files: ["**/*.{tsx,jsx}"]
-exclude: ["components/ui/**"]
-requires: components/task-shell.tsx
-pattern: "\btext-(base|lg|xl|[3-9]xl)\b"
+exclude: ["components/ui/**", "**/components/ui/**"]
+requires: src/components/task-shell.tsx
+pattern: "\btext-(xs|sm|base|lg|xl|[2-9]xl)\b"
 source: memory ui-design-system-everywhere (2026-10-03)
 ---
 
-Pages on the ui.zyx.tw shell use three sizes only: 24, 16 and 14 px
-(`text-2xl`, `text-sm`, `text-xs`). Any other Tailwind text size breaks the
-scale. Only applies to repos that carry `components/task-shell.tsx`.
+Pages on the ui.zyx.tw shell use four sizes only, by token: `text-display`
+(80 px), `text-title` (24 px), `text-body` (16 px) and `text-caption`
+(14 px). The theme clears Tailwind's own text sizes, so a class such as
+`text-lg` sets nothing. Only applies to repos that carry
+`src/components/task-shell.tsx`.
 
 ## Bad
 
@@ -18,4 +20,4 @@ scale. Only applies to repos that carry `components/task-shell.tsx`.
 
 ## Good
 
-`<h2 className="text-2xl">` or `<p className="text-sm">`
+`<h2 className="text-title">` or `<p className="text-caption">`

@@ -16,7 +16,7 @@ You are a planner worker for the kilo lead. You turn a fuzzy goal into a concret
 ## Steps
 
 1. 從完成狀態倒推:做完長什麼樣、怎麼驗收,寫成具體完成標準。
-2. 切成 work item,每項標 worker、依賴、風險、可否並行。worker 選項:`developer` / `surveyor` / `reviewer` / `lead`(lead 自做)。
+2. 切成 work item,每項標 worker、依賴、風險、可否並行。worker 選項:`lead`(開發一律 lead 自做)/ `surveyor`(查)/ `reviewer`(審高風險)。
 3. 派不派的判準:過程產生的 token 遠多於要帶回的結論才派;5 步以內、要跟使用者來回、跨模組整合的標 `lead`。
 4. 跨 module / 長期後果 / 多方案的選擇 → 列選項 + trade-off,標為 lead 決策點。
 

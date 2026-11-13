@@ -34,9 +34,9 @@ Dispatcher routes by name and `exec`s the file; the shebang decides what runs. C
 
 Examples to read before writing:
 
-- bash: `scripts/clipboard.sh`, `scripts/notify.sh`
-- Python (single command): `scripts/uuid.py`, `scripts/tokens.py`
-- Python (multi-subcommand wrapping osascript): `scripts/keynote.py` (macOS app scripts now belong in [zyx1121/macos](https://github.com/zyx1121/macos))
+- Python (multi-subcommand): `scripts/pdf.py`, `scripts/md2slide.py`
+- Python (single source, web): `scripts/gmaps.py`
+- macOS app scripts belong in [zyx1121/macos](https://github.com/zyx1121/macos), not here
 
 Rule of thumb: if the op has more than one verb or any structured arg, reach for `.py` with typer — bash's case-statement subcommands and AppleScript's `on run argv` are both clumsy compared to typer.
 
@@ -112,7 +112,7 @@ Errors are first-class API. Agents read errors before they read `--help`. Refere
 ### 1. Sync repo
 
 ```bash
-cd ~/plugin/utils 2>/dev/null || { gh repo clone zyx1121/plugin ~/plugin && cd ~/plugin/utils; }
+cd "<PLUGIN_ROOT>/utils"
 git checkout main && git pull --ff-only
 ```
 
@@ -158,7 +158,7 @@ Atoms an agent will call from inside a CC/Codex session (not just SSH/scripts/No
 - **Existing domain** (`fix-existing`, or a new verb on a live atom): add the tool to that domain's `index.ts` directly.
 - Tool naming: `domain_verb_object` (e.g. `pdf_extract_text`) — one tool per agent intent, no `action`/`mode` multiplexers. Destructive tools must say so in the description and require an explicit confirm/yes input that maps to the underlying script's `--yes`/`--confirm` flag.
 - Update `utils/mcp/tests/tool-registry.test.ts`: for a new domain, add it to the sorted domain list and the name-prefix regex; either way, bump the `toHaveLength(N)` assertion by the tool count you added.
-- Validate: `bun test && bun run typecheck` in `utils/mcp`, run on the sandbox VM (`rsync` the clone to `sandbox:~/work/<branch>/`, then `ssh sandbox 'bash -lc "cd ~/work/<branch>/utils/mcp && bun install && bun test && bun run typecheck"'`). A bad schema or duplicate name fails the registry test, not a generic crash.
+- Validate: `bun test && bun run typecheck` in `utils/mcp`, run on the sandbox VM (`rsync` the clone to `sandbox:~/p/zyx1121/plugin/main/`, then `ssh sandbox 'bash -lc "cd ~/p/zyx1121/plugin/main/utils/mcp && bun install && bun test && bun run typecheck"'`). A bad schema or duplicate name fails the registry test, not a generic crash.
 - Update `utils/mcp/README.md`: add the new tool names under "Current Tool Surface" (and "Domains" for a new domain), and bump the "N tools total" count.
 - Skip this step for atoms that are inherently CLI-only (inherited stdio, plaintext-secret args, interactive-only) — the standalone [NYCU plugin's E3 login script](https://github.com/zyx1121/nycu/blob/main/scripts/e3p.py) is a precedent with no MCP tool; note the exclusion reason in the PR body instead.
 - This only wires the tool into the toolbox source — it doesn't touch client-side registration (the plugin's `.mcp.json` auto-registers for Claude Code; Codex needs its own `config.toml` entry), which is a separate one-time step outside this agent's scope.

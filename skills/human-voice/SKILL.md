@@ -1,6 +1,6 @@
 ---
 name: human-voice
-description: "Make copy read as written by a person, not a model: product and promo pages, tutorials, lesson text, announcements and narration, in Chinese or English. Use when writing or reviewing copy people will read. Triggers on 'AI 感', 'AI 腔', 'AI slop', '真人感', '文案', '宣傳文案', '教學文案', '抓 AI 寫作痕跡', 'sounds like AI', 'human voice'. NOT single academic sentences; that's academic-sentence. NOT interface labels alone; that's the alint rule ui-copy-no-filler. NOT what to cut from a page; that's simple-first."
+description: "Make copy read as written by a person, not a model: product and promo pages, tutorials, lesson text, announcements and narration, in Chinese or English. Use when writing or reviewing copy people will read. Triggers on 'AI 感', 'AI 腔', 'AI slop', '真人感', '文案', '宣傳文案', '教學文案', '抓 AI 寫作痕跡', 'sounds like AI', 'human voice'. NOT single academic sentences; that's academic-sentence. NOT interface labels alone; that's the alint rule ui-copy-no-filler. NOT what to cut from a page; that's simple-first. NOT the 小林说 storytelling voice; that's xiao-lin-shuo."
 ---
 
 # human-voice
