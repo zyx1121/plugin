@@ -47,7 +47,7 @@ Codex gets the skills only: install `zyx@zyx1121` from [zyx1121/marketplace](htt
 
 | Part | Contents |
 |------|----------|
-| [skills/](skills/) | `academic-sentence`, `alint`, `create-verify`, `dev-workflow`, `dual-review`, `nextjs-dev`, `paper-revise`, `photo-realism`, `project-docs`, `video`, `winlab-pptx`, `xiao-lin-shuo` |
+| [skills/](skills/) | `academic-sentence`, `alint`, `create-verify`, `dev-workflow`, `dual-review`, `human-voice`, `nextjs-dev`, `paper-revise`, `photo-realism`, `project-docs`, `video`, `winlab-pptx`, `xiao-lin-shuo` |
 | [agents/](agents/) | `planner`, `surveyor`, `developer`, `reviewer`, `alint`, `utils-promoter` |
 | [utils/](utils/) | MCP tools: `pdf_*` (9), `md2slide_init`, `md2slide_build`, `gmaps_get_list`, `utils_capabilities` |
 | [decisions/](decisions/) | ADRs for each merge, extraction and retirement |

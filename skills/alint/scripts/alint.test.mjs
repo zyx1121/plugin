@@ -30,7 +30,7 @@ test("globs", () => {
 });
 
 test("every rule parses", () => {
-  assert.equal(rules.length, 6);
+  assert.equal(rules.length, 8);
   for (const rule of rules) assert.ok(["grep", "model"].includes(rule.engine));
 });
 
@@ -56,6 +56,22 @@ test("grep rules hit added lines only in their files", () => {
     "no-dash-separators app/page.tsx:12",
     "text-size-scale app/page.tsx:11",
   ]);
+});
+
+test("ai tone phrases", () => {
+  const out = run({
+    rules,
+    diff: [
+      diff("docs/intro.md", "\u503c\u5f97\u4e00\u63d0\u7684\u662f\uff0c\u5b83\u5f88\u5feb", "It's worth noting that it is fast", "It is fast"),
+      diff("skills/human-voice/SKILL.md", "\u503c\u5f97\u4e00\u63d0\u7684\u662f"),
+      diff("lib/x.ts", "// \u503c\u5f97\u4e00\u63d0\u7684\u662f"),
+    ].join("\n"),
+    exists: () => false,
+  });
+  assert.deepEqual(
+    out.grep.filter((f) => f.rule === "ai-tone-phrases").map((f) => `${f.file}:${f.line}`),
+    ["docs/intro.md:11", "docs/intro.md:12"],
+  );
 });
 
 test("requires turns a rule off when the path is missing", () => {

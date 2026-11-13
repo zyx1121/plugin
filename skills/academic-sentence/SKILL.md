@@ -1,6 +1,6 @@
 ---
 name: academic-sentence
-description: "Sentence-level academic writing formulas for English and Traditional Chinese: 語序 / topic-stress position / nominalization / passive voice / parallelism / 歐化中文病灶 / AI 腔偵測. Use when polishing a single sentence, not restructuring a paper. Triggers on 'SVO 語序', '這句話怎麼寫', '被動語態要不要用', '這句中文西化了', '翻譯腔', '句子太長怎麼拆', '改這句話', 'sentence structure', 'nominalization', 'topic position', 'given-new', 'AI 腔', 'AI slop', '抓 AI 寫作痕跡'. NOT whole-paper / reviewer-comment revision; that's paper-revise. NOT slide content; that's winlab-pptx."
+description: "Sentence-level academic writing formulas for English and Traditional Chinese: 語序 / topic-stress position / nominalization / passive voice / parallelism / 歐化中文病灶. Use when polishing a single sentence, not restructuring a paper. Triggers on 'SVO 語序', '這句話怎麼寫', '被動語態要不要用', '這句中文西化了', '翻譯腔', '句子太長怎麼拆', '改這句話', 'sentence structure', 'nominalization', 'topic position', 'given-new'. NOT whole-paper / reviewer-comment revision; that's paper-revise. NOT slide content; that's winlab-pptx. NOT AI-sounding copy; that's human-voice."
 ---
 
 # academic-sentence:中英學術句子層級寫作公式
@@ -99,29 +99,9 @@ however / therefore / for example 選錯比不用還糟:讀者會去找一個不
 
 (source: 黃伯榮、廖序東《現代漢語》;CUHK 語文中心「歐化句子」教材)
 
-### 5. AI 腔偵測(改稿時逐句掃過)
+### 5. AI 腔偵測
 
-改編自 [slivenred/no-ai-slop-zh-TW](https://github.com/slivenred/no-ai-slop-zh-TW)(MIT,改編自 petergyang/no-ai-slop)。跟名詞化 / 被字氾濫重複的項目已收在第 3、4 條,這裡不重複列。
-
-| 模式 | 常見寫法 | 怎麼改 |
-|---|---|---|
-| 二分轉折模板 | 「真正的問題不是 X,而是 Y。」 | 直接講 Y,不用套模板起手 |
-| 清喉嚨式開場 | 「值得一提的是……」 | 刪,直接講重點 |
-| 假洞見鋪陳 | 「多數人都忽略了……」 | 刪,除非能舉證多數人怎麼想 |
-| 冒號揭曉 | 「真正的關鍵是:它會自己學習。」 | 併成一句直述句 |
-| 空泛分析 | 「彰顯團隊對創新的承諾」 | 換成具體做了什麼、量化到什麼 |
-| 重要性膨脹 | 「寫下關鍵里程碑」 | 降回平實敘述,除非證據夠格 |
-| 模糊歸因 | 「研究顯示」「專家普遍認為」 | 點名研究 / 專家是誰,或刪掉 |
-| 假強動詞 | 「作為統一管理的核心樞紐」 | 換成具體管什麼、怎麼管 |
-| 同義詞輪替 | 同一個東西輪流叫「代理、助理、工具」 | 全文統一用同一個詞 |
-| 否定排比 | 「不是 X,不是 Y,而是 Z。」 | 只保留真正要講的 Z |
-| 戲劇化碎句 | 「就這樣。真的。沒有別的。」 | 刪,除非文章語氣本來就走這節奏 |
-| 機械排比 | 「更快、更準、更聰明」 | 換成一個具體差異點,不湊三詞排比 |
-| 連接詞堆疊 | 每段固定以「此外/同時/然而」開頭 | 刪連接詞,靠意合接續(見第 2 條) |
-| 虛假全面性 | 「無論新手、專家或企業團隊,都能……」 | 只寫確實驗證過的對象 |
-| 無證據因果 | 「進而提升效率並創造更高價值」 | 補證據,或刪掉因果宣稱 |
-
-跟 Loki 的文案規範 `no-em-dash`(禁破折號)、`professional-register-copy`(結構性文案不用口語比喻)同一類:讀起來順但沒有實質內容的訊號,改稿時一起查。
+移到 `human-voice` skill:AI 腔句型表、真人寫法與各種文案的語域都在那裡。改學術句子時一樣照那份表掃過。
 
 ### 6. 台大寫作教學中心構句四原則(蔡柏盈)
 - 宜短不宜長,一逗到底是大忌
