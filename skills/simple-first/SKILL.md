@@ -1,6 +1,6 @@
 ---
 name: simple-first
-description: "Keep a product as clean as the Linear site or Apple Notes: simple goal, simple architecture, simple design, simple implementation, judged by user, developer and agent experience. Use when planning, building or reviewing any app, page, flow or feature, before the first screen is drawn and again before it ships. Triggers on 'build an app', 'new page', 'new feature', 'landing page', 'redesign', 'UI review', 'UX review', 'too cluttered', '做個 app', '做個網站', '新頁面', '新功能', '改版', '太亂', '太複雜', '乾淨', '簡單', '砍功能', 'UX', 'DX', 'AX'. NOT wording and tone; that's human-voice. NOT tokens, fonts and corners; that's the site's DESIGN.md or task-web."
+description: "Keep a product as clean as the Linear site or Apple Notes: simple goal, simple architecture, simple design, simple implementation, judged by user, developer and agent experience. Use when planning, building or reviewing any app, page, flow or feature, before the first screen is drawn and again before it ships. Triggers on 'build an app', 'new page', 'new feature', 'redesign', 'UX review', 'too cluttered', '做個 app', '做個網站', '新頁面', '新功能', '改版', '太亂', '太複雜', '砍功能', 'UX', 'DX', 'AX'. NOT wording and tone; that's human-voice. NOT tokens, fonts and corners; that's the site's DESIGN.md or task-web."
 ---
 
 # simple-first
