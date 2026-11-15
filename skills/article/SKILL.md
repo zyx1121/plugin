@@ -124,6 +124,18 @@ what the text already says is decoration: remove it.
 6. Operate every choice in a real browser, at desktop and phone width,
    before showing it.
 
+A technical mechanism is taught at the depth a systems course would give
+it, so the reader could build a small one:
+
+1. Start from the problem it solves, then show one run of it, then name it.
+2. Draw its model: the parts and what passes between them (an architecture
+   or a flow), nothing decorative.
+3. Give about ten lines of pseudo code with a comment on each step.
+4. State one trade-off and when the mechanism fails.
+5. List the primary sources (the specification, the official docs, the
+   paper) with links, and fetch each one before citing it. State the
+   revision when a specification changed between versions.
+
 ## 7. Name things
 
 1. Name the subject. In headings, labels and the first mention in each
