@@ -75,7 +75,30 @@ practice.
 4. End with the one action that makes the practice better over time, not
    with a recap.
 
-## 6. Name things
+## 6. Teach a mechanism, then let the reader operate it
+
+Naming a thing and saying when to pick it does not teach it. For each
+mechanism the article introduces, say what it is, how it works, how it
+differs from the obvious alternative ("the service already has an API, so
+why this?") and what it saves. Check each of those facts in the official
+documentation before writing it, and write no saving nobody measured.
+
+A figure earns its place when the reader changes one condition and sees a
+consequence the paragraph could not show. A figure that only highlights
+what the text already says is decoration: remove it.
+
+1. Order each section as scene, question, figure, reasons, name. Ask the
+   question the figure answers just before it, so the reader predicts first.
+2. One control a figure. Each choice changes the content, not only a color.
+3. It never plays by itself: what changes on screen is the reader's doing.
+4. Fill it with the author's real setup (files, counts, versions), counted
+   that day, and say when it was counted.
+5. A table of pairs is a lookup, not a lesson. Keep it static, at the end,
+   where the reader checks what they learned.
+6. Operate every choice in a real browser, at desktop and phone width,
+   before showing it.
+
+## 7. Name things
 
 1. Name the subject. In headings, labels and the first mention in each
    paragraph, write the product's name, not "it".
@@ -85,7 +108,7 @@ practice.
 4. One name for one thing, and proper nouns in their own casing.
 5. Do not call the article by an internal label ("this log", "this entry").
 
-## 7. Numbers are optional
+## 8. Numbers are optional
 
 Teach the idea first. A number stays only when the reader can tell in one
 read what it proves. If a claim gets a number, the more important claims
@@ -93,14 +116,14 @@ beside it need theirs too, or none gets one. For a count that stays: state
 the period and what was counted, remove duplicates, and count again before
 publishing.
 
-## 8. Emphasis is the article in brief
+## 9. Emphasis is the article in brief
 
 Read only the marked words. If they do not give the article's core, the
 marks are wrong. Keep about one mark a section, on a whole claim, not on a
 stray word. Bold, marks and term links each mean one thing; do not mix them
 for decoration.
 
-## 9. Review before showing it
+## 10. Review before showing it
 
 1. For each sentence ask: who, does what, and why does the reader care? A
    sentence that cannot answer is rewritten or cut.
@@ -110,11 +133,12 @@ for decoration.
 5. Look at the rendered page, not only the text: a line that breaks inside a
    phrase reads as a mistake.
 
-A second model can draft alternatives from a brief. It only has the brief,
-so the brief must carry the author's real practice. Its draft goes through
-the same review.
+A second model can draft alternatives from a brief, and can design the
+lesson: ask it how to teach the idea, not how to word it. It only has the
+brief, so the brief must carry the author's real practice and the checked
+facts. Its draft goes through the same review.
 
-## 10. When the author corrects the draft
+## 11. When the author corrects the draft
 
 A correction to one sentence is usually a rule for the whole article, and a
 fault found in one article is usually in its siblings too. Apply it
