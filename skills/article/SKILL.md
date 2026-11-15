@@ -126,7 +126,10 @@ what the text already says is decoration: remove it.
    runs a full lap".
 3. A heading is a full plain sentence a person would say to a colleague.
 4. One name for one thing, and proper nouns in their own casing.
-5. Do not call the article by an internal label ("this log", "this entry").
+5. A tool or product the author made is unknown to the reader. At its
+   first mention in each article, say what it is in plain words and link
+   to its page or repository. A bare name teaches nothing.
+6. Do not call the article by an internal label ("this log", "this entry").
 
 ## 8. Numbers that teach stay, measurements go
 
