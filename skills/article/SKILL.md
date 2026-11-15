@@ -20,6 +20,12 @@ Example: "The reader trusts Claude Code enough to hand over a whole task."
 With that sentence fixed, a section of usage counts has no place, and a
 section on what the tool can do by itself does.
 
+One article teaches one idea, along one line. When the sections answer
+different questions (what a thing is, how to pick between things, how to
+ship it), each question is its own article, and the first one keeps only
+the choice and links to the rest. A point that belongs to a sibling
+article moves there; it is not repeated.
+
 ## 2. Teach the author's practice, in a textbook voice
 
 The content is the author's real practice. The voice is a textbook's: the
