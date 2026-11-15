@@ -139,6 +139,19 @@ across an article and across a series:
 An article may hold several figures when each one answers its own question.
 When most figures in a series are one kind, the kind was picked by habit.
 
+An interactive figure sits on the article's one idea, nowhere else. A price,
+a limit, a default or any other reference detail gets one sentence, or
+nothing. Before adding a section, ask whether the reader would miss it: a
+section nobody would miss is cut whole, not kept without its figure.
+
+Teach the general mechanism, not one vendor's version of it. A field name,
+a price, a time limit or a default that belongs to one provider is not a
+fact about the mechanism. Before writing, survey how at least three
+providers or tools do it, from their own documentation. Write what they
+share as the mechanism. Write what differs as "some providers", and name a
+vendor only as an example. An article about one product says so in its
+title, and still says which parts other tools share.
+
 Say what is official and what is self-built. For every tool, command or
 mechanism, state whether the product ships it, or the author made it, and
 name the built-in feature that is closest. Check the official documentation
