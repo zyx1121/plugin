@@ -1,6 +1,6 @@
 ---
 name: article
-description: "Write a teaching article or blog post in the author's own voice: what it says, in what order, and how to review it as a reader. Use when drafting, rewriting or reviewing an article, a lesson or a course note. Triggers on '寫文章', '寫下一篇', '寫一篇', 'blog', '教學文', '課程文', '改寫這篇', 'review 文案', 'write an article', 'write a post', 'next article'. NOT sentence shapes that sound machine-written; that's human-voice. NOT what a page shows or cuts; that's simple-first. NOT project reports or runbooks; that's project-docs."
+description: "Write a teaching article or blog post that teaches the author's practice in a textbook voice: what it says, in what order, and how to review it as a reader. Use when drafting, rewriting or reviewing an article, a lesson or a course note. Triggers on '寫文章', '寫下一篇', '寫一篇', 'blog', '教學文', '課程文', '改寫這篇', 'review 文案', 'write an article', 'write a post', 'next article'. NOT sentence shapes that sound machine-written; that's human-voice. NOT what a page shows or cuts; that's simple-first. NOT project reports or runbooks; that's project-docs."
 ---
 
 # article
@@ -20,7 +20,21 @@ Example: "The reader trusts Claude Code enough to hand over a whole task."
 With that sentence fixed, a section of usage counts has no place, and a
 section on what the tool can do by itself does.
 
-## 2. Write the author's practice, not the textbook's
+## 2. Teach the author's practice, in a textbook voice
+
+The content is the author's real practice. The voice is a textbook's: the
+article teaches, and the author does not appear in it.
+
+- No first person: no "I", "my" or "we". The subject is the reader, the
+  tool or the practice.
+- Each section is a principle, a method or a next step, and its heading
+  says which.
+- An example is introduced as an example ("For example: ..."), not as
+  something the author once typed.
+- The article shares how to work. It is not a data report: no usage
+  statistics, and no notes on how something was counted.
+- An opinion is written as an instruction with its reason, not as a
+  feeling.
 
 The draft that sounds reasonable is usually the common advice. The author's
 real practice is often the opposite, and that is why the article is worth
@@ -28,7 +42,8 @@ reading.
 
 1. Read the author's own rules first (CLAUDE.md, AGENTS.md, memory notes).
 2. Sample what the author really typed: their messages in the transcripts,
-   their commits, their notes. Quote sentences they wrote.
+   their commits, their notes. Use them as the source of each practice and
+   of each example.
 3. Check the direction of each rule against its source. "Ask only before
    what cannot be undone" is a rule about not interrupting the author. It is
    not a rule about safety. The same words carry both readings, and only the
@@ -39,20 +54,20 @@ reading.
 
 ## 3. Say where it differs from the usual advice
 
-State the author's position plainly, once, near the top, as what the author
-does and does not do: "I do not write long prompts. I do not paste file
-contents. I do not let it ask me at every step." The disagreement is the
-hook. Do not soften it into "it depends".
+State the position plainly, once, near the top, as what to do and what to
+skip: "Give the goal. Do not paste file contents. Do not ask for a check at
+every step." The disagreement is the hook. Do not soften it into "it
+depends".
 
-Do not tell the story of a worse past self ("I used to..., then I
-learned..."). Say how to do it and what it gains.
+Do not tell the story of a worse past self. Say how to do it and what it
+gains.
 
 ## 4. Every claim carries its reason
 
 A conclusion alone reads as a slogan. "Add only what is missing" tells the
 reader what to do and gives them no way to agree. For each claim, write the
-cause in the author's terms: what the author saw, and why that led to this
-practice.
+cause: what goes wrong without the practice, and why the practice prevents
+it.
 
 1. After each claim ask "why does the author think so?". The reason needs
    a source: the author's words, their rules file, a skill or a note. A
@@ -61,17 +76,17 @@ practice.
 2. Some practices have no reason worth teaching ("it was just fun"). Write
    the practice without one, and do not build a section on a motive the
    author never had. Leave a topic out when the author says so.
-3. The ending holds the author's deepest opinion on the subject, with its
-   reason. It is the part the reader keeps, so it must not be a recap or a
+3. The ending holds the most important instruction on the subject, with
+   its reason. It is the part the reader keeps, so it must not be a recap or a
    teaser for the next article.
-4. A good reason often comes with what the author does instead: "I do not
-   install every open-source skill I see. I read it, take what fits and
-   rewrite it as mine, because my agent and I already have our own habits."
+4. A good reason often comes with what to do instead: "Read an open-source
+   skill in full before installing it. Take what fits and rewrite it,
+   because the agent already works by the rules of its own setup."
 
 ## 5. Take the reader's seat
 
-1. Start from a scene: one real sentence, one real task. Then what happened.
-   Then the name of the concept. The term comes last.
+1. Start from an example: one real sentence, one real task. Then what
+   happens. Then the name of the concept. The term comes last.
 2. Each section answers one question the reader already has ("Can it find my
    files?", "Will it break something?").
 3. Say what can wait, and link to where it is explained. A term the article
@@ -96,8 +111,8 @@ what the text already says is decoration: remove it.
    question the figure answers just before it, so the reader predicts first.
 2. One control a figure. Each choice changes the content, not only a color.
 3. It never plays by itself: what changes on screen is the reader's doing.
-4. Fill it with the author's real setup (files, counts, versions), counted
-   that day, and say when it was counted.
+4. Fill it with the author's real setup (files, names, versions), with
+   private names masked.
 5. A table of pairs is a lookup, not a lesson. Keep it static, at the end,
    where the reader checks what they learned.
 6. Operate every choice in a real browser, at desktop and phone width,
@@ -113,13 +128,12 @@ what the text already says is decoration: remove it.
 4. One name for one thing, and proper nouns in their own casing.
 5. Do not call the article by an internal label ("this log", "this entry").
 
-## 8. Numbers are optional
+## 8. Numbers that teach stay, measurements go
 
-Teach the idea first. A number stays only when the reader can tell in one
-read what it proves. If a claim gets a number, the more important claims
-beside it need theirs too, or none gets one. For a count that stays: state
-the period and what was counted, remove duplicates, and count again before
-publishing.
+Teach the idea first. A number stays when the reader needs it to follow
+the step: a version, a limit, how many parts a thing has. Usage statistics
+and measurements of the author's own work are left out, with the notes on
+how they were counted.
 
 ## 9. Emphasis is the article in brief
 
