@@ -54,12 +54,17 @@ reader what to do and gives them no way to agree. For each claim, write the
 cause in the author's terms: what the author saw, and why that led to this
 practice.
 
-1. After each claim ask "why does the author think so?". If the answer is
-   not on the page, find it in the author's words or ask. Do not make one up.
-2. The ending holds the author's deepest opinion on the subject, with its
+1. After each claim ask "why does the author think so?". The reason needs
+   a source: the author's words, their rules file, a skill or a note. A
+   reason that only sounds likely is an invented one. With no source, write
+   the practice alone and ask the author.
+2. Some practices have no reason worth teaching ("it was just fun"). Write
+   the practice without one, and do not build a section on a motive the
+   author never had. Leave a topic out when the author says so.
+3. The ending holds the author's deepest opinion on the subject, with its
    reason. It is the part the reader keeps, so it must not be a recap or a
    teaser for the next article.
-3. A good reason often comes with what the author does instead: "I do not
+4. A good reason often comes with what the author does instead: "I do not
    install every open-source skill I see. I read it, take what fits and
    rewrite it as mine, because my agent and I already have our own habits."
 
