@@ -47,7 +47,23 @@ hook. Do not soften it into "it depends".
 Do not tell the story of a worse past self ("I used to..., then I
 learned..."). Say how to do it and what it gains.
 
-## 4. Take the reader's seat
+## 4. Every claim carries its reason
+
+A conclusion alone reads as a slogan. "Add only what is missing" tells the
+reader what to do and gives them no way to agree. For each claim, write the
+cause in the author's terms: what the author saw, and why that led to this
+practice.
+
+1. After each claim ask "why does the author think so?". If the answer is
+   not on the page, find it in the author's words or ask. Do not make one up.
+2. The ending holds the author's deepest opinion on the subject, with its
+   reason. It is the part the reader keeps, so it must not be a recap or a
+   teaser for the next article.
+3. A good reason often comes with what the author does instead: "I do not
+   install every open-source skill I see. I read it, take what fits and
+   rewrite it as mine, because my agent and I already have our own habits."
+
+## 5. Take the reader's seat
 
 1. Start from a scene: one real sentence, one real task. Then what happened.
    Then the name of the concept. The term comes last.
@@ -59,7 +75,7 @@ learned..."). Say how to do it and what it gains.
 4. End with the one action that makes the practice better over time, not
    with a recap.
 
-## 5. Name things
+## 6. Name things
 
 1. Name the subject. In headings, labels and the first mention in each
    paragraph, write the product's name, not "it".
@@ -69,7 +85,7 @@ learned..."). Say how to do it and what it gains.
 4. One name for one thing, and proper nouns in their own casing.
 5. Do not call the article by an internal label ("this log", "this entry").
 
-## 6. Numbers are optional
+## 7. Numbers are optional
 
 Teach the idea first. A number stays only when the reader can tell in one
 read what it proves. If a claim gets a number, the more important claims
@@ -77,14 +93,14 @@ beside it need theirs too, or none gets one. For a count that stays: state
 the period and what was counted, remove duplicates, and count again before
 publishing.
 
-## 7. Emphasis is the article in brief
+## 8. Emphasis is the article in brief
 
 Read only the marked words. If they do not give the article's core, the
 marks are wrong. Keep about one mark a section, on a whole claim, not on a
 stray word. Bold, marks and term links each mean one thing; do not mix them
 for decoration.
 
-## 8. Review before showing it
+## 9. Review before showing it
 
 1. For each sentence ask: who, does what, and why does the reader care? A
    sentence that cannot answer is rewritten or cut.
@@ -98,8 +114,9 @@ A second model can draft alternatives from a brief. It only has the brief,
 so the brief must carry the author's real practice. Its draft goes through
 the same review.
 
-## 9. When the author corrects the draft
+## 10. When the author corrects the draft
 
-A correction to one sentence is usually a rule for the whole article. Apply
-it everywhere, then write it back here if it would hold for the next
-article too.
+A correction to one sentence is usually a rule for the whole article, and a
+fault found in one article is usually in its siblings too. Apply it
+everywhere, check the other articles in the series, then write it back here
+if it would hold for the next article too.
