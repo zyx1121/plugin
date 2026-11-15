@@ -131,6 +131,10 @@ General rules only. Each came from a real correction.
 - Several values of 1 filter are 1 select, not a row of links.
 - Enlarge a tap target with padding and an equal negative margin, so the row
   keeps its height.
+- A full-screen surface does not repeat its name as a title when the
+  breadcrumb already shows it.
+- Content starts at the same inset as the fixed chrome around it: one token
+  for both.
 
 ## 8. Grow this skill
 
