@@ -124,13 +124,39 @@ what the text already says is decoration: remove it.
 6. Operate every choice in a real browser, at desktop and phone width,
    before showing it.
 
+Pick the figure by what the reader does with the idea, and vary the kinds
+across an article and across a series:
+
+| The idea is | The reader | Kind |
+|---|---|---|
+| A choice between ways | Picks one and sees what it leads to | Choice |
+| A quantity that grows | Moves it and watches the parts change | Dial |
+| A run of messages | Replays it one event at a time | Trace |
+| A judgement | Answers first, then reads why | Quiz |
+| Parts and what passes between them | Reads it part by part | Drawing |
+| Something to build | Reads it line by line | Pseudo code |
+
+An article may hold several figures when each one answers its own question.
+When most figures in a series are one kind, the kind was picked by habit.
+
+Say what is official and what is self-built. For every tool, command or
+mechanism, state whether the product ships it, or the author made it, and
+name the built-in feature that is closest. Check the official documentation
+before writing either half. An illustrative design is labelled as one.
+
+A practice the author made (a skill, a convention, a checklist) is told as
+sharing: what it holds, how it is used, and how a reader with other needs
+and tastes would change it. Do not present it as the standard.
+
 A technical mechanism is taught at the depth a systems course would give
 it, so the reader could build a small one:
 
 1. Start from the problem it solves, then show one run of it, then name it.
 2. Draw its model: the parts and what passes between them (an architecture
    or a flow), nothing decorative.
-3. Give about ten lines of pseudo code with a comment on each step.
+3. Give about ten lines of pseudo code with a comment on each step, only
+   where the reader would build from it. A quantity that grows, a run of
+   messages or a judgement call is not code: draw it as what it is.
 4. State one trade-off and when the mechanism fails.
 5. List the primary sources (the specification, the official docs, the
    paper) with links, and fetch each one before citing it. State the
