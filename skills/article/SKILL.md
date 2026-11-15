@@ -100,6 +100,17 @@ it.
    it".
 4. End with the one action that makes the practice better over time, not
    with a recap.
+5. Say the premise before the advice. Advice that picks one option only
+   makes sense to a reader who knows the options exist. Open with what the
+   reader may not know: what the tool does by default, which ways exist,
+   what goes wrong without the practice. A thing nobody mentioned is a
+   thing the reader does not know.
+6. Read the draft as someone who has never seen the author's setup. Every
+   fact the advice depends on is said in the article or linked from it. A
+   term from another field or from a later article counts as unsaid.
+7. Keep the article's history out of the article. The page shows the
+   version and the date of the last change. What changed is a record for
+   the author, kept in the data, not printed.
 
 ## 6. Teach a mechanism, then let the reader operate it
 
