@@ -1,6 +1,6 @@
 ---
 name: article
-description: "Write a teaching article or blog post that teaches the author's practice in a textbook voice: what it says, in what order, and how to review it as a reader. Use when drafting, rewriting or reviewing an article, a lesson or a course note. Triggers on '寫文章', '寫下一篇', '寫一篇', 'blog', '教學文', '課程文', '改寫這篇', 'review 文案', 'write an article', 'write a post', 'next article'. NOT sentence shapes that sound machine-written; that's human-voice. NOT what a page shows or cuts; that's simple-first. NOT project reports or runbooks; that's project-docs."
+description: "Write a teaching article or blog post as a concept note, a deep dive or a field note: what it says, in what order, in which voice, and how to review it as a reader, alone or with a second model as the writer. Use when drafting, rewriting or reviewing an article, a lesson or a course note. Triggers on '寫文章', '寫下一篇', '寫一篇', 'blog', '教學文', '課程文', '改寫這篇', 'review 文案', 'write an article', 'write a post', 'next article'. NOT sentence shapes that sound machine-written; that's human-voice. NOT what a page shows or cuts; that's simple-first. NOT project reports or runbooks; that's project-docs."
 ---
 
 # article
@@ -26,19 +26,29 @@ ship it), each question is its own article, and the first one keeps only
 the choice and links to the rest. A point that belongs to a sibling
 article moves there; it is not repeated.
 
-## 2. Teach the author's practice, in a textbook voice
+## 2. Pick the kind, and write in its voice
 
-The content is the author's real practice. The voice is a textbook's: the
-article teaches, and the author does not appear in it.
+Decide the kind before the outline. Each kind answers its own question, in
+its own voice and order.
 
-- No first person: no "I", "my" or "we". The subject is the reader, the
-  tool or the practice.
-- Each section is a principle, a method or a next step, and its heading
-  says which.
+| Kind | The reader asks | Voice | Order |
+|---|---|---|---|
+| Concept note | What is it, and when do I use it? | No author: the subject is the reader, the tool or the agent | What it is, the problem it solves, when to use it, when not to |
+| Deep dive | How does it work? | No author | The core in two sentences, the run in order, what follows from it, where it fails and how to check |
+| Field note | Should I do what the author does? | First person | What I do, the mechanism it rests on, what it costs, when it fits and when it does not |
+
+- A deep dive explains how the thing works: who does what, when, and where
+  the data goes. It is not an experiment report. How the author confirmed a
+  fact stays out of the article.
+- A field note says "I" only for what the source states as the author's
+  practice. A consequence of the mechanism is written as a consequence, not
+  as "I chose" or "I accept".
+- A part of the order that the sources cannot fill is left out, and the
+  article is shorter. A cost, a motive or a failure case made up to fill
+  the template is an invented fact.
+- A concept note leaves protocols and internals to the deep dive it links.
 - An example is introduced as an example ("For example: ..."), not as
-  something the author once typed.
-- The article shares how to work. It is not a data report: no usage
-  statistics, and no notes on how something was counted.
+  something the author once typed, unless the article is a field note.
 - An opinion is written as an instruction with its reason, not as a
   feeling.
 
@@ -108,7 +118,11 @@ it.
 6. Read the draft as someone who has never seen the author's setup. Every
    fact the advice depends on is said in the article or linked from it. A
    term from another field or from a later article counts as unsaid.
-7. Keep the article's history out of the article. The page shows the
+7. A mechanism's name (a tool call, a context window, a token) reaches
+   the reader in one of two ways: an article listed as "read first" covers
+   it, or the article explains it in at most two sentences, with a link,
+   where it first appears. A name used first and linked later fails.
+8. Keep the article's history out of the article. The page shows the
    version and the date of the last change. What changed is a record for
    the author, kept in the data, not printed.
 
@@ -128,8 +142,9 @@ what the text already says is decoration: remove it.
    question the figure answers just before it, so the reader predicts first.
 2. One control a figure. Each choice changes the content, not only a color.
 3. It never plays by itself: what changes on screen is the reader's doing.
-4. Fill it with the author's real setup (files, names, versions), with
-   private names masked.
+4. Fill it with the author's real setup (files, names), with private
+   names masked. A version shown in a figure is a neutral example, not the
+   real one.
 5. A table of pairs is a lookup, not a lesson. Keep it static, at the end,
    where the reader checks what they learned.
 6. Operate every choice in a real browser, at desktop and phone width,
@@ -146,6 +161,10 @@ across an article and across a series:
 | A judgement | Answers first, then reads why | Quiz |
 | Parts and what passes between them | Reads it part by part | Drawing |
 | Something to build | Reads it line by line | Pseudo code |
+
+A rewrite keeps the figures. Place each one in the section it serves, and
+let the paragraph before it say what the figure shows. Drop a figure only
+when it no longer belongs to the article's idea.
 
 An article may hold several figures when each one answers its own question.
 When most figures in a series are one kind, the kind was picked by habit.
@@ -188,23 +207,31 @@ it, so the reader could build a small one:
 
 ## 7. Name things
 
-1. Name the subject. In headings, labels and the first mention in each
-   paragraph, write the product's name, not "it".
+1. Name the subject. In labels and in the first mention in each
+   paragraph, write the product's name, not "it". Do not force the name
+   into every heading.
 2. Say who does what to what. "How Claude Code finishes a task", not "It
    runs a full lap".
-3. A heading is a full plain sentence a person would say to a colleague.
+3. A heading is a full plain sentence a person would say to a colleague:
+   the section's conclusion, or the question it answers. No label in front
+   of it ("Principle:", "Method:").
 4. One name for one thing, and proper nouns in their own casing.
 5. A tool or product the author made is unknown to the reader. At its
    first mention in each article, say what it is in plain words and link
    to its page or repository. A bare name teaches nothing.
-6. Do not call the article by an internal label ("this log", "this entry").
+6. Do not call the article by an internal label ("this log", "this entry"),
+   and do not mention how it was written ("the old article", "the source").
+7. The title, the summary and the headings are plain text: no code marks
+   and no links. An article does not link to its own term.
 
-## 8. Numbers that teach stay, measurements go
+## 8. Nothing that goes stale
 
-Teach the idea first. A number stays when the reader needs it to follow
-the step: a version, a limit, how many parts a thing has. Usage statistics
-and measurements of the author's own work are left out, with the notes on
-how they were counted.
+The article must still hold a year from now. Leave out dates, version
+numbers, model names, trial counts, usage statistics and measurements of
+the author's own work, with the notes on how they were counted.
+
+A number stays when it is the subject of the step: how many parts a thing
+has, or an example version in a lesson about versions.
 
 ## 9. Emphasis is the article in brief
 
@@ -222,13 +249,37 @@ for decoration.
 4. Run the `human-voice` checks for sentence shapes.
 5. Look at the rendered page, not only the text: a line that breaks inside a
    phrase reads as a mistake.
+6. Use only the markup the page renders. A table or a list the page cannot
+   draw shows up as raw symbols. Search every rendered page for leftover
+   markup, after any entry animation has finished.
 
-A second model can draft alternatives from a brief, and can design the
-lesson: ask it how to teach the idea, not how to word it. It only has the
-brief, so the brief must carry the author's real practice and the checked
-facts. Its draft goes through the same review.
+## 11. Write with a second model
 
-## 11. When the author corrects the draft
+A second model can write the draft, and can design the lesson: ask it how
+to teach the idea, not only how to word it. It only has the brief.
+
+1. The brief carries everything: the rules, the kind, the facts, what the
+   reader has already read, the terms that can be linked and their exact
+   names, and the figures to keep. The facts are the only source.
+2. The writer lists what it left out for lack of facts. Read that list: it
+   is the research still to do.
+3. Check each draft by script first: stale patterns, names to mask, link
+   names, terms explained at first use, figures placed, words about the
+   writing process, markup the page cannot draw.
+4. A different model gates each draft against its brief. It scores the
+   draft, quotes every claim the facts do not support, and gives
+   instructions that quote the sentence to change.
+5. The script's findings and the gate's go back to the writer for one
+   revision. Then confirm by script that each quoted claim is gone.
+
+A writer model has habits. Name them in the brief:
+
+- It fills a part of the template with an invented motive or cost.
+- It leaves the figures out.
+- It says the core sentence in the opening, the middle and the ending.
+- It mentions the brief or the article it rewrites.
+
+## 12. When the author corrects the draft
 
 A correction to one sentence is usually a rule for the whole article, and a
 fault found in one article is usually in its siblings too. Apply it
