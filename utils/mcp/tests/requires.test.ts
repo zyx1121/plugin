@@ -157,6 +157,16 @@ describe("ssh aliases are read from the config, not dialled", () => {
     expect([...sshConfigHosts(config)].sort()).toEqual(["king", "pve"]);
   });
 
+  test("a config.d with more than 16 files still yields every alias", () => {
+    mkdirSync(join(scratch, "conf.d"), { recursive: true });
+    for (let i = 0; i < 40; i++) writeFileSync(join(scratch, "conf.d", `h${i}.conf`), `Host alias${i}\n`);
+    const config = writeConfig("Include conf.d/*.conf\n");
+
+    const hosts = sshConfigHosts(config);
+    expect(hosts.size).toBe(40);
+    expect(hosts.has("alias39")).toBe(true);
+  });
+
   test("a globbed Include is followed, a broken one is ignored", () => {
     mkdirSync(join(scratch, "conf.d"), { recursive: true });
     writeFileSync(join(scratch, "conf.d", "a.conf"), "Host alpha\n");

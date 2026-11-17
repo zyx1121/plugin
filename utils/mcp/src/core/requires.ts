@@ -57,6 +57,9 @@ export function findOnPath(name: string, env: Record<string, string | undefined>
   return Bun.which(name, { PATH: env.PATH ?? "" });
 }
 
+/** Upper bound on config files visited, so an Include loop or a huge config.d stays cheap. */
+const MAX_CONFIG_FILES = 128;
+
 /**
  * Literal host aliases declared in an SSH config, following `Include` best effort.
  *
@@ -67,7 +70,7 @@ export function findOnPath(name: string, env: Record<string, string | undefined>
 export function sshConfigHosts(configPath: string = join(homedir(), ".ssh", "config"), seen: Set<string> = new Set()): Set<string> {
   const aliases = new Set<string>();
   const resolved = expandHome(configPath);
-  if (seen.has(resolved) || seen.size > 16) return aliases;
+  if (seen.has(resolved) || seen.size > MAX_CONFIG_FILES) return aliases;
   seen.add(resolved);
 
   let text: string;
