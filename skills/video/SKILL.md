@@ -82,6 +82,18 @@ Settle these in the script, before building a frame.
 5. **Drive every animation by frame** in Remotion. CSS animation and
    motion libraries do not sync with rendering.
 
+## Sound effects
+
+1. **Mark the beats, under the voice.** Short effects peak around -13 dB
+   and go lower under speech.
+2. **Land on the frame of the action**: a box landing, an arrival, a click.
+   Check the onsets with ffmpeg `silencedetect` against the frames.
+3. **Rise in pitch on repeated actions**, for example a pentatonic step per
+   box, so the viewer hears progress.
+4. **A moving thing sounds as long as it moves**: the whoosh envelope spans
+   the trip.
+5. **Close the last step with a different sound**, such as a confirmation.
+
 ## Screens and end cards
 
 - Draw product screens from the product's own code or design system when
