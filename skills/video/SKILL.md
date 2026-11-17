@@ -82,6 +82,15 @@ Settle these in the script, before building a frame.
 5. **Drive every animation by frame** in Remotion. CSS animation and
    motion libraries do not sync with rendering.
 
+## Subtitles and loudness
+
+1. **Split long subtitles where the voice says them.** Cut at punctuation
+   into lines of 16 Chinese characters or fewer, and switch lines at the
+   moment the speech reaches each one, timed from word timestamps of a
+   transcription of the clip.
+2. **Deliver at -14 LUFS** with true peaks under -1 dB, measured after any
+   speed-up, so every video plays equally loud.
+
 ## Sound effects
 
 1. **Mark the beats, under the voice.** Short effects peak around -13 dB
