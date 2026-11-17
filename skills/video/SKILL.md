@@ -52,6 +52,36 @@ Settle these in the script, before building a frame.
    (scene change, click, element entering or leaving). Put them in a grid
    and look at them. Fix what is wrong, then deliver.
 
+## Look
+
+1. **Cloud white, one accent.** The background is an off-white, not pure
+   white. Cards are white with a soft shadow. One accent color covers about
+   10% of a frame at most.
+2. **Mix colors in sRGB.** An oklch mix detours through other hues: white
+   to blue flashes pink halfway.
+3. **One stroke width and one icon set** per video.
+4. **Keep to the safe area.** Nothing within 96px of the sides or 54px of
+   the top and bottom. A subtitle line holds 16 Chinese characters at most
+   and does not end with a period.
+5. **Lines never touch text.** A return arc runs below the labels, and an
+   arrowhead clears them.
+6. **One star move per shot.** Everything else stays quiet. When
+   everything moves, nothing is the point.
+7. **Shots leave before the next one enters.** No double exposure at a cut.
+
+## Diagrams
+
+1. **Draw structures and flows in code**, not with stock images: boxes,
+   arrows, layers, sequences, topologies.
+2. **A packet leads its arrow.** The arrow grows behind it. It rests about
+   10 frames at each stop, then the next step starts with no idle gap.
+3. **Time each step by its length.** A long arc gets more frames, so the
+   pace stays even and nothing suddenly races.
+4. **Draw arrowheads on curves yourself**, from the end tangent. Markers on
+   a curve sit crooked.
+5. **Drive every animation by frame** in Remotion. CSS animation and
+   motion libraries do not sync with rendering.
+
 ## Screens and end cards
 
 - Draw product screens from the product's own code or design system when
@@ -65,4 +95,6 @@ Settle these in the script, before building a frame.
 1. Story rules 1 to 5 hold for the final cut.
 2. Every voice-over line passed the speech-to-text check.
 3. The frame grid shows no element that pops in, vanishes or overlaps.
+   Stills every 0.1 s around each cut show no double exposure, and zoomed
+   crops of arrowheads, line gaps and color transitions look clean.
 4. The file opens and plays from start to end.
