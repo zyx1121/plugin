@@ -62,10 +62,10 @@ One Markdown file per rule. Front matter keys:
 | Key | Required | Meaning |
 |---|---|---|
 | `id` | yes | Kebab-case name, same as the file name |
-| `engine` | yes | `grep` or `model` |
+| `engine` | yes | `grep`, `path` or `model` |
 | `files` | yes | Quoted globs: `["**/*.{md,tsx}"]`. `**` crosses folders |
 | `exclude` | no | Quoted globs to skip |
-| `pattern` | grep only | A JavaScript regular expression, tested per added line |
+| `pattern` | grep, path | A JavaScript regular expression, tested per added line (`grep`) or on each changed file's path (`path`) |
 | `requires` | no | A repo path that must exist for the rule to apply |
 | `source` | yes | Where the rule came from: a memory name, a PR, a date |
 

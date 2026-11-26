@@ -2,7 +2,8 @@
 // The deterministic half of alint. Reads the diff against a base, loads the
 // rules (this skill's rules/ plus the repo's .alint/rules/, repo wins on the
 // same id), runs every `engine: grep` rule on the added lines, and lists the
-// `engine: model` rules that apply to the changed files. Prints JSON.
+// `engine: model` rules that apply to the changed files. An `engine: path`
+// rule tests its pattern on the name of each changed file. Prints JSON.
 //
 //   node alint.mjs [--base main] [--repo .] [--ci]
 //
@@ -67,8 +68,8 @@ export function parseRule(text, path) {
   for (const key of ["id", "engine", "files"]) {
     if (!meta[key]) throw new Error(`${path}: missing ${key}`);
   }
-  if (meta.engine === "grep" && !meta.pattern) {
-    throw new Error(`${path}: a grep rule needs a pattern`);
+  if ((meta.engine === "grep" || meta.engine === "path") && !meta.pattern) {
+    throw new Error(`${path}: a ${meta.engine} rule needs a pattern`);
   }
   return { ...meta, body: match[2].trim(), path };
 }
@@ -87,7 +88,8 @@ export function addedLines(diff) {
   let line = 0;
   for (const raw of diff.split("\n")) {
     if (raw.startsWith("+++ ")) {
-      file = raw === "+++ /dev/null" ? null : raw.slice(6);
+      // Git ends the name with a tab when it holds a space.
+      file = raw === "+++ /dev/null" ? null : raw.slice(6).replace(/\t$/, "");
     } else if (raw.startsWith("@@")) {
       line = Number(raw.match(/\+(\d+)/)[1]);
     } else if (file && raw.startsWith("+")) {
@@ -102,9 +104,14 @@ const matches = (rule, file) =>
   rule.files.some((glob) => globToRegExp(glob).test(file)) &&
   !(rule.exclude ?? []).some((glob) => globToRegExp(glob).test(file));
 
+/** Binary files a diff adds or changes; they have no added lines. */
+export function binaryFiles(diff) {
+  return [...diff.matchAll(/^Binary files .* and b\/(.*) differ$/gm)].map((m) => m[1]);
+}
+
 export function run({ rules, diff, exists }) {
   const added = addedLines(diff);
-  const changed = [...new Set(added.map((a) => a.file))];
+  const changed = [...new Set([...added.map((a) => a.file), ...binaryFiles(diff)])];
   const active = rules.filter((rule) => !rule.requires || exists(rule.requires));
   const findings = [];
   for (const rule of active.filter((r) => r.engine === "grep")) {
@@ -112,6 +119,14 @@ export function run({ rules, diff, exists }) {
     for (const a of added) {
       if (matches(rule, a.file) && re.test(a.text)) {
         findings.push({ rule: rule.id, file: a.file, line: a.line, text: a.text.trim() });
+      }
+    }
+  }
+  for (const rule of active.filter((r) => r.engine === "path")) {
+    const re = new RegExp(rule.pattern);
+    for (const file of changed) {
+      if (matches(rule, file) && re.test(file)) {
+        findings.push({ rule: rule.id, file, line: 1, text: file });
       }
     }
   }
