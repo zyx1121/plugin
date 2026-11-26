@@ -42,10 +42,11 @@ hits. The reusable workflow `zyx1121/.github/.github/workflows/alint.yml`
 runs it on every pull request of a repo that calls it, so the `grep` half
 blocks the merge on its own. The same workflow then runs
 `scripts/alint-model.mjs`, which sends each `model` rule and the diff of the
-files it covers to Claude Haiku and fails the check on a finding. It needs
-the repo secret `ANTHROPIC_API_KEY`, passed with `secrets: inherit`; without
-it the `model` rules show as a notice, and step 2 above still runs before
-the PR.
+files it covers to Claude Haiku. It fails the check on a finding and also
+when a model check could not run. It needs the repo secret
+`ANTHROPIC_API_KEY`, passed by name (`secrets: inherit` does not cross from
+an org repo to this zyx1121 workflow); without it the `model` rules show as
+a notice, and step 2 above still runs before the PR.
 
 A repo adds the gate with one file:
 
@@ -57,7 +58,8 @@ on:
 jobs:
   alint:
     uses: zyx1121/.github/.github/workflows/alint.yml@main
-    secrets: inherit
+    secrets:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 ```
 
 ## Rule files

@@ -148,7 +148,7 @@ export function annotations({ grep, model }) {
     (f) => `::error file=${f.file},line=${f.line},title=alint ${f.rule}::${esc(f.text)}`
   );
   for (const rule of model) {
-    lines.push(`::notice title=alint ${rule.id}::model rule, run the zyx:alint agent on ${rule.files.length} file(s)`);
+    lines.push(`::notice title=alint ${rule.id}::model rule on ${rule.files.length} file(s): CI runs it when the repo passes ANTHROPIC_API_KEY, else run the zyx:alint agent`);
   }
   return lines;
 }
