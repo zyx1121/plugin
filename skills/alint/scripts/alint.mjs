@@ -153,7 +153,8 @@ export function annotations({ grep, model }) {
   return lines;
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+/** Rules, the diff against the merge base and the result for a repo. */
+export function collect({ repo, base }) {
   const byId = new Map();
   for (const rule of [...loadRules(skillRules), ...loadRules(join(repo, ".alint", "rules"))]) {
     byId.set(rule.id, rule);
@@ -184,11 +185,17 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
         return error.stdout?.toString() ?? "";
       }
     });
+  const rules = [...byId.values()];
   const result = run({
-    rules: [...byId.values()],
+    rules,
     diff: [diff, ...untracked].join("\n"),
     exists: (path) => existsSync(join(repo, path)),
   });
+  return { rules, mergeBase, result };
+}
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  const { mergeBase, result } = collect({ repo, base });
   console.log(JSON.stringify({ base, mergeBase, ...result }, null, 2));
   if (ci) {
     for (const line of annotations(result)) console.log(line);

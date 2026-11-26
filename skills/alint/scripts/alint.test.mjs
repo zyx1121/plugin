@@ -159,3 +159,11 @@ test("referrer policy header, not the img attribute", () => {
   });
   assert.deepEqual(hits(out, "referrer-policy-same-origin"), ["next.config.ts:11", "Caddyfile:11"]);
 });
+
+test("model prompt wraps the rule and the diff as data", async () => {
+  const { prompt } = await import("./alint-model.mjs");
+  const rule = rules.find((r) => r.id === "sign-in-centered");
+  const text = prompt(rule, "+<h1>x</h1>");
+  assert.ok(text.startsWith('<rule id="sign-in-centered">'));
+  assert.ok(text.includes("<diff>\n+<h1>x</h1>\n</diff>"));
+});
