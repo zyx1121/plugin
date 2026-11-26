@@ -30,7 +30,7 @@ test("globs", () => {
 });
 
 test("every rule parses", () => {
-  assert.equal(rules.length, 13);
+  assert.equal(rules.length, 15);
   for (const rule of rules) assert.ok(["grep", "model", "path"].includes(rule.engine));
 });
 
@@ -191,4 +191,17 @@ test("model batches split by size and flag files too large", async () => {
   const plan = batches([["a", "x".repeat(6)], ["b", "x".repeat(6)], ["c", "x".repeat(20)]], 10);
   assert.deepEqual(plan.batches.map((b) => b.map(([f]) => f)), [["a"], ["b"]]);
   assert.deepEqual(plan.tooLarge, ["c"]);
+});
+
+test("kicad rules files and install paths", () => {
+  const out = run({
+    rules,
+    diff: [
+      diff("kicad/b.kicad_dru", "(constraint track_angle (min 89deg))", "(condition \"A.Parent.Reference == 'U5'\")", "(constraint track_angle (min 89))", "(condition \"A.memberOfFootprint('U5')\")"),
+      diff("tools/fab.py", "CLI = r\"C:\\Program Files\\KiCad\\10.0\\bin\\kicad-cli.exe\"", "CLI = shutil.which(\"kicad-cli\")"),
+    ].join("\n"),
+    exists: () => false,
+  });
+  assert.deepEqual(hits(out, "kicad-dru-silent-drop"), ["kicad/b.kicad_dru:11", "kicad/b.kicad_dru:12"]);
+  assert.deepEqual(hits(out, "kicad-hardcoded-path"), ["tools/fab.py:11"]);
 });
