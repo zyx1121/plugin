@@ -2,7 +2,7 @@
 id: kicad-hardcoded-path
 engine: grep
 files: ["**/*.{py,ps1,sh,ts,mjs,toml}"]
-exclude: ["**/alint/rules/**"]
+exclude: ["**/alint/rules/**", "**/alint/scripts/**"]
 pattern: "[A-Za-z]:[\\/]+Program Files[\\/]+KiCad"
 source: memory pcb-flow-survey; vacuum-controller tools ported to the KiCad container (2026-11-26)
 ---
