@@ -30,8 +30,8 @@ test("globs", () => {
 });
 
 test("every rule parses", () => {
-  assert.equal(rules.length, 9);
-  for (const rule of rules) assert.ok(["grep", "model"].includes(rule.engine));
+  assert.equal(rules.length, 13);
+  for (const rule of rules) assert.ok(["grep", "model", "path"].includes(rule.engine));
 });
 
 test("added lines keep their new line numbers", () => {
@@ -114,4 +114,48 @@ test("ci annotations: an error per grep finding, a notice per model rule", () =>
   assert.equal(lines.filter((l) => l.startsWith("::error ")).length, 1);
   assert.ok(lines[0].startsWith("::error file=app/page.tsx,line=11,title=alint no-dash-separators::"));
   assert.equal(lines.filter((l) => l.startsWith("::notice ")).length, out.model.length);
+});
+
+const hits = (out, id) =>
+  out.grep.filter((f) => f.rule === id).map((f) => `${f.file}:${f.line}`);
+
+test("icloud duplicate files hit by name", () => {
+  const out = run({
+    rules,
+    diff: [
+      diff("app/page 2.tsx", "x"),
+      diff("README 3.md", "x"),
+      diff("app/page.tsx", "x"),
+      diff("docs/v2.md", "x"),
+      diff("fonts/Inter 400.woff2", "x"),
+      "diff --git a/f/A 2.woff2 b/f/A 2.woff2\nnew file mode 100644\nBinary files /dev/null and b/f/A 2.woff2 differ",
+    ].join("\n"),
+    exists: () => false,
+  });
+  assert.deepEqual(hits(out, "icloud-duplicate-files"), ["app/page 2.tsx:1", "README 3.md:1", "f/A 2.woff2:1"]);
+});
+
+test("native form controls outside components/ui", () => {
+  const out = run({
+    rules,
+    diff: [
+      diff("app/page.tsx", "<select value={a}>", "<textarea rows={3} />", "<Select items={a}>", '<input type="file" />'),
+      diff("components/ui/textarea.tsx", "<textarea"),
+    ].join("\n"),
+    exists: () => false,
+  });
+  assert.deepEqual(hits(out, "native-form-controls"), ["app/page.tsx:11", "app/page.tsx:12"]);
+});
+
+test("referrer policy header, not the img attribute", () => {
+  const out = run({
+    rules,
+    diff: [
+      diff("next.config.ts", '{ key: "Referrer-Policy", value: "no-referrer" }', '{ key: "Referrer-Policy", value: "same-origin" }'),
+      diff("Caddyfile", "header Referrer-Policy no-referrer", "header Referrer-Policy no-referrer-when-downgrade"),
+      diff("app/song.tsx", 'referrerPolicy="no-referrer"'),
+    ].join("\n"),
+    exists: () => false,
+  });
+  assert.deepEqual(hits(out, "referrer-policy-same-origin"), ["next.config.ts:11", "Caddyfile:11"]);
 });
