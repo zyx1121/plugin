@@ -159,3 +159,36 @@ test("referrer policy header, not the img attribute", () => {
   });
   assert.deepEqual(hits(out, "referrer-policy-same-origin"), ["next.config.ts:11", "Caddyfile:11"]);
 });
+
+test("model prompt wraps the rule and the diff as data", async () => {
+  const { prompt } = await import("./alint-model.mjs");
+  const rule = rules.find((r) => r.id === "sign-in-centered");
+  const text = prompt(rule, "+<h1>x</h1>");
+  assert.ok(text.startsWith('<rule id="sign-in-centered">'));
+  assert.ok(text.includes("<diff>\n+<h1>x</h1>\n</diff>"));
+});
+
+test("model diff numbers added lines and keeps only findings on them", async () => {
+  const { numberDiff, validFindings } = await import("./alint-model.mjs");
+  const { text, added } = numberDiff(
+    ["--- a/app/p.tsx", "+++ b/app/p.tsx", "@@ -4,2 +4,3 @@", " keep", "-old", "+new", "+more", " tail"].join("\n")
+  );
+  assert.ok(text.includes("+[L5] new") && text.includes("+[L6] more"));
+  assert.deepEqual([...added.get("app/p.tsx")], [5, 6]);
+  const kept = validFindings(
+    [
+      { file: "app/p.tsx", line: 5 },
+      { file: "app/p.tsx", line: 4 },
+      { file: "x,line=1::evil\n::error", line: 5 },
+    ],
+    added
+  );
+  assert.deepEqual(kept, [{ file: "app/p.tsx", line: 5 }]);
+});
+
+test("model batches split by size and flag files too large", async () => {
+  const { batches } = await import("./alint-model.mjs");
+  const plan = batches([["a", "x".repeat(6)], ["b", "x".repeat(6)], ["c", "x".repeat(20)]], 10);
+  assert.deepEqual(plan.batches.map((b) => b.map(([f]) => f)), [["a"], ["b"]]);
+  assert.deepEqual(plan.tooLarge, ["c"]);
+});

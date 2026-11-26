@@ -40,8 +40,13 @@ the sandbox copy with `.git`. It is read-only and needs only Node 22.
 `--ci` prints a GitHub annotation per finding and exits 1 when a `grep` rule
 hits. The reusable workflow `zyx1121/.github/.github/workflows/alint.yml`
 runs it on every pull request of a repo that calls it, so the `grep` half
-blocks the merge on its own. CI cannot dispatch the agent: the `model` rules
-show as notices, and step 2 above still runs before the PR.
+blocks the merge on its own. The same workflow then runs
+`scripts/alint-model.mjs`, which sends each `model` rule and the diff of the
+files it covers to Claude Haiku. It fails the check on a finding and also
+when a model check could not run. It needs the repo secret
+`ANTHROPIC_API_KEY`, passed by name (`secrets: inherit` does not cross from
+an org repo to this zyx1121 workflow); without it the `model` rules show as
+a notice, and step 2 above still runs before the PR.
 
 A repo adds the gate with one file:
 
@@ -53,6 +58,8 @@ on:
 jobs:
   alint:
     uses: zyx1121/.github/.github/workflows/alint.yml@main
+    secrets:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 ```
 
 ## Rule files
