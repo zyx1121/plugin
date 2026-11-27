@@ -35,16 +35,17 @@ bash "$R" codex  --intent /tmp/review-intent.md --base main > /tmp/review-codex.
 bash "$R" gemini --intent /tmp/review-intent.md --base main > /tmp/review-gemini.json
 ```
 
-- Each run clones the branch on the sandbox into
-  `~/p/<org>/<repo>/review-<branch>/<model>/`, one disposable checkout per
-  model. `claim --reap` deletes it after 24 hours idle.
-- In that checkout the reviewer may run commands and tests and edit files to
-  prove an exploit. Nothing is pushed back.
-- Codex runs `codex exec` in its `workspace-write` sandbox. Gemini runs
-  `agy` with `gemini-4-neon-high`. Add `--effort xhigh` for the riskiest
-  changes.
+- Each run makes a fresh clone of the pushed commit on the sandbox under
+  `~/p/<org>/<repo>/review-<branch>-<hash>/<model>/`. `claim --reap` deletes
+  it after 24 hours idle.
+- The reviewer runs in a bwrap jail: it sees the checkout and its own
+  sign-in, nothing else in the home directory. Inside it may run commands and
+  tests and edit files to prove an exploit. Nothing is pushed back.
+- Codex runs `codex exec`, Gemini runs `agy` with `gemini-4-neon-high`. Add
+  `--effort xhigh` to either for the riskiest changes.
 - Both return one JSON object that follows `scripts/finding.schema.json`:
-  a verdict and findings with severity, status, file, line, failure and fix.
+  a verdict and findings with severity, status, file, line, failure and fix,
+  plus `model`, `sha` and `round`.
 - Use `--base <ref>` when the branch is not cut from `main`.
 - If one leg fails, the script says why. Continue with the others and say so
   in the report.
