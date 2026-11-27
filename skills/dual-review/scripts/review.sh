@@ -51,4 +51,5 @@ e() { printf '%s' "$1" | base64 | tr -d '\n'; }
 ssh -o BatchMode=yes sandbox bash -s -- \
   "$(e "$model")" "$(e "$repo")" "$(e "$branch")" "$(e "$sha")" "$(e "$base")" \
   "$(e "$round")" "$(e "$effort")" "$(e "$(cat "$intent_file")")" \
-  "$(e "$(cat "$here/finding.schema.json")")" "$(e "$review_id")" < "$here/remote.sh"
+  "$(e "$(cat "$here/finding.schema.json")")" "$(e "$review_id")" \
+  "$(e "$(cat "$here/proxy.ts")")" "$(e "$(cat "$here/relay.ts")")" "$(e "$(cat "$here/allowed-hosts.txt")")" < "$here/remote.sh"
