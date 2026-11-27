@@ -37,7 +37,9 @@ bash "$R" gemini --intent "$D/intent.md" --base main > "$D/gemini.json"
 ```
 
 - Each run makes a fresh clone of the pushed commit on the sandbox under
-  `~/p/<org>/<repo>/review-<branch>-<hash>/<model>/`. `claim --reap` deletes
+  `~/p/<org>/<repo>/review-<branch>-<hash>/<model>/`. The hash includes the
+  name of `$D`, so keep the same `$D` for round 2 and use a new one for a
+  separate review of the same branch (or pass `--review-id`). `claim --reap` deletes
   it after 24 hours idle.
 - The reviewer runs in a bwrap jail: it sees the checkout and its own
   sign-in, nothing else in the home directory. Inside it may run commands and

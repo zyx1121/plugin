@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Runs on the sandbox host, fed through `ssh sandbox bash -s` by review.sh.
 # Every argument arrives base64-encoded, so ssh never re-parses user data:
-#   model repo branch sha base round effort intent schema
+#   model repo branch sha base round effort intent schema review_id
 # All work happens inside main(), so bash has read the whole script before
 # any child process can touch stdin.
 set -euo pipefail
@@ -12,10 +12,10 @@ main() {
   die() { echo "remote.sh: $*" >&2; exit 2; }
   d() { printf '%s' "$1" | base64 -d; }
 
-  [[ $# -eq 9 ]] || die "expected 9 arguments, got $#"
-  local model repo branch sha base round effort intent
+  [[ $# -eq 10 ]] || die "expected 10 arguments, got $#"
+  local model repo branch sha base round effort intent rid
   model=$(d "$1") repo=$(d "$2") branch=$(d "$3") sha=$(d "$4")
-  base=$(d "$5") round=$(d "$6") effort=$(d "$7") intent=$(d "$8")
+  base=$(d "$5") round=$(d "$6") effort=$(d "$7") intent=$(d "$8") rid=$(d "${10}")
 
   [[ $model == codex || $model == gemini ]] || die "bad model"
   [[ $repo =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ && $repo != *..* ]] || die "bad repo"
@@ -25,10 +25,13 @@ main() {
   [[ $round == 1 || $round == 2 ]] || die "bad round"
   [[ $effort =~ ^(low|medium|high|xhigh)$ ]] || die "bad effort"
   [[ -n $intent ]] || die "empty intent"
+  [[ $rid =~ ^[A-Za-z0-9_.-]{1,64}$ ]] || die "bad review id"
 
-  # One dir per branch: a readable slug plus a hash, so feat/a and feat-a differ.
+  # One dir per branch and review: a readable slug plus a hash of repo, branch
+  # and review id, so feat/a and feat-a differ and two reviews of one branch
+  # never share a session id.
   local key work src state home
-  key=$(printf '%s' "$branch" | tr -c 'A-Za-z0-9._-' '-' | cut -c1-40)-$(printf '%s' "$repo:$branch" | sha256sum | cut -c1-16)
+  key=$(printf '%s' "$branch" | tr -c 'A-Za-z0-9._-' '-' | cut -c1-40)-$(printf '%s' "$repo:$branch:$rid" | sha256sum | cut -c1-16)
   work=$HOME/p/$repo/review-$key
   src=$work/$model
   state=$work/$model.state
