@@ -34,11 +34,16 @@ main() {
   home=$work/$model.home
   # Only touch a dir this script created: a new one gets an owner marker, an
   # existing one without the marker is someone else's.
-  if [[ -e $work ]]; then
-    [[ -f $work/.review-owner ]] || die "$work exists but was not made by review.sh"
-  else
-    mkdir -p "$work" && printf '%s\n' "$repo:$branch" > "$work/.review-owner"
-  fi
+  # Both legs start in parallel, so create the dir and its marker under a lock.
+  mkdir -p "$HOME/p/$repo"
+  (
+    flock 8
+    if [[ -e $work ]]; then
+      [[ -f $work/.review-owner ]] || die "$work exists but was not made by review.sh"
+    else
+      mkdir "$work" && printf '%s\n' "$repo:$branch" > "$work/.review-owner"
+    fi
+  ) 8>"$HOME/p/$repo/.review.lock" || exit 2
   [[ $(cat "$work/.review-owner") == "$repo:$branch" ]] || die "$work belongs to another branch"
   mkdir -p "$state"
   touch "$work/.seeded" # `claim --reap` deletes the dir after 24 h idle
@@ -122,8 +127,10 @@ For each finding from your previous review, set status \"fixed\" or \"still_open
   case $model in
     gemini)
       [[ -x $HOME/.local/bin/agy ]] || die "agy is not installed on the sandbox"
-      local settings='{"permissions":{"allow":["command(*)","write_file(*)","read_file(*)"]}}'
-      local args=(-p="$prompt" --model "gemini-4-neon-$effort" --output-format json
+      # accept-edits, not the default auto mode: auto starts agy's own
+      # namespace sandbox, which cannot nest inside the jail (EPERM).
+      local settings='{"enableTerminalSandbox":false,"permissions":{"allow":["command(*)","write_file(*)","read_file(*)"]}}'
+      local args=(-p="$prompt" --mode=accept-edits --model "gemini-4-neon-$effort" --output-format json
         --json-schema "$HOME/.review-schema.json" --settings "$settings" --print-timeout 1500s)
       if [[ $round == 2 ]]; then
         local id; id=$(cat "$state/id" 2>/dev/null || true)
