@@ -119,3 +119,10 @@ Settle these in the script, before building a frame.
    Stills every 0.1 s around each cut show no double exposure, and zoomed
    crops of arrowheads, line gaps and color transitions look clean.
 4. The file opens and plays from start to end.
+5. Gemini watched the final file. Dispatch the `zyx:gemini` agent on the
+   rendered file with the script beside it. Ask for a shot list with start
+   times, the narration as heard, the on-screen text, and every place where
+   the cut differs from the script or breaks a rule above. It sees the
+   frames and hears the audio, so it catches what a frame grid misses:
+   a wrong reading, a line that drifts from its subtitle, music over
+   speech. Fix what it reports, or note why a report is wrong.
