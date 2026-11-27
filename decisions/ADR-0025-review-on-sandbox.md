@@ -19,12 +19,16 @@ The MacBook is for editing only; builds and tests run on the sandbox.
 
 ## Decision
 
-- `review.sh` sends one leg to the sandbox over `ssh sandbox bash -s`. The
-  sandbox clones the pushed branch into a disposable checkout per model under
-  `~/p/<org>/<repo>/review-<branch>/`, reaped by `claim --reap`.
-- In that checkout the reviewer may run commands and tests and edit files.
-  Codex runs in its `workspace-write` sandbox. Gemini runs with allow rules,
-  since `agy` has no Linux sandbox that keeps commands useful.
+- `review.sh` sends one leg to the sandbox over `ssh sandbox bash -s`, with
+  every argument base64-encoded so ssh never re-parses a branch name.
+- The sandbox makes a fresh clone of the pushed commit for each model and
+  round under `~/p/<org>/<repo>/review-<branch>-<hash>/`, reaped by
+  `claim --reap`. The hash keeps `feat/a` and `feat-a` apart.
+- The reviewer runs in a bwrap jail: the filesystem read-only, the home
+  directory replaced by an empty tmpfs, and only the checkout, its state and
+  its own sign-in mounted back. Inside, Codex runs with `danger-full-access`
+  (it cannot nest its own bwrap) and Gemini with allow rules (`agy --sandbox`
+  restricts nothing on Linux, tested).
 - Both legs return JSON that follows `finding.schema.json`
   (`--output-schema` for Codex, `--json-schema` for Gemini).
 - Round 2 resumes the round 1 conversation by its stored id.
@@ -36,6 +40,7 @@ The MacBook is for editing only; builds and tests run on the sandbox.
 ## Consequences
 
 - A review needs the branch pushed first.
-- The sandbox holds the Codex and Antigravity sign-ins. A reviewer with
-  command access there can read them; a malicious diff could try prompt
-  injection. The checkout is disposable, but the host is not.
+- Network stays open in the jail, because the model APIs need it. A
+  prompt injection in a diff can reach the reviewer's own sign-in token and
+  the internet, but not the gh token, ssh keys, the other model's token or
+  other repositories.
