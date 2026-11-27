@@ -56,7 +56,9 @@ bash "$R" gemini --intent "$D/intent.md" --base main > "$D/gemini.json"
   plus `model`, `sha` and `round`.
 - Use `--base <branch>` when the branch is not cut from `main`. The base
   must be a branch on origin, not a tag.
-- If one leg fails, the script says why. Continue with the others and say so
+- If one leg fails, the script says why. A host the allowlist blocks shows in
+  the proxy deny log (`proxy.log` in the `<model>.state`
+  directory of the review). Continue with the others and say so
   in the report.
 
 Claude, through the Agent tool:
