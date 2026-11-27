@@ -25,8 +25,10 @@ The MacBook is for editing only; builds and tests run on the sandbox.
   round under `~/p/<org>/<repo>/review-<branch>-<hash>/`, reaped by
   `claim --reap`. The hash keeps `feat/a` and `feat-a` apart.
 - The reviewer runs in a bwrap jail: the filesystem read-only, the home
-  directory replaced by an empty tmpfs, and only the checkout, its state and
-  its own sign-in mounted back. Inside, Codex runs with `danger-full-access`
+  directory, /tmp and /run replaced by empty tmpfs, a cleared environment, and
+  only the checkout, the schema and a per-review CLI home mounted back. The
+  CLI home holds a copy of the sign-in, never the real `~/.codex` or
+  `~/.gemini`, so a reviewer cannot plant config that runs outside the jail. Inside, Codex runs with `danger-full-access`
   (it cannot nest its own bwrap) and Gemini with allow rules (`agy --sandbox`
   restricts nothing on Linux, tested).
 - Both legs return JSON that follows `finding.schema.json`
@@ -44,3 +46,5 @@ The MacBook is for editing only; builds and tests run on the sandbox.
   prompt injection in a diff can reach the reviewer's own sign-in token and
   the internet, but not the gh token, ssh keys, the other model's token or
   other repositories.
+- Reviewer commands share the sandbox PID namespace (#130): `--unshare-pid`
+  breaks `agy`. A review can see and signal other processes of the same user.
