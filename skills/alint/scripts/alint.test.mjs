@@ -32,7 +32,7 @@ test("globs", () => {
 });
 
 test("every rule parses", () => {
-  assert.equal(rules.length, 16);
+  assert.equal(rules.length, 17);
   for (const rule of rules) assert.ok(["grep", "model", "path"].includes(rule.engine));
 });
 
@@ -160,6 +160,28 @@ test("referrer policy header, not the img attribute", () => {
     exists: () => false,
   });
   assert.deepEqual(hits(out, "referrer-policy-same-origin"), ["next.config.ts:11", "Caddyfile:11"]);
+});
+
+test("ai tone buzzwords", () => {
+  const out = run({
+    rules,
+    diff: diff("docs/intro.md", "\u70ba\u5718\u968a\u8ce6\u80fd", "We leverage a seamless flow", "It saves a step"),
+    exists: () => false,
+  });
+  assert.deepEqual(hits(out, "ai-tone-phrases"), ["docs/intro.md:11", "docs/intro.md:12"]);
+});
+
+test("next csp needs a nonce and connect-src", () => {
+  const out = run({
+    rules,
+    diff: diff(
+      "proxy.ts",
+      `const a = "default-src 'self'; script-src 'self' 'unsafe-inline'"`,
+      `const b = "default-src 'self'; script-src 'self' 'nonce-\${nonce}'; connect-src 'self'"`,
+    ),
+    exists: () => false,
+  });
+  assert.deepEqual(hits(out, "next-csp-nonce-connect"), ["proxy.ts:11"]);
 });
 
 test("model prompt wraps the rule and the diff as data", async () => {
