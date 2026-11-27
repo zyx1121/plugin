@@ -19,7 +19,7 @@ description: "Loki 的唯一簡報 skill: 產 .pptx(NOT .key)涵蓋三類 deck:�
 |---|---|---|
 | 場景 | lab talk / pitch / demo / 現場報告 | 現場工作坊 / hands-on(邊講邊操作) |
 | 語言 | 投影片英文 | 英文短標題 + 中文一句 caption |
-| 密度 | 高,nested bullets 塞滿 | 極低,一頁一 beat、一句話 |
+| 密度 | 高,nested bullets 塞滿(lab meeting 預設;時間短照下方資訊解析度降) | 極低,一頁一 beat、一句話 |
 | 標題 | claim / dash 句型 | 英文短語,是節奏器不是內容 |
 | 頁數 | 正常 | 傳統的 3 到 4 倍(翻頁即動畫) |
 | 專章 | §3A | §3C |
@@ -29,6 +29,23 @@ description: "Loki 的唯一簡報 skill: 產 .pptx(NOT .key)涵蓋三類 deck:�
 母片是為報告 deck 做的(title 32 / body 24pt)。分鏡 deck 的落地缺口見該章「落地限制」,別假裝母片預設就對。
 
 第三類:主管 deck(給主管、行政、大眾)。全中文、幾乎不用 bullet、一頁一張圖卡,專章 §3D。2026-11 起老闆要求未來簡報儘量照他新簡報的樣子做。我們只學版型,檔案一律用本目錄清洗過的 `template.pptx`,不用他的母版(layout 重複、名稱雜、內容框畫死在 layout 上)。拿不準類別時先問聽眾是誰:技術同儕走 §3A,其餘走 §3D。
+
+### 資訊解析度:時間與聽眾決定細節量
+
+同一個研究可以用不同細節量講。時間不夠時降解析度,不是加快語速、縮小字或塞更多頁。分類後先定這份 deck 的解析度,再列頁。
+
+| 解析度 | 留在投影片上的內容 | 場景 |
+|---|---|---|
+| 高 | 完整公式、演算法、實作細節、實驗設定 | 論文、技術討論 |
+| 中 | 方法原理、架構、關鍵設計、實驗結果 | lab meeting(§3A 預設) |
+| 低 | 研究問題、核心概念、主要貢獻 | 10 分鐘左右的 conference talk |
+| 極低 | 一句話講研究與它的價值 | 面試、自我介紹(1 到 2 分鐘) |
+
+- 列頁前先寫每頁的核心訊息:寫「希望聽眾理解什麼」,不是「我想講什麼」。
+- 自我檢查:同一個研究要能講成 Title(一句)、Abstract(一段)、Introduction(完整背景)三種長度。講不出短版,代表核心訊息還沒定。
+- 降解析度不代表內容不重要,只是換一種呈現;刪減順序見 §3A「時間有限時的取捨」。
+
+來源:[研究簡報技巧:視覺焦點、資訊解析度與敘事邏輯](https://hackmd.io/@Jackshyr/Sy11UnIy7x)(教授的簡報指導筆記,2026-11 整理進來;§2 視覺焦點與 §3A 取捨同源)。
 
 ## §2 共用底線:WinLab 官方規範
 
@@ -44,12 +61,30 @@ Source of truth 是 NYCU-WinLab/marketplace 的 `academic:slides-lint` skill(`pl
 
 刻意偏離官方(其餘照守):
 
-1. 官方 SHOULD「每 bullet ≤1 行」是單一密度;我們按類別分:報告 deck 高密度 nested(撐不過一行才拆下一層)、分鏡 deck 一句話。
+1. 官方 SHOULD「每 bullet ≤1 行」是單一密度;我們按類別分:報告 deck 高密度 nested(撐不過一行才拆下一層)、分鏡 deck 一句話。報告 deck 的密度再照 §1 資訊解析度依時間調整。
 2. 分鏡 deck 刻意違反「標題唯一」與「One topic, one slide」:同圖差分讓同標題 / 同主題跨數十頁,是節奏設計。報告 deck 仍守。
+
+### 視覺焦點(三類 deck 都守)
+
+講者正在講的東西,要等於聽眾當下在看的東西。聽眾沒聽懂或分心時(英文口音、聽力、恍神),靠畫面也能找回進度。
+
+- 每頁先數視覺焦點:同一時刻只有一個,聽眾要能立刻找到講者正在講的對象。文字、圖、表、數據同時滿版,聽眾不知道看哪。
+- 引導手段:逐次出現、箭頭、圓圈、顏色強調、淡化非重點、投影筆。
+- 多曲線圖表:正在講的曲線加粗或換醒目色,其餘淡化;箭頭指轉折點,圓圈標關鍵數值;曲線照講述順序逐條介紹。目標是聽眾快速讀到結論,不是圖裝更多資訊。
+- 逐次出現:資訊跟著口述順序出現(問題 → 場景或架構 → 逐步加元素 → 要解的問題 → 結果與結論)。每隔幾秒畫面有新東西,能把注意力拉回來;動畫只為理解,不為效果。
+- 純文字逐行出現只有字幕效果;抽象概念要配示意圖、架構圖或圖表。
+- 放了但不講的元素:會搶焦點、讓聽眾困惑或打斷敘事的,移到 Backup slides。
+
+落地:
+
+- 報告 deck:builder 不產動畫(python-pptx 沒有動畫 API)。build 完在 PowerPoint 手加「出現」動畫,同一頁逐步揭露、不拆頁,所以不違反「標題唯一」與「One topic, one slide」。
+- 分鏡 deck:翻頁即動畫,藍橘差分就是視覺焦點(§3C)。
+- 圖表:加粗與淡化在出圖時做(如 matplotlib 的 `linewidth`、`alpha`);箭頭與圓圈用 pptx 原生 shape 疊在圖上,線寬與顏色取 §4T tokens。
+- 架構圖:native diagram 的 box 沒有顏色 override(同 §3C 落地限制),要標焦點就 build 完手改或擴 builder。
 
 ## §3A 報告 deck(技術簡報)
 
-投影片英文、高密度,整份是一條線。
+投影片英文、高密度,整份是一條線。高密度是 lab meeting 的預設(§1 的中解析度);報告時間短就先降解析度,照下方「時間有限時的取捨」刪。
 
 ### Cover
 
@@ -97,6 +132,24 @@ Source of truth 是 NYCU-WinLab/marketplace 的 `academic:slides-lint` skill(`pl
 - 重點預告放在內容之前(「這頁只要記住一件事」「接下來注意 X」);demo 前先說等下會看到什麼、該盯哪裡
 - Old before new:句首擺前面已建立的資訊,句尾才帶新東西。例:上一張講完 `Transcript Store`,下一句從它接 `The store feeds the agent prompt`。
 - 句子要有明確主詞:不寫 `It improves performance`,寫 `Caching cuts p99 latency by 40%`。代稱(`the store`、`ASR`、`this pipeline`)先有全名 / 定義才用;寧可重複明確名詞,也不換成模糊代稱。
+
+### 時間有限時的取捨(What / Why / How)
+
+短講不取代論文:目標是聽眾懂核心價值、想去讀論文,不是知道你做了多少事。
+
+| 項目 | 優先 | 留什麼 |
+|---|---|---|
+| What | 必留 | 研究主題、要解的問題、最主要的成果 |
+| Why | 必留 | 現有方法的問題、為何值得做、解了有何效益 |
+| How | 依時間刪 | 只留能支撐貢獻與結論的核心方法,次要實作細節先刪 |
+| Results | 必留 | 支持結論的證據 |
+
+- System model:留示意圖,公式改口頭帶過。目標是聽眾對系統有正確認知,不是記住每條公式。
+- Evaluation metrics:聽眾只需分辨優劣時,給 Bad / Fair / Good 的判讀方式,不逐一講數學定義。指標本身是貢獻,或少了定義讀不懂結論,才留定義。
+- Backup slides:刪掉的細節(完整公式、實驗設定、次要結果)放在 Q&A 頁之後,被問到再翻。
+- 刪完從頭順一次:省略後每段仍要接得到下一段(見 Story arc)。
+- 1 到 2 分鐘版(面試)講 4 句:我在研究什麼、為什麼重要、我的方法哪裡不同、得到什麼成果。
+- 不背逐字稿:記每頁的核心訊息與畫面怎麼引導,邊講邊看聽眾有沒有跟上。
 
 ### Slide copy(英文)
 
@@ -375,6 +428,8 @@ uv run rebase.py in.pptx out.pptx        # 把 slide 換到乾淨的 template.pp
 - [ ] cover:title + 日期 `YYYY/M/D` + 詹詠翔
 - [ ] §2 官方規範全過:標題唯一對題、context before detail、takeaway 一眼可見、同主題同頁、縮寫有全名、pipeline 附步驟
 - [ ] 跑過 render QA 至少一輪,每張看過圖
+- [ ] 解析度對得上報告時間與聽眾(§1);每頁寫得出一句核心訊息
+- [ ] 每頁同一時刻只有一個視覺焦點;多曲線圖已標出正在講的那條;放了不講的元素不搶焦點
 - [ ] 架構圖每個 box / edge `kind` 對應真實語意差異,自動 legend 能解碼全圖
 - [ ] Old before new、代稱先定義;命名編碼行為、支線有掛起宣告、數字有參照系、重點預告在內容之前
 - [ ] 對外分享前清掉不需要的 speaker notes
@@ -392,6 +447,7 @@ uv run rebase.py in.pptx out.pptx        # 把 slide 換到乾淨的 template.pp
 - [ ] outline 每條是 section label;`current` 指對當前 section
 - [ ] 內容頁 title 是 claim / 冒號句型,不是空殼分類名;全 deck 無破折號
 - [ ] bullet `level` 正確(L0 句尾 `:`,L1+ 不加),同層同類
+- [ ] 短講:What / Why / Results 都在,How 只留核心方法;刪掉的細節在 Q&A 後的 Backup slides
 
 分鏡 deck
 
