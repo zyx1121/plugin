@@ -127,3 +127,13 @@ when a drive fails for a reason that is not a product bug.
 When a repo has a verify skill, the done report runs the feature map entry
 for what changed and cites the evidence path. `dual-review` hands the same
 recipe to `zyx:reviewer` so it can reproduce findings.
+
+## Background servers over ssh
+
+- Start a server in its own ssh call:
+  `ssh -n sandbox 'bash -lc "cd <dir> && setsid -f <cmd> > /tmp/x.log 2>&1 < /dev/null"'`.
+  Run the tests in a separate ssh call. Otherwise ssh waits for the server.
+- When a background job is quiet for long, check `ps` and `ss -ltnp` before
+  waiting more.
+- Before a new build, kill the old server found with `ss -ltnp`. An old
+  server serves the new chunks as 500.

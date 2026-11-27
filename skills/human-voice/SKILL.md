@@ -21,6 +21,9 @@ a concrete scene, a plain rule, a direct "you".
 Metaphors belong in the tutorial register only. A heading or a transition
 stays literal: 「了解內部運作」, not 「打開引擎蓋」.
 
+Interface field names and options use the formal term of the field:
+「允許的寄件人」, not 「誰能寄」.
+
 ## 2. Read references before writing
 
 Fetch 2 or 3 real texts of the same register and language, and read them

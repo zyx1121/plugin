@@ -174,3 +174,12 @@ export const config = {
 ## review 舊專案
 
 逐項對照清單 + 反模式表（含 prevalence / 修法）：`Read ${CLAUDE_SKILL_DIR}/assets/review-checklist.md`
+
+## Traps
+
+- In a bun monorepo, never run `bun update <pkg>` at the root for a package
+  the root does not list. Bun adds it to the root `dependencies` at latest,
+  across majors. Edit the member's `package.json` and run `bun install`.
+- After any `bun update`, run `git diff package.json` before committing.
+- With turbo across several apps, grep the lint output for the `✖` totals.
+  Warnings are spread across app blocks, so the tail is not enough.

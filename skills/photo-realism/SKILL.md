@@ -107,3 +107,14 @@ Pitfalls:
 - Stock-site reference photos are downscaled and processed, so their grain reads very low. Prefer an original-resolution reference.
 - For video, apply the look in post on clean footage (generate clean, no grain, no grading), then add noise and grading per shot so the shots match.
 - Matching the stats removes what the eye reads as fake; it does not defeat forensic detection (frequency analysis, C2PA).
+
+## Which generator
+
+- Default to the Codex CLI image tool:
+  `codex exec --skip-git-repo-check -s workspace-write -C <dir> "<prompt>, save as out.png" < /dev/null`.
+  Always close stdin.
+- Fallback: `qwen-image-2.1` on llm.winlab.tw. When both fail, ask Loki. Never
+  switch to OpenRouter or another paid service on your own.
+- Run a single image as one command. Use an agent only for several rounds of
+  generate, look and regenerate.
+- Return candidates for Loki to pick. The choice of picture is his.

@@ -285,3 +285,11 @@ A correction to one sentence is usually a rule for the whole article, and a
 fault found in one article is usually in its siblings too. Apply it
 everywhere, check the other articles in the series, then write it back here
 if it would hold for the next article too.
+
+## 13. Article pages
+
+- An article page is plain prose: a few H2 topics, then per item 1 bold
+  verdict sentence, 1 link and 1 paragraph of 2 to 3 sentences. No cards,
+  badges, stat tiles or rating words.
+- Use precise terms, and give every number its baseline.
+- Use the narrow reading column (40rem). A full-width line is too long.

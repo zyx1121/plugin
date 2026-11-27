@@ -126,3 +126,9 @@ Settle these in the script, before building a frame.
    frames and hears the audio, so it catches what a frame grid misses:
    a wrong reading, a line that drifts from its subtitle, music over
    speech. Fix what it reports, or note why a report is wrong.
+
+## Storyboard before the full render
+
+- A new shot, look or grade goes to Loki first as still frames (key poses and
+  camera) in 1 message. Start the full high-quality render only after he
+  picks. A passing technical check is not his approval of the picture.

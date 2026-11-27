@@ -1,6 +1,6 @@
 ---
 name: dev-workflow
-description: "Loki 的開發流程標準: 從需求到發版一條鏈:GitHub Issues 當 backlog、Milestone 當 sprint、Projects 看板,接 Conventional Commits PR 與 Release Please 發版,一套做法套到任何 repo(node / rust / python uv / tauri / generic). Use when planning work into issues or sprints, setting up a repo's backlog or releases, cutting a release, or auditing how a repo plans, versions and tags. Triggers on 'backlog', 'scrum', 'sprint', 'github issue', 'milestone', '看板', '開 issue', 'release', '發版', '版本號', 'tag', 'CI/CD', 'changelog', 'conventional commits', 'release please', 'bump', 'semver', '怎麼發版'. NOT 專案文件 / runbook 寫法，那是 project-docs."
+description: "Loki 的開發流程標準: 從需求到發版一條鏈(Issues 當 backlog、Milestone 當 sprint、Conventional Commits PR、Release Please 發版),加上共用 clone、sandbox、疊 PR 與新服務的工作規則. Use when committing or opening a PR, starting a new service, planning issues or sprints, or cutting a release. Triggers on 'backlog', 'sprint', 'github issue', 'milestone', '開 issue', 'release', '發版', '版本號', 'changelog', 'conventional commits', 'semver', 'worktree', 'commit', '疊 PR', 'stacked PR', 'claim', 'reset --hard', '新服務', 'OTel'. NOT 專案文件 / runbook 寫法，那是 project-docs."
 ---
 
 # dev-workflow: one path from idea to release
@@ -42,6 +42,56 @@ Read only the reference the task needs. Both use templates from
   `docs:` or `chore:` fix.
 - Stack house styles (`nextjs-dev`, and others later) sit on top of this chain.
   They decide how the code looks, not how the work flows.
+
+## Working rules
+
+Each rule came from a real correction.
+
+### Shared clones
+
+- An iCloud clone is shared by every session. Before editing, run
+  `git worktree add <scratchpad>/wt-<name> <branch>` and work there. Open the
+  PR with `--head <branch>`.
+- Stage only the paths you changed. Never `git add -A` or a whole directory.
+  Before committing, run `git diff --cached --name-only` and drop any file you
+  did not change.
+- Read a SHA to pin from GitHub: `gh api repos/<owner>/<repo>/commits/main --jq .sha`.
+  Never read it from the local HEAD.
+- When a `git checkout` fails in a chain of commands, stop the chain.
+- On the sandbox, run `claim <org>/<repo> <session>` before touching
+  `~/p/<org>/<repo>/main/`, and use the directory it prints.
+- Never put a destructive command (`reset --hard`, `checkout -- .`,
+  `clean -fd`) on the same line as the check before it. Read the output first.
+  With uncommitted changes, commit them to a WIP branch or switch directory.
+
+### Pull requests and releases
+
+- Stacked PRs: squash-merge the lower PR without `--delete-branch`, run
+  `gh pr edit <next> --base main`, then delete the lower branch. Deleting it
+  first closes the next PR, and a closed PR cannot change its base. Rebase the
+  next PR with `git rebase --onto origin/main <old lower head>`.
+- A release PR merges like any other PR once its checks pass. Do not ask.
+  Then confirm the tag, the GitHub release and the image tags.
+- A PR opened by `GITHUB_TOKEN` leaves `pull_request` runs in
+  `action_required`. Approve the run with
+  `gh api -X POST repos/<owner>/<repo>/actions/runs/<run_id>/approve`.
+  Never merge with `--admin`.
+- In Loki's own `zyx1121` repos, rename and change interfaces freely, even in
+  public repos. Mark the break with SemVer (0.x bumps minor) and write the
+  migration in the PR. Shared lab, course and client repos keep compatibility.
+
+### New services
+
+- Wire observability in the first PR, not after an incident. Read the standard
+  `OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_EXPORTER_OTLP_HEADERS` and
+  `OTEL_SERVICE_NAME`, and stay off when they are unset. Log external calls,
+  each workflow step, decisions and failure causes. Send counts and ids, never
+  secrets or user content.
+- Personal projects send to sensorium-zyx, lab services to sensorium-winlab.
+  Run `list_projects` before you register, because the same name rotates the key.
+- Verification includes finding the data in sensorium.
+- Default a new backend to TypeScript (Bun) or Go. When Python is the only
+  option, name the ecosystem need and its cost first, and let Loki decide.
 
 ## Assets
 

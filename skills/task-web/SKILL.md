@@ -90,3 +90,11 @@ The skill is not an always-on instruction or permission to redesign unrelated
 sites. It works without FDE. A request to build a demo does not by itself
 authorize new infrastructure or paid services. Report the resulting URL or
 artifact and what was actually verified.
+
+## Scope
+
+- This design contract covers every web page Kilo builds for Loki, not only
+  task pages: new sites, product pages and demos. Read the live
+  `DESIGN.md` from GitHub, not the iCloud copy, which often lags.
+- Email Kilo sends for a product uses the same system: send it through the
+  product's own mail template, not hand-written HTML.
