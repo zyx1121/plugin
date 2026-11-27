@@ -42,18 +42,20 @@ The MacBook is for editing only; builds and tests run on the sandbox.
 ## Consequences
 
 - A review needs the branch pushed first.
-- Network stays open in the jail, because the model APIs need it. A
-  prompt injection in a diff can reach the reviewer's own sign-in token and
-  the internet, but not the gh token, ssh keys, the other model's token or
-  other repositories.
+- The jail has no host network (#139). It has its own empty network
+  namespace, so reviewers cannot reach services on sandbox loopback or any
+  other host. Model traffic goes through a relay on the jail loopback to an
+  allowlist proxy outside, over a Unix socket (#137, #138). The remaining
+  risk: a reviewer can still talk to the allowlisted model hosts, so a prompt
+  injection in a diff can still use the reviewer's own sign-in token there. It
+  cannot reach the gh token, ssh keys, the other model's token or other
+  repositories.
 - The sign-in is copied in, never back: a reviewer could swap in another
   account. If Codex rotates its refresh token inside the jail, the host copy
   can expire and `codex login` must run again on the sandbox.
 - Reviewers get private PID and IPC namespaces. Gemini runs in
   `accept-edits` mode with `enableTerminalSandbox: false`, because the
   default `auto` mode starts agy's own namespace sandbox, which cannot nest.
-- Network stays shared (#133): reviewers can reach services on sandbox
-  loopback.
 - Disk use is capped (#134): the checkout is copied into a 2 GiB tmpfs, home
   gets 128 MiB, /tmp and /run 1 GiB each, so a runaway test cannot fill `~/p`.
   The tmpfs counts against RAM and swap. The CLI home stays on disk, because
