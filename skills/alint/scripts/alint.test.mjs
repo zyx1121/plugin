@@ -30,7 +30,7 @@ test("globs", () => {
 });
 
 test("every rule parses", () => {
-  assert.equal(rules.length, 15);
+  assert.equal(rules.length, 16);
   for (const rule of rules) assert.ok(["grep", "model", "path"].includes(rule.engine));
 });
 
