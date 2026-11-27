@@ -27,10 +27,18 @@ main() {
 
   # One dir per branch: a readable slug plus a hash, so feat/a and feat-a differ.
   local key work src state
-  key=$(printf '%s' "$branch" | tr -c 'A-Za-z0-9._-' '-' | cut -c1-40)-$(printf '%s' "$repo:$branch" | sha256sum | cut -c1-8)
+  key=$(printf '%s' "$branch" | tr -c 'A-Za-z0-9._-' '-' | cut -c1-40)-$(printf '%s' "$repo:$branch" | sha256sum | cut -c1-16)
   work=$HOME/p/$repo/review-$key
   src=$work/$model
   state=$work/$model.state
+  # Only touch a dir this script created: a new one gets an owner marker, an
+  # existing one without the marker is someone else's.
+  if [[ -e $work ]]; then
+    [[ -f $work/.review-owner ]] || die "$work exists but was not made by review.sh"
+  else
+    mkdir -p "$work" && printf '%s\n' "$repo:$branch" > "$work/.review-owner"
+  fi
+  [[ $(cat "$work/.review-owner") == "$repo:$branch" ]] || die "$work belongs to another branch"
   mkdir -p "$state"
   touch "$work/.seeded" # `claim --reap` deletes the dir after 24 h idle
 
@@ -140,7 +148,7 @@ For each finding from your previous review, set status \"fixed\" or \"still_open
       and all(.findings[];
         type == "object" and (keys == ["failure", "file", "fix", "line", "severity", "status", "title"])
         and (.severity | IN("blocking", "issue", "nit")) and (.status | IN("new", "still_open", "fixed"))
-        and (.line | type == "number") and ([.file, .title, .failure, .fix] | all(type == "string"))))' \
+        and (.line | type == "number" and . == floor) and ([.file, .title, .failure, .fix] | all(type == "string"))))' \
     "$state/out.json" >/dev/null 2>&1 || die "$model returned no valid report: $(head -c 2000 "$state/out.json")"
   # Publish the session id only after a valid report, so round 2 resumes this run.
   [[ -n ${tid:-} && ${tid:-} != null ]] && printf '%s\n' "$tid" > "$state/id"
