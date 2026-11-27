@@ -31,7 +31,7 @@ from the repo root. `$SKILL_DIR` is this skill's base directory, shown when
 the skill loads; stop if `review.sh` is not there.
 
 ```bash
-R="$SKILL_DIR/scripts/review.sh"; D=<review dir from step 1>
+R="$SKILL_DIR/scripts/review.sh"  # D is the review dir from step 1
 bash "$R" codex  --intent "$D/intent.md" --base main > "$D/codex.json"
 bash "$R" gemini --intent "$D/intent.md" --base main > "$D/gemini.json"
 ```

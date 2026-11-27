@@ -55,8 +55,12 @@ main() {
   # cannot plant symlinks where the host writes.
   rm -f -- "$state/schema.json"
   d "$9" > "$state/schema.json"
-  # A new round 1 voids any earlier session, so round 2 never resumes a stale one.
-  [[ $round == 1 ]] && rm -f -- "$state/id"
+  # A new round 1 voids any earlier session and CLI home, so round 2 never
+  # resumes a stale one and no earlier reviewer's config carries over.
+  if [[ $round == 1 ]]; then
+    rm -f -- "$state/id"
+    rm -rf -- "$home"
+  fi
 
   # The CLI home the reviewer sees: a per-review copy holding only the sign-in,
   # never the real ~/.codex or ~/.gemini, so a reviewer cannot plant config,
@@ -97,14 +101,14 @@ main() {
 Intent from the author:
 $intent
 
-Review the change from the merge base of origin/$base to HEAD. Start with: git diff origin/$base...HEAD
+Review the change from the merge base of refs/remotes/origin/$base to HEAD. Start with: git diff refs/remotes/origin/$base...HEAD
 
 This checkout is disposable and you run in a jail: you may read files, run commands and tests, and edit files to prove an exploit or a fix. Nothing you change is kept. Do not push and do not call external services the project talks to.
 
 Look for: security holes, data loss or corruption, wrong external side effects, broken existing behavior, crashes on common paths, and claims the code does not back up. Skip style, wording, formatting and lint; CI owns those.
 Every finding needs a concrete failure: the input or state, and the wrong result. Prefer findings you reproduced. Mark every finding status \"new\". Give verdict \"fail\" if any finding is blocking."
   else
-    prompt="The author pushed fixes. This is a fresh checkout of $branch at $sha. Run: git diff origin/$base...HEAD
+    prompt="The author pushed fixes. This is a fresh checkout of $branch at $sha. Run: git diff refs/remotes/origin/$base...HEAD
 
 For each finding from your previous review, set status \"fixed\" or \"still_open\" after checking the code, and run the reproduction again where you had one. Then check whether the fixes broke anything else; mark such findings \"new\". Only security holes and data loss count as blocking among new findings. Give verdict \"fail\" if any finding that is not fixed is blocking."
   fi
