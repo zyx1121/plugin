@@ -58,22 +58,37 @@ export function numberDiff(diff) {
   const added = new Map();
   let file = null;
   let line = 0;
+  // Lines still to read in the current hunk; header lines only count outside one.
+  let oldLeft = 0;
+  let newLeft = 0;
   const out = diff.split("\n").map((raw) => {
-    if (raw.startsWith("+++ ")) {
+    const inHunk = oldLeft > 0 || newLeft > 0;
+    if (!inHunk && raw.startsWith("+++ ")) {
       file = raw === "+++ /dev/null" ? null : raw.slice(6).replace(/\t$/, "");
       if (file && !added.has(file)) added.set(file, new Set());
       return raw;
     }
-    if (raw.startsWith("@@")) {
-      line = Number(raw.match(/\+(\d+)/)[1]);
+    if (!inHunk && raw.startsWith("@@")) {
+      const m = raw.match(/^@@ -\d+(?:,(\d+))? \+(\d+)(?:,(\d+))? @@/);
+      if (!m) return raw;
+      oldLeft = m[1] === undefined ? 1 : Number(m[1]);
+      line = Number(m[2]);
+      newLeft = m[3] === undefined ? 1 : Number(m[3]);
       return raw;
     }
-    if (!file) return raw;
+    if (!file || !inHunk) return raw;
     if (raw.startsWith("+")) {
       added.get(file).add(line);
+      newLeft--;
       return `+[L${line++}] ${raw.slice(1)}`;
     }
-    if (raw.startsWith(" ")) line++;
+    if (raw.startsWith("-")) {
+      oldLeft--;
+    } else if (raw.startsWith(" ")) {
+      oldLeft--;
+      newLeft--;
+      line++;
+    }
     return raw;
   });
   return { text: out.join("\n"), added };
@@ -155,10 +170,10 @@ async function ask(key, rule, diff) {
 }
 
 /** The diff of one file against the merge base, with 3 lines of context. */
-function fileDiff(repo, mergeBase, file) {
+export function fileDiff(repo, mergeBase, file) {
   return execFileSync(
     "git",
-    ["-C", repo, "diff", "--unified=3", "--no-color", "--no-ext-diff", mergeBase, "--", file],
+    ["-C", repo, "-c", "core.quotepath=false", "diff", "--unified=3", "--no-color", "--no-ext-diff", mergeBase, "--", file],
     { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 }
   );
 }

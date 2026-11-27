@@ -186,6 +186,41 @@ test("model diff numbers added lines and keeps only findings on them", async () 
   assert.deepEqual(kept, [{ file: "app/p.tsx", line: 5 }]);
 });
 
+test("model diff keeps an added line that starts with ++ inside the hunk", async () => {
+  const { numberDiff } = await import("./alint-model.mjs");
+  const { added } = numberDiff(
+    ["--- a/a.js", "+++ b/a.js", "@@ -1,1 +1,4 @@", " keep", "+++ x", "+one", "+two"].join("\n")
+  );
+  assert.deepEqual([...added.get("a.js")], [2, 3, 4]);
+});
+
+test("model diff reads the next file header after a hunk ends", async () => {
+  const { numberDiff } = await import("./alint-model.mjs");
+  const { added } = numberDiff(
+    ["--- a/a.js", "+++ b/a.js", "@@ -1 +1,2 @@", " k", "+n", "--- a/b.js", "+++ b/b.js", "@@ -0,0 +1 @@", "+z"].join("\n")
+  );
+  assert.deepEqual([...added.get("a.js")], [2]);
+  assert.deepEqual([...added.get("b.js")], [1]);
+});
+
+test("model diff of a non-ASCII path is keyed by the real name", async () => {
+  const { execFileSync } = await import("node:child_process");
+  const fs = await import("node:fs");
+  const os = await import("node:os");
+  const path = await import("node:path");
+  const { fileDiff, numberDiff } = await import("./alint-model.mjs");
+  const repo = fs.mkdtempSync(path.join(process.env.TMPDIR || os.tmpdir(), "alint-"));
+  const git = (...a) => execFileSync("git", ["-C", repo, ...a], { encoding: "utf8" });
+  git("init", "-q");
+  fs.writeFileSync(path.join(repo, "é.txt"), "a\n");
+  git("add", ".");
+  git("-c", "user.name=t", "-c", "user.email=t@t", "commit", "-qm", "i");
+  const base = git("rev-parse", "HEAD").trim();
+  fs.writeFileSync(path.join(repo, "é.txt"), "a\nb\n");
+  const { added } = numberDiff(fileDiff(repo, base, "é.txt"));
+  assert.deepEqual([...added.get("é.txt")], [2]);
+});
+
 test("model batches split by size and flag files too large", async () => {
   const { batches } = await import("./alint-model.mjs");
   const plan = batches([["a", "x".repeat(6)], ["b", "x".repeat(6)], ["c", "x".repeat(20)]], 10);
