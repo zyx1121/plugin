@@ -43,7 +43,7 @@ main() {
     else
       mkdir "$work" && printf '%s\n' "$repo:$branch" > "$work/.review-owner"
     fi
-  ) 8>"$HOME/p/$repo/.review.lock" || exit 2
+  ) 8>>"$HOME/p/$repo/.review.lock" || exit 2
   [[ $(cat "$work/.review-owner") == "$repo:$branch" ]] || die "$work belongs to another branch"
   mkdir -p "$state"
   touch "$work/.seeded" # `claim --reap` deletes the dir after 24 h idle
@@ -122,7 +122,7 @@ For each finding from your previous review, set status \"fixed\" or \"still_open
   jail() {
     local args=(--ro-bind / / --tmpfs "$HOME" --tmpfs /tmp --tmpfs /run --dev /dev --proc /proc
       --ro-bind /run/systemd/resolve /run/systemd/resolve
-      --ro-bind "$HOME/.local" "$HOME/.local"
+      --ro-bind "$HOME/.local/bin" "$HOME/.local/bin" --ro-bind "$HOME/.local/lib" "$HOME/.local/lib"
       --ro-bind "$state/schema.json" "$HOME/.review-schema.json"
       --bind "$src" "$src" --chdir "$src" --die-with-parent
       --clearenv --setenv HOME "$HOME" --setenv PATH "$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin"
