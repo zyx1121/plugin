@@ -1,3 +1,7 @@
 api.openai.com
 auth.openai.com
 chatgpt.com
+oauth2.googleapis.com
+daily-cloudcode-pa.googleapis.com
+www.googleapis.com
+aicode.googleapis.com

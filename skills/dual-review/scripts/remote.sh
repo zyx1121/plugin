@@ -146,9 +146,10 @@ For each finding from your previous review, set status \"fixed\" or \"still_open
   local proxy_url=http://127.0.0.1:3128 proxy_pid
   # The proxy runs outside the jail, one per leg; kill only this pid when the
   # leg ends. Its deny log (host and reason) lands in $state/proxy.log.
-  "$bun" "$state/proxy.ts" "$net/proxy.sock" "$state/allowed-hosts.txt" 2> "$state/proxy.log" </dev/null &
+  "$bun" "$state/proxy.ts" "$net/proxy.sock" "$state/allowed-hosts.txt" > /dev/null 2> "$state/proxy.log" </dev/null &
   proxy_pid=$!
-  trap 'kill "$proxy_pid" 2>/dev/null || true' EXIT
+  # Expand the pid now: proxy_pid is local and gone when the trap fires.
+  trap "kill $proxy_pid 2>/dev/null || true" EXIT
   local _
   for _ in $(seq 100); do [[ -S $net/proxy.sock ]] && break; sleep 0.1; done
   [[ -S $net/proxy.sock ]] || die "proxy did not start: $(tail -c 500 "$state/proxy.log")"
