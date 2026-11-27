@@ -7,6 +7,7 @@
 set -euo pipefail
 
 main() {
+  umask 077 # review dirs and copied sign-ins stay private to this user
   export PATH="$HOME/.local/bin:$PATH"
   die() { echo "remote.sh: $*" >&2; exit 2; }
   d() { printf '%s' "$1" | base64 -d; }
