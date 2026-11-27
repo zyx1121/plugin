@@ -62,7 +62,7 @@ main() {
   local net=$work/$model.net bun
   bun=$(command -v bun || true)
   [[ -n $bun ]] || bun=$HOME/.bun/bin/bun
-  bun=$(readlink -f "$bun")
+  bun=$(readlink -f "$bun" 2>/dev/null || true)
   [[ -x $bun ]] || die "bun is not installed on the sandbox"
   rm -rf -- "$net"
   mkdir -p "$net"

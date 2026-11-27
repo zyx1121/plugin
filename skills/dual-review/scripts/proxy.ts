@@ -64,8 +64,14 @@ const defaultResolve: Resolver = async (host) =>
   (await lookup(host, { all: true })).map((r) => r.address);
 const defaultConnect: Connector = (ip, port) => netConnect({ host: ip, port });
 
+const logged = new Set<string>();
+
 function deny(sock: Socket, status = "403 Forbidden", why = ""): void {
-  if (why) console.error(`deny ${why}`);
+  // Log each denied target once, so a reviewer cannot grow the log.
+  if (why && !logged.has(why) && logged.size < 200) {
+    logged.add(why);
+    console.error(`deny ${why}`);
+  }
   sock.end(`HTTP/1.1 ${status}\r\nConnection: close\r\nContent-Length: 0\r\n\r\n`);
 }
 
