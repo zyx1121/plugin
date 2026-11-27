@@ -135,6 +135,8 @@ General rules only. Each came from a real correction.
   breadcrumb already shows it.
 - Content starts at the same inset as the fixed chrome around it: one token
   for both.
+- Every page below the home page shows the breadcrumb the shared chrome
+  already offers, a full-screen page too.
 
 ## 8. Grow this skill
 
