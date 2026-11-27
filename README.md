@@ -26,7 +26,7 @@ Skills, agents and tools used to live in separate repos. Each machine then had a
 ## Features
 
 - **Skills**: house rules for slides, project docs, academic writing, Next.js, the dev workflow and photorealistic image prompts.
-- **Worker agents**: `planner`, `surveyor` and `reviewer` return structured reports, not chat. `reviewer` tries to refute a claim before it counts, and the `dual-review` skill pairs it with a Codex review for high-risk changes. `surveyor` and `reviewer` grade each claim with the Admiralty Code.
+- **Worker agents**: `planner`, `surveyor` and `reviewer` return structured reports, not chat. `reviewer` tries to refute a claim before it counts, and the `dual-review` skill pairs it with Codex and Gemini reviews for high-risk changes. `gemini` forwards a read-only question or review to Gemini 4 Neon. `surveyor` and `reviewer` grade each claim with the Admiralty Code.
 - **utils MCP server**: 13 tools for PDFs, Google Maps lists and Markdown slides. The plugin registers the server for you.
 - **Host-aware tools**: the server registers only the tools that this machine can run, and `utils_capabilities` reports the rest.
 
@@ -48,7 +48,7 @@ Codex gets the skills only: install `zyx@zyx1121` from [zyx1121/marketplace](htt
 | Part | Contents |
 |------|----------|
 | [skills/](skills/) | `academic-sentence`, `alint`, `article`, `create-verify`, `dev-workflow`, `dual-review`, `human-voice`, `nextjs-dev`, `paper-revise`, `photo-realism`, `project-docs`, `simple-first`, `task-web`, `video`, `winlab-pptx`, `xiao-lin-shuo` |
-| [agents/](agents/) | `planner`, `surveyor`, `reviewer`, `alint`, `utils-promoter` |
+| [agents/](agents/) | `planner`, `surveyor`, `reviewer`, `gemini`, `alint`, `utils-promoter` |
 | [utils/](utils/) | MCP tools: `pdf_*` (9), `md2slide_init`, `md2slide_build`, `gmaps_get_list`, `utils_capabilities` |
 | [decisions/](decisions/) | ADRs for each merge, extraction and retirement |
 
