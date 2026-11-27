@@ -28,7 +28,7 @@ skill、agent 和工具以前分散在不同 repo，每台機器裝到的組合�
 ## 功能
 
 - **Skill**：簡報、專案文件、學術寫作、Next.js、開發流程與寫實生圖 prompt 的自家規則。
-- **Worker agent**：`planner`、`surveyor`、`reviewer` 回傳結構化報告，不是聊天。`reviewer` 先嘗試反駁，主張才算數；高風險改動由 `dual-review` skill 再加 Codex 與 Gemini 審查。`gemini` 把唯讀的提問或審查轉給 Gemini 4 Neon。`surveyor` 與 `reviewer` 用 Admiralty Code 替每項說法評等。
+- **Worker agent**：`planner`、`surveyor`、`reviewer` 回傳結構化報告，不是聊天。`reviewer` 先嘗試反駁，主張才算數；高風險改動由 `dual-review` skill 再加 Codex 與 Gemini 審查。`gemini` 把唯讀的提問轉給 Gemini 4 Neon。`surveyor` 與 `reviewer` 用 Admiralty Code 替每項說法評等。
 - **utils MCP server**：13 個工具，處理 PDF、Google 地圖清單與 Markdown 投影片。plugin 會自動註冊這個 server。
 - **依主機註冊工具**：server 只註冊這台機器能跑的工具，其餘由 `utils_capabilities` 回報。
 
