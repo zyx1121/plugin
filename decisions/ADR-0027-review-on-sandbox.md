@@ -46,5 +46,8 @@ The MacBook is for editing only; builds and tests run on the sandbox.
   prompt injection in a diff can reach the reviewer's own sign-in token and
   the internet, but not the gh token, ssh keys, the other model's token or
   other repositories.
+- The sign-in is copied in, never back: a reviewer could swap in another
+  account. If Codex rotates its refresh token inside the jail, the host copy
+  can expire and `codex login` must run again on the sandbox.
 - Reviewer commands share the sandbox PID namespace (#130): `--unshare-pid`
   breaks `agy`. A review can see and signal other processes of the same user.

@@ -62,7 +62,13 @@ main() {
   # never the real ~/.codex or ~/.gemini, so a reviewer cannot plant config,
   # hooks or plugins that would run outside the jail later. Sessions stay in
   # it for round 2. rm before cp, so a planted symlink is replaced, not followed.
+  # The reviewer can write inside $home between rounds, so refuse any
+  # symlink on the paths the host writes to.
   mkdir -p "$home"
+  local p
+  for p in "$home/auth.json" "$home/antigravity-cli" "$home/antigravity-cli/antigravity-oauth-token"; do
+    [[ -L $p ]] && die "$p is a symlink; delete $work and run round 1 again"
+  done
   case $model in
     codex)
       rm -f -- "$home/auth.json"
@@ -176,16 +182,6 @@ For each finding from your previous review, set status \"fixed\" or \"still_open
         and (.severity | IN("blocking", "issue", "nit")) and (.status | IN("new", "still_open", "fixed"))
         and (.line | type == "number" and . == floor) and ([.file, .title, .failure, .fix] | all(type == "string"))))' \
     "$state/out.json" >/dev/null 2>&1 || die "$model returned no valid report: $(head -c 2000 "$state/out.json")"
-  # Codex may rotate its refresh token during the run. Copy a newer sign-in
-  # back only if it is a regular file with a newer last_refresh, so the host
-  # copy stays valid and a reviewer cannot swap in anything else.
-  if [[ $model == codex && -f $home/auth.json && ! -L $home/auth.json ]] \
-    && jq -e --slurpfile host "$HOME/.codex/auth.json" \
-      '(.tokens.refresh_token | type == "string") and ((.last_refresh // "") > ($host[0].last_refresh // ""))' \
-      "$home/auth.json" >/dev/null 2>&1; then
-    install -m 600 -- "$home/auth.json" "$HOME/.codex/auth.json.review" && mv -f -- "$HOME/.codex/auth.json.review" "$HOME/.codex/auth.json"
-  fi
-
   # Publish the session id only after a valid report, so round 2 resumes this run.
   [[ -n ${tid:-} && ${tid:-} != null ]] && printf '%s\n' "$tid" > "$state/id"
   jq -c --arg m "$model" --arg s "$sha" --argjson r "$round" '. + {model: $m, sha: $s, round: $r}' "$state/out.json"
