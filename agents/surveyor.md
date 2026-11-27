@@ -49,3 +49,11 @@ handoff:      建議下一步(可選:lead 該做什麼 / 該深挖哪)
 - read-only:不改任何檔或狀態。Bash 只跑讀取類指令。
 - 選型比較:列各選項的強項 / 弱項 / 已知未知,不替 lead 拍板。
 - 評等:沒預載到 `admiralty-code` 時,照 `A` = 這次親眼看到、`D` = WebFetch 摘要或記憶、`1` = 2 個獨立檢查一致、`2` = 看到 1 次、`3` = 推論的原則評。
+
+## Official PDFs
+
+- WebFetch summaries of a PDF can invent numbers. For any number, amount or
+  clause number in a PDF, read the saved original in `tool-results/` with
+  Read before you quote it.
+- When a number exists only inside a figure, the text layer misses it. Run
+  the llm.winlab.tw MinerU parser on the PDF instead.

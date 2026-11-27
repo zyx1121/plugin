@@ -114,3 +114,12 @@ GitHub alerts 的硬限制:
 - [ ] CAUTION 在對應步驟之前?報告有誠實邊界段?
 - [ ] 沒有殘留 HackMD 語法(`:::`、`[TOC]`、`=70%x`、`[color=…]`)?
 - [ ] 圖片是 repo 相對路徑,已 commit?
+
+## Rules from corrections
+
+- To align a doc or page with a product, open the live site with `pw` first,
+  then read the README. Put a screenshot of the live site beside ours, and
+  name the URL you checked.
+- Course report PDFs set formulas with KaTeX, never in `<pre>` monospace.
+  Body line-height 1.5, paragraph spacing about 8pt. Wait for
+  `data-math=done` before printing the PDF.

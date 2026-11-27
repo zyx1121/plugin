@@ -137,6 +137,19 @@ General rules only. Each came from a real correction.
   for both.
 - Every page below the home page shows the breadcrumb the shared chrome
   already offers, a full-screen page too.
+- Argue a feature by how good and how strong it is: speed, isolation, what
+  others cannot do. Cost gets 1 sentence, only when it blocks the way.
+- A port or rewrite matches the old behavior and deletes the extras. Before
+  proposing a more complete or custom version, show 3 numbers: estimated
+  lines, new dependencies, and how often the real data needs it. Show the
+  minimal option beside it.
+- Everything a person can do in the interface, their own agent can do through
+  MCP and the API. Split access by whose agent it is and whether it reads
+  untrusted content, not by human versus agent.
+- An architecture proposal keeps the block count. Put cross-cutting needs
+  such as permissions and validation into fields or rules of the data
+  contract. Present N blocks, 1 data shape, a few rules and 1 diagram, and
+  expand only when asked.
 
 ## 8. Grow this skill
 
@@ -146,8 +159,8 @@ This file changes when it fails. Do not wait to be asked.
    about 1 project.
 2. About 1 project: write it in that repo's `DESIGN.md` or `AGENTS.md`.
 3. General: add 1 line to section 7, in the same PR as the fix.
-4. The same correction a second time: prose failed. Turn it into an alint
-   rule, a component or an audit check, and delete the prose line.
+4. Try to turn a correction into an alint rule, a component or an audit
+   check the first time. Keep a prose line only when no check can judge it.
 5. New literature enters section 6 only with a boundary and a source. A
    principle that changed no decision in 90 days leaves the table.
 
