@@ -117,22 +117,26 @@ For each finding from your previous review, set status \"fixed\" or \"still_open
   # The jail: the whole filesystem read-only; home, /tmp and /run replaced by
   # empty tmpfs; then only the checkout (writable), the schema (read-only),
   # the per-review CLI home and the DNS resolver mounted back; and a clean
-  # environment. Other repos, gh, ssh keys, the agent socket, user sockets and
+  # environment. Every writable tree except the CLI home is a size-capped
+  # tmpfs, so a runaway test fills its own cap, not the host disk (#134). The
+  # checkout is copied into its tmpfs from a read-only seed mount. Other repos, gh, ssh keys, the agent socket, user sockets and
   # the other model's tokens are invisible. Network stays open because the
   # model API needs it.
   jail() {
-    local args=(--ro-bind / / --tmpfs "$HOME" --tmpfs /tmp --tmpfs /run --dev /dev --proc /proc
+    local args=(--ro-bind / / --size 134217728 --tmpfs "$HOME" --size 1073741824 --tmpfs /tmp
+      --size 1073741824 --tmpfs /run --dev /dev --proc /proc
       --ro-bind /run/systemd/resolve /run/systemd/resolve
       --ro-bind "$HOME/.local/bin" "$HOME/.local/bin" --ro-bind "$HOME/.local/lib" "$HOME/.local/lib"
       --ro-bind "$state/schema.json" "$HOME/.review-schema.json"
-      --bind "$src" "$src" --chdir "$src" --die-with-parent --unshare-pid --unshare-ipc
+      --ro-bind "$src" /run/review-seed --size 2147483648 --tmpfs "$src" --chdir "$src" --die-with-parent --unshare-pid --unshare-ipc
       --clearenv --setenv HOME "$HOME" --setenv PATH "$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin"
       --setenv LANG C.UTF-8 --setenv TERM dumb)
     case $model in
       gemini) args+=(--bind "$home" "$HOME/.gemini") ;;
       codex) args+=(--bind "$home" "$HOME/.codex") ;;
     esac
-    bwrap "${args[@]}" "$@" </dev/null
+    # Seed the capped checkout tmpfs, then run the reviewer.
+    bwrap "${args[@]}" bash -c 'cp -a /run/review-seed/. . && exec "$@"' seed "$@" </dev/null
   }
 
   case $model in

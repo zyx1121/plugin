@@ -54,3 +54,7 @@ The MacBook is for editing only; builds and tests run on the sandbox.
   default `auto` mode starts agy's own namespace sandbox, which cannot nest.
 - Network stays shared (#133): reviewers can reach services on sandbox
   loopback.
+- Disk use is capped (#134): the checkout is copied into a 2 GiB tmpfs, home
+  gets 128 MiB, /tmp and /run 1 GiB each, so a runaway test cannot fill `~/p`.
+  The tmpfs counts against RAM and swap. The CLI home stays on disk, because
+  round 2 resumes from it, and is not capped.
