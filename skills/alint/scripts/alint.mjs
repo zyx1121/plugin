@@ -7,7 +7,8 @@
 //
 //   node alint.mjs [--base main] [--repo .] [--ci]
 //
-// --ci also prints GitHub annotations and exits 1 on any grep finding. CI can
+// --ci loads the repo rules from the merge base, not the working tree. It
+// also prints GitHub annotations and exits 1 on any grep finding. CI can
 // not dispatch the model rules, so it only lists them as a notice.
 // No dependencies: Node 22 or later.
 import { execFileSync } from "node:child_process";
@@ -79,6 +80,18 @@ function loadRules(dir) {
   return readdirSync(dir)
     .filter((name) => name.endsWith(".md"))
     .map((name) => parseRule(readFileSync(join(dir, name), "utf8"), join(dir, name)));
+}
+
+/** Repo rules as committed at `ref`, so a change under review cannot edit them. */
+export function loadRulesFromGit(repo, ref, dir) {
+  const names = execFileSync("git", ["-C", repo, "ls-tree", "--name-only", ref, `${dir}/`], {
+    encoding: "utf8",
+  })
+    .split("\n")
+    .filter((name) => name.endsWith(".md"));
+  return names.map((name) =>
+    parseRule(execFileSync("git", ["-C", repo, "show", `${ref}:${name}`], { encoding: "utf8" }), name)
+  );
 }
 
 /** Added lines of a unified diff with zero context: file, line, text. */
@@ -154,15 +167,20 @@ export function annotations({ grep, model }) {
 }
 
 /** Rules, the diff against the merge base and the result for a repo. */
-export function collect({ repo, base }) {
-  const byId = new Map();
-  for (const rule of [...loadRules(skillRules), ...loadRules(join(repo, ".alint", "rules"))]) {
-    byId.set(rule.id, rule);
-  }
-  // The working tree against the merge base, so uncommitted work counts too.
+export function collect({ repo, base, ci = false }) {
   const mergeBase = execFileSync("git", ["-C", repo, "merge-base", base, "HEAD"], {
     encoding: "utf8",
   }).trim();
+  // In CI the repo rules come from the merge base, so a pull request cannot
+  // replace a rule it is judged by. Rule changes apply after they merge.
+  const repoRules = ci
+    ? loadRulesFromGit(repo, mergeBase, ".alint/rules")
+    : loadRules(join(repo, ".alint", "rules"));
+  const byId = new Map();
+  for (const rule of [...loadRules(skillRules), ...repoRules]) {
+    byId.set(rule.id, rule);
+  }
+  // The working tree against the merge base, so uncommitted work counts too.
   const diff = execFileSync(
     "git",
     ["-C", repo, "diff", "--unified=0", "--no-color", "--no-ext-diff", mergeBase],
@@ -195,7 +213,7 @@ export function collect({ repo, base }) {
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const { mergeBase, result } = collect({ repo, base });
+  const { mergeBase, result } = collect({ repo, base, ci });
   console.log(JSON.stringify({ base, mergeBase, ...result }, null, 2));
   if (ci) {
     for (const line of annotations(result)) console.log(line);
