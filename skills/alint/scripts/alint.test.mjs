@@ -32,7 +32,7 @@ test("globs", () => {
 });
 
 test("every rule parses", () => {
-  assert.equal(rules.length, 17);
+  assert.equal(rules.length, 19);
   for (const rule of rules) assert.ok(["grep", "model", "path"].includes(rule.engine));
 });
 
@@ -287,4 +287,17 @@ test("ci loads repo rules from the merge base, not the pull request", () => {
   assert.equal(ci.result.grep.length, 1);
   const local = collect({ repo, base: "main" });
   assert.equal(local.result.grep.length, 0);
+});
+
+test("corner rules go to the model for shell repos only", () => {
+  const ids = ["corner-text-not-icons", "no-account-corner"];
+  const d = diff("app/page.tsx", "<a href=\"/privacy\"><ShieldIcon /></a>");
+  const withShell = run({ rules, diff: d, exists: (p) => p === "src/components/task-shell.tsx" });
+  for (const id of ids) {
+    const rule = rules.find((r) => r.id === id);
+    assert.equal(rule.engine, "model");
+    assert.ok(withShell.model.some((m) => m.id === id));
+  }
+  const without = run({ rules, diff: d, exists: () => false });
+  for (const id of ids) assert.ok(!without.model.some((m) => m.id === id));
 });
