@@ -48,6 +48,9 @@ bash "$R" gemini --intent "$D/intent.md" --base main > "$D/gemini.json"
   cannot fill the sandbox disk.
 - Codex runs `codex exec`, Gemini runs `agy` with `gemini-4-neon-high`. Add
   `--effort xhigh` to either for the riskiest changes.
+- The jail has no network of its own. Model traffic goes through a loopback
+  relay to an allowlist proxy outside (`scripts/allowed-hosts.txt`), so the
+  reviewer cannot reach sandbox loopback services or other hosts.
 - Both return one JSON object that follows `scripts/finding.schema.json`:
   a verdict and findings with severity, status, file, line, failure and fix,
   plus `model`, `sha` and `round`.

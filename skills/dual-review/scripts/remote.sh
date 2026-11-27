@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Runs on the sandbox host, fed through `ssh sandbox bash -s` by review.sh.
 # Every argument arrives base64-encoded, so ssh never re-parses user data:
-#   model repo branch sha base round effort intent schema review_id
+#   model repo branch sha base round effort intent schema review_id proxy relay hosts
 # All work happens inside main(), so bash has read the whole script before
 # any child process can touch stdin.
 set -euo pipefail
@@ -12,7 +12,7 @@ main() {
   die() { echo "remote.sh: $*" >&2; exit 2; }
   d() { printf '%s' "$1" | base64 -d; }
 
-  [[ $# -eq 10 ]] || die "expected 10 arguments, got $#"
+  [[ $# -eq 13 ]] || die "expected 13 arguments, got $#"
   local model repo branch sha base round effort intent rid
   model=$(d "$1") repo=$(d "$2") branch=$(d "$3") sha=$(d "$4")
   base=$(d "$5") round=$(d "$6") effort=$(d "$7") intent=$(d "$8") rid=$(d "${10}")
@@ -54,6 +54,21 @@ main() {
 
   exec 9>"$work/$model.lock"
   flock -n 9 || die "another $model review of $branch is running"
+
+  # The proxy, the relay and the host allowlist travel as arguments, like the
+  # schema, so the sandbox needs no checkout of this plugin. $net holds only
+  # files this script writes; the jail mounts it read-only, so the reviewer
+  # cannot edit the relay or replace the proxy socket.
+  local net=$work/$model.net bun
+  bun=$(command -v bun || true)
+  [[ -n $bun ]] || bun=$HOME/.bun/bin/bun
+  bun=$(readlink -f "$bun" 2>/dev/null || true)
+  [[ -x $bun ]] || die "bun is not installed on the sandbox"
+  rm -rf -- "$net"
+  mkdir -p "$net"
+  d "${11}" > "$state/proxy.ts"
+  d "${12}" > "$net/relay.ts"
+  d "${13}" > "$state/allowed-hosts.txt"
 
   # $state is host-only: it is never mounted into the jail, so a reviewer
   # cannot plant symlinks where the host writes.
@@ -119,27 +134,49 @@ For each finding from your previous review, set status \"fixed\" or \"still_open
 
   # The jail: the whole filesystem read-only; home, /tmp and /run replaced by
   # empty tmpfs; then only the checkout (writable), the schema (read-only),
-  # the per-review CLI home and the DNS resolver mounted back; and a clean
-  # environment. Every writable tree except the CLI home is a size-capped
+  # the per-review CLI home and the proxy socket mounted back; and a clean
+  # environment. The jail has its own empty network namespace (#139): its
+  # loopback is private, so a dev server on the sandbox is out of reach. The
+  # model API is reached through relay.ts (127.0.0.1:3128 in the jail), which
+  # pipes to the allowlist proxy that runs outside, resolves DNS and refuses
+  # every host not in allowed-hosts.txt. Every writable tree except the CLI home is a size-capped
   # tmpfs, so a runaway test fills its own cap, not the host disk (#134). The
   # checkout is copied into its tmpfs from a read-only seed mount. Other repos, gh, ssh keys, the agent socket, user sockets and
-  # the other model's tokens are invisible. Network stays open because the
-  # model API needs it.
+  # the other model's tokens are invisible.
+  local proxy_url=http://127.0.0.1:3128 proxy_pid
+  # The proxy runs outside the jail, one per leg; kill only this pid when the
+  # leg ends. Its deny log (host and reason) lands in $state/proxy.log.
+  "$bun" "$state/proxy.ts" "$net/proxy.sock" "$state/allowed-hosts.txt" > /dev/null 2> "$state/proxy.log" </dev/null &
+  proxy_pid=$!
+  # Expand the pid now: proxy_pid is local and gone when the trap fires.
+  trap "kill $proxy_pid 2>/dev/null || true" EXIT
+  local _
+  for _ in $(seq 100); do [[ -S $net/proxy.sock ]] && break; sleep 0.1; done
+  [[ -S $net/proxy.sock ]] || die "proxy did not start: $(tail -c 500 "$state/proxy.log")"
+
   jail() {
     local args=(--ro-bind / / --size 134217728 --tmpfs "$HOME" --size 1073741824 --tmpfs /tmp
       --size 1073741824 --tmpfs /run --dev /dev --proc /proc
-      --ro-bind /run/systemd/resolve /run/systemd/resolve
+      --unshare-net --ro-bind "$net" /run/review-net --ro-bind "$bun" /run/review-bun
       --ro-bind "$HOME/.local/bin" "$HOME/.local/bin" --ro-bind "$HOME/.local/lib" "$HOME/.local/lib"
       --ro-bind "$state/schema.json" "$HOME/.review-schema.json"
       --ro-bind "$src" /run/review-seed --size 2147483648 --tmpfs "$src" --chdir "$src" --die-with-parent --unshare-pid --unshare-ipc
       --clearenv --setenv HOME "$HOME" --setenv PATH "$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin"
-      --setenv LANG C.UTF-8 --setenv TERM dumb)
+      --setenv LANG C.UTF-8 --setenv TERM dumb
+      --setenv HTTPS_PROXY "$proxy_url" --setenv HTTP_PROXY "$proxy_url"
+      --setenv ALL_PROXY "$proxy_url" --setenv NO_PROXY "")
     case $model in
       gemini) args+=(--bind "$home" "$HOME/.gemini") ;;
       codex) args+=(--bind "$home" "$HOME/.codex") ;;
     esac
-    # Seed the capped checkout tmpfs, then run the reviewer.
-    bwrap "${args[@]}" bash -c 'cp -a /run/review-seed/. . && exec "$@"' seed "$@" </dev/null
+    # Seed the capped checkout tmpfs, start the relay and wait until it
+    # listens, then run the reviewer. The relay exits with the reviewer, whose
+    # pid it watches (exec keeps the shell's pid).
+    bwrap "${args[@]}" bash -c '
+      cp -a /run/review-seed/. . || exit 1
+      /run/review-bun /run/review-net/relay.ts /run/review-net/proxy.sock 3128 &
+      for _ in $(seq 100); do (exec 3<>/dev/tcp/127.0.0.1/3128) 2>/dev/null && break; sleep 0.1; done
+      exec "$@"' seed "$@" </dev/null
   }
 
   case $model in

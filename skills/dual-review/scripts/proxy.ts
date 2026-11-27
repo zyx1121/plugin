@@ -64,7 +64,14 @@ const defaultResolve: Resolver = async (host) =>
   (await lookup(host, { all: true })).map((r) => r.address);
 const defaultConnect: Connector = (ip, port) => netConnect({ host: ip, port });
 
-function deny(sock: Socket, status = "403 Forbidden"): void {
+const logged = new Set<string>();
+
+function deny(sock: Socket, status = "403 Forbidden", why = ""): void {
+  // Log each denied target once, so a reviewer cannot grow the log.
+  if (why && !logged.has(why) && logged.size < 200) {
+    logged.add(why);
+    console.error(`deny ${why}`);
+  }
   sock.end(`HTTP/1.1 ${status}\r\nConnection: close\r\nContent-Length: 0\r\n\r\n`);
 }
 
@@ -97,7 +104,7 @@ export function createProxy(opts: ProxyOptions): Server {
       if (!target) return deny(client);
       const host = target[1].toLowerCase().replace(/\.$/, "");
       if (target[2] !== "443" || isIP(host) || host === "localhost" || !opts.allowed.has(host)) {
-        return deny(client);
+        return deny(client, "403 Forbidden", `${host}:${target[2]}`);
       }
 
       let addrs: string[];
