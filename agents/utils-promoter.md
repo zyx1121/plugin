@@ -34,7 +34,7 @@ Dispatcher routes by name and `exec`s the file; the shebang decides what runs. C
 
 Examples to read before writing:
 
-- Python (multi-subcommand): `scripts/pdf.py`, `scripts/md2slide.py`
+- Python (multi-subcommand): `scripts/pdf.py`
 - Python (single source, web): `scripts/gmaps.py`
 - macOS app scripts belong in [zyx1121/macos](https://github.com/zyx1121/macos), not here
 

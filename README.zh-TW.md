@@ -18,7 +18,7 @@
 ```
 > utils_capabilities
 {"host":{"platform":"darwin","arch":"arm64"},"registered":["utils_capabilities",
-"gmaps_get_list","md2slide_init","md2slide_build","pdf_info","pdf_extract_text",
+"gmaps_get_list","pdf_info","pdf_extract_text",
 "pdf_extract_comments","pdf_compress","pdf_decrypt","pdf_merge","pdf_split",
 "pdf_rotate","pdf_render"],"hidden":[]}
 ```
@@ -28,8 +28,8 @@ skill、agent 和工具以前分散在不同 repo，每台機器裝到的組合�
 ## 功能
 
 - **Skill**：簡報、專案文件、學術寫作、Next.js、開發流程與寫實生圖 prompt 的自家規則。
-- **Worker agent**：`planner`、`surveyor`、`reviewer` 回傳結構化報告，不是聊天。`reviewer` 先嘗試反駁，主張才算數；高風險改動由 `dual-review` skill 再加 Codex 與 Gemini 審查。`gemini` 把唯讀的提問或審查轉給 Gemini 4 Neon。`surveyor` 與 `reviewer` 用 Admiralty Code 替每項說法評等。
-- **utils MCP server**：13 個工具，處理 PDF、Google 地圖清單與 Markdown 投影片。plugin 會自動註冊這個 server。
+- **Worker agent**：`planner`、`surveyor`、`reviewer` 回傳結構化報告，不是聊天。`reviewer` 先嘗試反駁，主張才算數；高風險改動由 `dual-review` skill 再加 Codex 與 Gemini 審查。`gemini` 把唯讀的提問轉給 Gemini 4 Neon。`surveyor` 與 `reviewer` 用 Admiralty Code 替每項說法評等。
+- **utils MCP server**：11 個工具，處理 PDF 與 Google 地圖清單。plugin 會自動註冊這個 server。
 - **依主機註冊工具**：server 只註冊這台機器能跑的工具，其餘由 `utils_capabilities` 回報。
 
 ## 快速開始
@@ -51,7 +51,7 @@ Codex 只拿得到 skill：從 [zyx1121/marketplace](https://github.com/zyx1121/
 |------|------|
 | [skills/](skills/) | `academic-sentence`、`alint`、`article`、`create-verify`、`dev-workflow`、`dual-review`、`human-voice`、`nextjs-dev`、`paper-revise`、`photo-realism`、`project-docs`、`simple-first`、`task-web`、`video`、`xiao-lin-shuo` |
 | [agents/](agents/) | `planner`、`surveyor`、`reviewer`、`gemini`、`alint`、`utils-promoter` |
-| [utils/](utils/) | MCP 工具：`pdf_*`(9 個)、`md2slide_init`、`md2slide_build`、`gmaps_get_list`、`utils_capabilities` |
+| [utils/](utils/) | MCP 工具：`pdf_*`(9 個)、`gmaps_get_list`、`utils_capabilities` |
 | [decisions/](decisions/) | 每次合併、拆出與退役的 ADR |
 
 請求符合 skill 的描述時，skill 會自動載入。agent 透過 Agent 工具以 `zyx:<name>` 執行。
@@ -63,7 +63,7 @@ Codex 只拿得到 skill：從 [zyx1121/marketplace](https://github.com/zyx1121/
 | 需要 | 用途 |
 |------|------|
 | `bun` | utils MCP server |
-| `uv` | PDF、投影片與地圖腳本 |
+| `uv` | PDF 與地圖腳本 |
 | `gs`(Ghostscript) | 只有 `pdf_compress` 需要 |
 | [admiralty-code](https://github.com/zyx1121/admiralty-code) plugin | `surveyor` 與 `reviewer` 回報裡的評等 |
 

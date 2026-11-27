@@ -16,7 +16,7 @@
 ```
 > utils_capabilities
 {"host":{"platform":"darwin","arch":"arm64"},"registered":["utils_capabilities",
-"gmaps_get_list","md2slide_init","md2slide_build","pdf_info","pdf_extract_text",
+"gmaps_get_list","pdf_info","pdf_extract_text",
 "pdf_extract_comments","pdf_compress","pdf_decrypt","pdf_merge","pdf_split",
 "pdf_rotate","pdf_render"],"hidden":[]}
 ```
@@ -25,9 +25,9 @@ Skills, agents and tools used to live in separate repos. Each machine then had a
 
 ## Features
 
-- **Skills**: house rules for slides, project docs, academic writing, Next.js, the dev workflow and photorealistic image prompts.
-- **Worker agents**: `planner`, `surveyor` and `reviewer` return structured reports, not chat. `reviewer` tries to refute a claim before it counts, and the `dual-review` skill pairs it with Codex and Gemini reviews for high-risk changes. `gemini` forwards a read-only question or review to Gemini 4 Neon. `surveyor` and `reviewer` grade each claim with the Admiralty Code.
-- **utils MCP server**: 13 tools for PDFs, Google Maps lists and Markdown slides. The plugin registers the server for you.
+- **Skills**: house rules for project docs, academic writing, Next.js, the dev workflow and photorealistic image prompts.
+- **Worker agents**: `planner`, `surveyor` and `reviewer` return structured reports, not chat. `reviewer` tries to refute a claim before it counts, and the `dual-review` skill pairs it with Codex and Gemini reviews for high-risk changes. `gemini` forwards a read-only question to Gemini 4 Neon. `surveyor` and `reviewer` grade each claim with the Admiralty Code.
+- **utils MCP server**: 11 tools for PDFs and Google Maps lists. The plugin registers the server for you.
 - **Host-aware tools**: the server registers only the tools that this machine can run, and `utils_capabilities` reports the rest.
 
 ## Quick start
@@ -49,7 +49,7 @@ Codex gets the skills only: install `zyx@zyx1121` from [zyx1121/marketplace](htt
 |------|----------|
 | [skills/](skills/) | `academic-sentence`, `alint`, `article`, `create-verify`, `dev-workflow`, `dual-review`, `human-voice`, `nextjs-dev`, `paper-revise`, `photo-realism`, `project-docs`, `simple-first`, `task-web`, `video`, `xiao-lin-shuo` |
 | [agents/](agents/) | `planner`, `surveyor`, `reviewer`, `gemini`, `alint`, `utils-promoter` |
-| [utils/](utils/) | MCP tools: `pdf_*` (9), `md2slide_init`, `md2slide_build`, `gmaps_get_list`, `utils_capabilities` |
+| [utils/](utils/) | MCP tools: `pdf_*` (9), `gmaps_get_list`, `utils_capabilities` |
 | [decisions/](decisions/) | ADRs for each merge, extraction and retirement |
 
 Skills load when a request matches their description. Agents run through the Agent tool as `zyx:<name>`.
@@ -61,7 +61,7 @@ To add a tool, give a script to the `utils-promoter` agent. It writes a PEP 723 
 | Needs | For |
 |-------|-----|
 | `bun` | the utils MCP server |
-| `uv` | the PDF, slide and Maps scripts |
+| `uv` | the PDF and Maps scripts |
 | `gs` (Ghostscript) | `pdf_compress` only |
 | [admiralty-code](https://github.com/zyx1121/admiralty-code) plugin | grades in `surveyor` and `reviewer` reports |
 
@@ -76,7 +76,7 @@ No secrets. A local clone as the marketplace serves skill edits after `git pull`
 
 Facts for coding agents and LLM tools. The rules for changing the code are in [AGENTS.md](AGENTS.md).
 
-- **Summary**: Claude Code plugin `zyx` with 14 skills, 5 worker agents and a bundled stdio MCP server (`utils`, 13 tools).
+- **Summary**: Claude Code plugin `zyx` with 14 skills, 5 worker agents and a bundled stdio MCP server (`utils`, 11 tools).
 - **Type**: plugin
 - **Interfaces**: skills `zyx:<skill>`, agents `zyx:<agent>`, MCP tools `mcp__plugin_zyx_utils__<tool>`
 - **Install**: `claude plugin marketplace add zyx1121/plugin && claude plugin install zyx@zyx`

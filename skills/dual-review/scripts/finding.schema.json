@@ -1,0 +1,25 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["verdict", "findings"],
+  "properties": {
+    "verdict": { "type": "string", "enum": ["pass", "fail"] },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["severity", "status", "file", "line", "title", "failure", "fix"],
+        "properties": {
+          "severity": { "type": "string", "enum": ["blocking", "issue", "nit"] },
+          "status": { "type": "string", "enum": ["new", "still_open", "fixed"] },
+          "file": { "type": "string" },
+          "line": { "type": "integer" },
+          "title": { "type": "string" },
+          "failure": { "type": "string" },
+          "fix": { "type": "string" }
+        }
+      }
+    }
+  }
+}

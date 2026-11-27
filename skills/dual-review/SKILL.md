@@ -6,63 +6,70 @@ description: "Review a high-risk change with three models: the zyx reviewer agen
 # dual-review
 
 Three models review the same change: Claude, Codex and Gemini. Findings that
-two or more raise are the strongest signal. The name stays `dual-review`. The lead sorts every finding into one of four buckets, and only
-**Act on** blocks the merge. Claude Code only: it needs the Agent tool.
+two or more raise are the strongest signal. The name stays `dual-review`.
+The lead sorts every finding into one of four buckets, and only **Act on**
+blocks the merge. Claude Code only: it needs the Agent tool.
 
 The gate and the round limit come from ADR-0015 and do not change: review
 high-risk changes only, at most two rounds.
 
 ## 1. Scope and intent
 
-1. Commit the change on a branch. Codex reviews git state, so uncommitted
-   work is invisible to a branch review.
-2. Write the intent in one paragraph: what the change must do, and the risk
-   that made it high-risk. Every reviewer gets the same paragraph.
+1. Commit the change on a branch and push it. Codex and Gemini review the
+   pushed commit on the sandbox, so local work is invisible to them.
+2. Write the intent in one paragraph to a file, for example
+   `/tmp/review-intent.md`: what the change must do, and the risk that made
+   it high-risk. Every reviewer gets this same paragraph.
 3. Note the CI state. Checks that are already green are not rerun.
 
 ## 2. Run all three reviewers in one message
 
 Send the three calls in the same response so they run in parallel.
 
-Codex, in the background, from the repo root:
+Codex and Gemini, each as its own Bash call with `run_in_background: true`,
+from the repo root:
 
 ```bash
-C=~/.claude/plugins/marketplaces/openai-codex/plugins/codex/scripts/codex-companion.mjs
-node "$C" adversarial-review --wait --base main "<risk focus in one line>"
+R=$(ls -d ~/.claude/plugins/cache/zyx1121/zyx/*/ | sort -V | tail -1)skills/dual-review/scripts/review.sh
+bash "$R" codex  --intent /tmp/review-intent.md --base main > /tmp/review-codex.json
+bash "$R" gemini --intent /tmp/review-intent.md --base main > /tmp/review-gemini.json
 ```
 
-- Run it with `run_in_background: true`. A small diff takes about 30 seconds.
+- Each run clones the branch on the sandbox into
+  `~/p/<org>/<repo>/review-<branch>/<model>/`, one disposable checkout per
+  model. `claim --reap` deletes it after 24 hours idle.
+- In that checkout the reviewer may run commands and tests and edit files to
+  prove an exploit. Nothing is pushed back.
+- Codex runs `codex exec` in its `workspace-write` sandbox. Gemini runs
+  `agy` with `gemini-4-neon-high`. Add `--effort xhigh` for the riskiest
+  changes.
+- Both return one JSON object that follows `scripts/finding.schema.json`:
+  a verdict and findings with severity, status, file, line, failure and fix.
 - Use `--base <ref>` when the branch is not cut from `main`.
-- If the script is missing, run `/codex:setup` once. If Codex still cannot
-  run, continue with the reviewer alone and say so in the report.
-
-Gemini, in the background, from the repo root:
-
-```bash
-G=$(ls -d ~/.claude/plugins/cache/zyx1121/zyx/*/ | sort -V | tail -1)skills/dual-review/scripts/gemini.sh
-bash "$G" review --base main "<risk focus in one line>"
-```
-
-- Run it with `run_in_background: true`. It sends the diff from the merge
-  base to the working tree to `gemini-4-neon-high` through the Antigravity
-  CLI (`agy`), and can read the repo for context.
-- The run cannot write files or run commands: plan mode, deny rules for
-  `write_file` and `command`, and a check that the working tree is unchanged.
-- If `agy` is missing or signed out, the script says how to fix it. Continue
-  with the other two reviewers and say so in the report.
+- If one leg fails, the script says why. Continue with the others and say so
+  in the report.
 
 Claude, through the Agent tool:
 
-- `subagent_type: zyx:reviewer`, with the intent paragraph, the acceptance
-  criteria, the risk level, the round number and the CI state.
+- `subagent_type: zyx:reviewer`, with the same intent paragraph, the
+  acceptance criteria, the risk level, the round number and the CI state.
 - State where to run tests (the sandbox by default) in the prompt.
 - If the repo has a verify skill (`.claude/skills/verify/SKILL.md`), point
   the reviewer at it so it drives the real app the same way.
 
 ## 3. Sort the findings
 
-Merge findings that describe the same problem. Mark which model raised each.
-Then put each one in exactly one bucket:
+List the Codex and Gemini findings side by side, sorted by file and line, so
+findings about the same spot sit next to each other:
+
+```bash
+jq -s -r '[.[] | .model as $m | .findings[] | . + {model: $m}] | sort_by(.file, .line)[]
+  | "\(.file):\(.line)  \(.model)  \(.severity)  \(.title)"' /tmp/review-codex.json /tmp/review-gemini.json
+```
+
+Add the reviewer's findings by hand. Merge findings that describe the same
+problem and mark which models raised each. Then put each one in exactly one
+bucket:
 
 | Bucket | What goes in | Effect |
 |---|---|---|
@@ -85,8 +92,9 @@ Rules for sorting:
 
 - Fix every Act on item, commit, then resume the same `zyx:reviewer` with the
   list. It confirms each fix and checks that the fix broke nothing else.
-- Rerun Codex and Gemini only when a fix changed the design, not for a
-  one-line fix.
+- Push the fixes, then run Codex and Gemini again with `--round 2`. Each
+  resumes its round 1 conversation, so it checks its own findings against
+  the new HEAD and marks each `fixed` or `still_open`.
 - A new finding in round 2 blocks only for a security hole or data loss. The
   rest become issues. There is no round 3.
 
