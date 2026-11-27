@@ -124,7 +124,7 @@ For each finding from your previous review, set status \"fixed\" or \"still_open
       --ro-bind /run/systemd/resolve /run/systemd/resolve
       --ro-bind "$HOME/.local/bin" "$HOME/.local/bin" --ro-bind "$HOME/.local/lib" "$HOME/.local/lib"
       --ro-bind "$state/schema.json" "$HOME/.review-schema.json"
-      --bind "$src" "$src" --chdir "$src" --die-with-parent
+      --bind "$src" "$src" --chdir "$src" --die-with-parent --unshare-pid --unshare-ipc
       --clearenv --setenv HOME "$HOME" --setenv PATH "$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin"
       --setenv LANG C.UTF-8 --setenv TERM dumb)
     case $model in

@@ -49,5 +49,8 @@ The MacBook is for editing only; builds and tests run on the sandbox.
 - The sign-in is copied in, never back: a reviewer could swap in another
   account. If Codex rotates its refresh token inside the jail, the host copy
   can expire and `codex login` must run again on the sandbox.
-- Reviewer commands share the sandbox PID namespace (#130): `--unshare-pid`
-  breaks `agy`. A review can see and signal other processes of the same user.
+- Reviewers get private PID and IPC namespaces. Gemini runs in
+  `accept-edits` mode with `enableTerminalSandbox: false`, because the
+  default `auto` mode starts agy's own namespace sandbox, which cannot nest.
+- Network stays shared (#133): reviewers can reach services on sandbox
+  loopback.
