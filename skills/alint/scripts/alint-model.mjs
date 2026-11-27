@@ -175,8 +175,9 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   };
   const repo = opt("repo", ".");
   const base = opt("base", "main");
+  const ci = args.includes("--ci");
   const key = process.env.ANTHROPIC_API_KEY;
-  const { rules, mergeBase, result } = collect({ repo, base });
+  const { rules, mergeBase, result } = collect({ repo, base, ci });
   if (result.model.length === 0) {
     console.log("alint model: no model rule covers a changed file");
   } else if (!key) {

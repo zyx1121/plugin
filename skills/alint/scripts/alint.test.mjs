@@ -1,10 +1,12 @@
 // node --test skills/alint/scripts/alint.test.mjs
 import assert from "node:assert/strict";
-import { readdirSync, readFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { mkdirSync, mkdtempSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 
-import { addedLines, annotations, globToRegExp, parseRule, run } from "./alint.mjs";
+import { addedLines, annotations, collect, globToRegExp, parseRule, run } from "./alint.mjs";
 
 const rulesDir = join(import.meta.dirname, "..", "rules");
 const rules = readdirSync(rulesDir).map((name) =>
@@ -204,4 +206,28 @@ test("kicad rules files and install paths", () => {
   });
   assert.deepEqual(hits(out, "kicad-dru-silent-drop"), ["kicad/b.kicad_dru:11", "kicad/b.kicad_dru:12"]);
   assert.deepEqual(hits(out, "kicad-hardcoded-path"), ["tools/fab.py:11"]);
+});
+
+test("ci loads repo rules from the merge base, not the pull request", () => {
+  const repo = mkdtempSync(join(tmpdir(), "alint-"));
+  const git = (...a) => execFileSync("git", ["-C", repo, ...a], { encoding: "utf8" });
+  const rule = (pattern) =>
+    `---\nid: repo-rule\nengine: grep\nfiles: ["**/*.txt"]\npattern: ${pattern}\nmessage: hit\n---\nbody\n`;
+  git("init", "-q", "-b", "main");
+  git("config", "user.email", "t@example.com");
+  git("config", "user.name", "t");
+  mkdirSync(join(repo, ".alint", "rules"), { recursive: true });
+  writeFileSync(join(repo, ".alint", "rules", "repo-rule.md"), rule("FORBIDDEN"));
+  git("add", ".");
+  git("commit", "-qm", "base");
+  git("checkout", "-qb", "pr");
+  // The pull request weakens the rule and adds the text it forbids.
+  writeFileSync(join(repo, ".alint", "rules", "repo-rule.md"), rule("NOTHING"));
+  writeFileSync(join(repo, "a.txt"), "FORBIDDEN\n");
+  git("add", ".");
+  git("commit", "-qm", "pr");
+  const ci = collect({ repo, base: "main", ci: true });
+  assert.equal(ci.result.grep.length, 1);
+  const local = collect({ repo, base: "main" });
+  assert.equal(local.result.grep.length, 0);
 });
