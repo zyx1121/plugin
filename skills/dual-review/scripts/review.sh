@@ -35,8 +35,9 @@ branch=$(git branch --show-current)
 [[ -n $branch ]] || die "detached HEAD; check out the branch under review"
 sha=$(git rev-parse HEAD)
 [[ -z $(git status --porcelain --untracked-files=no) ]] || die "uncommitted changes; the sandbox reviews only pushed commits"
-git fetch -q origin "$branch" || die "branch $branch is not on origin; push it first"
-[[ $(git rev-parse "origin/$branch") == "$sha" ]] || die "origin/$branch is not HEAD; push first"
+remote_sha=$(git ls-remote --exit-code origin "refs/heads/$branch" | cut -f1) \
+  || die "branch $branch is not on origin; push it first"
+[[ $remote_sha == "$sha" ]] || die "origin has $branch at ${remote_sha:0:7}, HEAD is ${sha:0:7}; push first"
 
 # ssh joins its arguments into one string for the remote shell, so every
 # value travels base64-encoded and remote.sh decodes and validates it.

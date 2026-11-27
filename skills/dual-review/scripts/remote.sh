@@ -37,12 +37,19 @@ main() {
   exec 9>"$work/$model.lock"
   flock -n 9 || die "another $model review of $branch is running"
 
+  # $state is host-only: it is never mounted into the jail, so a reviewer
+  # cannot plant symlinks where the host writes.
+  rm -f -- "$state/schema.json"
   d "$9" > "$state/schema.json"
+  # A new round 1 voids any earlier session, so round 2 never resumes a stale one.
+  [[ $round == 1 ]] && rm -f -- "$state/id"
 
-  # A fresh checkout every round: nothing from an earlier run survives.
+  # A fresh full clone every round: nothing from an earlier run survives, and
+  # the diff never needs a lazy fetch, which would need credentials the jail hides.
   rm -rf -- "$src"
-  gh repo clone "$repo" "$src" -- -q --filter=blob:none </dev/null >&2 || die "clone of $repo failed"
-  git -C "$src" fetch -q origin "$base" "$sha" </dev/null || die "fetch failed"
+  gh repo clone "$repo" "$src" -- -q </dev/null >&2 || die "clone of $repo failed"
+  git -C "$src" fetch -q origin "+refs/heads/$base:refs/remotes/origin/$base" "$sha" </dev/null \
+    || die "fetch failed: base must be a branch on origin"
   git -C "$src" checkout -q --detach "$sha" || die "commit $sha not found on origin"
 
   local prompt
@@ -64,14 +71,20 @@ Every finding needs a concrete failure: the input or state, and the wrong result
 For each finding from your previous review, set status \"fixed\" or \"still_open\" after checking the code, and run the reproduction again where you had one. Then check whether the fixes broke anything else; mark such findings \"new\". Only security holes and data loss count as blocking among new findings. Give verdict \"fail\" if any finding that is not fixed is blocking."
   fi
 
-  # The jail: the whole filesystem read-only, home replaced by an empty
-  # tmpfs, then only the checkout, this model's state and its own sign-in
-  # mounted back. Other repos, gh, ssh and the other model's tokens are
-  # invisible. Network stays open because the model API needs it.
+  # The jail: the whole filesystem read-only; home, /tmp and /run replaced by
+  # empty tmpfs; then only the checkout (writable), the schema (read-only),
+  # the model's own sign-in and the DNS resolver mounted back; and a clean
+  # environment. Other repos, gh, ssh keys, the agent socket, user sockets and
+  # the other model's tokens are invisible. Network stays open because the
+  # model API needs it.
   jail() {
-    local args=(--ro-bind / / --tmpfs "$HOME" --tmpfs /tmp --dev /dev --proc /proc
+    local args=(--ro-bind / / --tmpfs "$HOME" --tmpfs /tmp --tmpfs /run --dev /dev --proc /proc
+      --ro-bind /run/systemd/resolve /run/systemd/resolve
       --ro-bind "$HOME/.local" "$HOME/.local"
-      --bind "$src" "$src" --bind "$state" "$state" --chdir "$src" --die-with-parent)
+      --ro-bind "$state/schema.json" "$HOME/.review-schema.json"
+      --bind "$src" "$src" --chdir "$src" --die-with-parent
+      --clearenv --setenv HOME "$HOME" --setenv PATH "$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin"
+      --setenv LANG C.UTF-8 --setenv TERM dumb)
     case $model in
       gemini) args+=(--bind "$HOME/.gemini" "$HOME/.gemini") ;;
       codex) args+=(--bind "$HOME/.codex" "$HOME/.codex") ;;
@@ -84,7 +97,7 @@ For each finding from your previous review, set status \"fixed\" or \"still_open
       [[ -x $HOME/.local/bin/agy ]] || die "agy is not installed on the sandbox"
       local settings='{"permissions":{"allow":["command(*)","write_file(*)","read_file(*)"]}}'
       local args=(-p="$prompt" --model "gemini-4-neon-$effort" --output-format json
-        --json-schema "$state/schema.json" --settings "$settings" --print-timeout 1500s)
+        --json-schema "$HOME/.review-schema.json" --settings "$settings" --print-timeout 1500s)
       if [[ $round == 2 ]]; then
         local id; id=$(cat "$state/id" 2>/dev/null || true)
         [[ -n $id && $id != null ]] || die "no round 1 conversation to resume"
@@ -93,33 +106,45 @@ For each finding from your previous review, set status \"fixed\" or \"still_open
       jail "$HOME/.local/bin/agy" "${args[@]}" > "$state/raw.json" 2> "$state/err" || true
       [[ $(jq -r '.status // "ERROR"' "$state/raw.json" 2>/dev/null) == SUCCESS ]] \
         || die "agy failed: $(tail -c 2000 "$state/err") $(head -c 2000 "$state/raw.json")"
-      jq -r '.conversation_id // empty' "$state/raw.json" > "$state/id"
+      local tid; tid=$(jq -r '.conversation_id // empty' "$state/raw.json")
       jq -r '.response' "$state/raw.json" > "$state/out.json"
       ;;
     codex)
       [[ -x $HOME/.local/bin/codex ]] || die "codex is not installed on the sandbox"
       # Codex cannot nest its own bwrap sandbox inside the jail, so the jail
       # is the sandbox and Codex runs with full access inside it.
-      local common=(-c "model_reasoning_effort=$effort" --output-schema "$state/schema.json"
-        -o "$state/out.json" --json --skip-git-repo-check)
+      local common=(-c "model_reasoning_effort=$effort" --output-schema "$HOME/.review-schema.json"
+        --json --skip-git-repo-check)
       if [[ $round == 1 ]]; then
         jail "$HOME/.local/bin/codex" exec -C "$src" -s danger-full-access "${common[@]}" "$prompt" \
           > "$state/events.jsonl" 2> "$state/err" || die "codex failed: $(tail -c 2000 "$state/err")"
-        jq -r 'select(.type == "thread.started") | .thread_id' "$state/events.jsonl" | head -1 > "$state/id"
       else
         local id; id=$(cat "$state/id" 2>/dev/null || true)
         [[ -n $id ]] || die "no round 1 session to resume"
         jail "$HOME/.local/bin/codex" exec resume -c sandbox_mode=danger-full-access "${common[@]}" "$id" "$prompt" \
           > "$state/events.jsonl" 2> "$state/err" || die "codex failed: $(tail -c 2000 "$state/err")"
       fi
+      # The report is the last agent message on stdout; nothing is read back
+      # from a path the reviewer could write.
+      jq -s -r 'map(select(.type == "item.completed" and .item.type == "agent_message")) | last | .item.text // empty' \
+        "$state/events.jsonl" > "$state/out.json"
+      local tid; tid=$(jq -r 'select(.type == "thread.started") | .thread_id' "$state/events.jsonl" | head -1)
       ;;
   esac
 
-  # Exactly one report object with a verdict and a findings array, then the
-  # transport metadata on top.
-  jq -e -s 'length == 1 and (.[0] | type == "object" and (.verdict == "pass" or .verdict == "fail") and (.findings | type == "array"))' \
+  # Exactly one report that matches the schema, then the host's metadata,
+  # which the report cannot override.
+  jq -e -s '
+    length == 1 and (.[0] | type == "object" and (keys == ["findings", "verdict"])
+      and (.verdict == "pass" or .verdict == "fail") and (.findings | type == "array")
+      and all(.findings[];
+        type == "object" and (keys == ["failure", "file", "fix", "line", "severity", "status", "title"])
+        and (.severity | IN("blocking", "issue", "nit")) and (.status | IN("new", "still_open", "fixed"))
+        and (.line | type == "number") and ([.file, .title, .failure, .fix] | all(type == "string"))))' \
     "$state/out.json" >/dev/null 2>&1 || die "$model returned no valid report: $(head -c 2000 "$state/out.json")"
-  jq -c --arg m "$model" --arg s "$sha" --argjson r "$round" '{model: $m, sha: $s, round: $r} + .' "$state/out.json"
+  # Publish the session id only after a valid report, so round 2 resumes this run.
+  [[ -n ${tid:-} && ${tid:-} != null ]] && printf '%s\n' "$tid" > "$state/id"
+  jq -c --arg m "$model" --arg s "$sha" --argjson r "$round" '. + {model: $m, sha: $s, round: $r}' "$state/out.json"
 }
 
 main "$@"
