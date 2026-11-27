@@ -3,11 +3,11 @@
 #
 #   review.sh <codex|gemini> --intent <file> [--base main] [--round 1|2] [--effort high]
 #
-# Run from the repo root on a pushed branch. The sandbox clones the branch
-# into ~/p/<org>/<repo>/review-<branch>/<model>/, a disposable checkout where
-# the reviewer may run commands and tests. Prints one JSON object that
-# follows finding.schema.json, plus "model" and "sha".
-# Round 2 resumes the same conversation with the new HEAD.
+# Run from the repo root on a pushed branch. The sandbox makes a fresh clone
+# of the commit under ~/p/<org>/<repo>/review-<branch>-<hash>/<model>/ and
+# runs the reviewer in a bwrap jail that sees only that checkout and its own
+# sign-in. Prints one JSON object: finding.schema.json plus model, sha, round.
+# Round 2 resumes the round 1 conversation against the new HEAD.
 set -euo pipefail
 
 die() { echo "review.sh: $*" >&2; exit 2; }
@@ -25,7 +25,7 @@ while [[ $# -gt 0 ]]; do
     *) die "unknown argument: $1" ;;
   esac
 done
-[[ -f $intent_file ]] || die "--intent must name a file with the intent paragraph"
+[[ -s $intent_file ]] || die "--intent must name a non-empty file with the intent paragraph"
 case $round in 1|2) ;; *) die "round must be 1 or 2" ;; esac
 case $effort in low|medium|high|xhigh) ;; *) die "effort must be low, medium, high or xhigh" ;; esac
 
@@ -35,10 +35,15 @@ branch=$(git branch --show-current)
 [[ -n $branch ]] || die "detached HEAD; check out the branch under review"
 sha=$(git rev-parse HEAD)
 [[ -z $(git status --porcelain --untracked-files=no) ]] || die "uncommitted changes; the sandbox reviews only pushed commits"
-git fetch -q origin "$branch" || die "branch $branch is not on origin; push it first"
-[[ $(git rev-parse "origin/$branch") == "$sha" ]] || die "origin/$branch is not HEAD; push first"
+# ls-remote matches by suffix, so keep only the exact ref.
+remote_sha=$(git ls-remote origin "refs/heads/$branch" | awk -v r="refs/heads/$branch" '$2 == r {print $1}')
+[[ -n $remote_sha ]] || die "branch $branch is not on origin; push it first"
+[[ $remote_sha == "$sha" ]] || die "origin has $branch at ${remote_sha:0:7}, HEAD is ${sha:0:7}; push first"
 
-b64() { base64 < "$1" | tr -d '\n'; }
+# ssh joins its arguments into one string for the remote shell, so every
+# value travels base64-encoded and remote.sh decodes and validates it.
+e() { printf '%s' "$1" | base64 | tr -d '\n'; }
 ssh -o BatchMode=yes sandbox bash -s -- \
-  "$model" "$repo" "$branch" "$sha" "$base" "$round" "$effort" \
-  "$(b64 "$intent_file")" "$(b64 "$here/finding.schema.json")" < "$here/remote.sh"
+  "$(e "$model")" "$(e "$repo")" "$(e "$branch")" "$(e "$sha")" "$(e "$base")" \
+  "$(e "$round")" "$(e "$effort")" "$(e "$(cat "$intent_file")")" \
+  "$(e "$(cat "$here/finding.schema.json")")" < "$here/remote.sh"

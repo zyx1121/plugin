@@ -17,9 +17,9 @@ high-risk changes only, at most two rounds.
 
 1. Commit the change on a branch and push it. Codex and Gemini review the
    pushed commit on the sandbox, so local work is invisible to them.
-2. Write the intent in one paragraph to a file, for example
-   `/tmp/review-intent.md`: what the change must do, and the risk that made
-   it high-risk. Every reviewer gets this same paragraph.
+2. Make a private directory for this review (`D=$(mktemp -d)`) and write
+   the intent in one paragraph to `$D/intent.md`: what the change must do,
+   and the risk that made it high-risk. Every reviewer gets this paragraph.
 3. Note the CI state. Checks that are already green are not rerun.
 
 ## 2. Run all three reviewers in one message
@@ -27,25 +27,28 @@ high-risk changes only, at most two rounds.
 Send the three calls in the same response so they run in parallel.
 
 Codex and Gemini, each as its own Bash call with `run_in_background: true`,
-from the repo root:
+from the repo root. `$SKILL_DIR` is this skill's base directory, shown when
+the skill loads; stop if `review.sh` is not there.
 
 ```bash
-R=$(ls -d ~/.claude/plugins/cache/zyx1121/zyx/*/ | sort -V | tail -1)skills/dual-review/scripts/review.sh
-bash "$R" codex  --intent /tmp/review-intent.md --base main > /tmp/review-codex.json
-bash "$R" gemini --intent /tmp/review-intent.md --base main > /tmp/review-gemini.json
+R="$SKILL_DIR/scripts/review.sh"  # D is the review dir from step 1
+bash "$R" codex  --intent "$D/intent.md" --base main > "$D/codex.json"
+bash "$R" gemini --intent "$D/intent.md" --base main > "$D/gemini.json"
 ```
 
-- Each run clones the branch on the sandbox into
-  `~/p/<org>/<repo>/review-<branch>/<model>/`, one disposable checkout per
-  model. `claim --reap` deletes it after 24 hours idle.
-- In that checkout the reviewer may run commands and tests and edit files to
-  prove an exploit. Nothing is pushed back.
-- Codex runs `codex exec` in its `workspace-write` sandbox. Gemini runs
-  `agy` with `gemini-4-neon-high`. Add `--effort xhigh` for the riskiest
-  changes.
+- Each run makes a fresh clone of the pushed commit on the sandbox under
+  `~/p/<org>/<repo>/review-<branch>-<hash>/<model>/`. `claim --reap` deletes
+  it after 24 hours idle.
+- The reviewer runs in a bwrap jail: it sees the checkout and its own
+  sign-in, nothing else in the home directory. Inside it may run commands and
+  tests and edit files to prove an exploit. Nothing is pushed back.
+- Codex runs `codex exec`, Gemini runs `agy` with `gemini-4-neon-high`. Add
+  `--effort xhigh` to either for the riskiest changes.
 - Both return one JSON object that follows `scripts/finding.schema.json`:
-  a verdict and findings with severity, status, file, line, failure and fix.
-- Use `--base <ref>` when the branch is not cut from `main`.
+  a verdict and findings with severity, status, file, line, failure and fix,
+  plus `model`, `sha` and `round`.
+- Use `--base <branch>` when the branch is not cut from `main`. The base
+  must be a branch on origin, not a tag.
 - If one leg fails, the script says why. Continue with the others and say so
   in the report.
 
@@ -63,8 +66,10 @@ List the Codex and Gemini findings side by side, sorted by file and line, so
 findings about the same spot sit next to each other:
 
 ```bash
-jq -s -r '[.[] | .model as $m | .findings[] | . + {model: $m}] | sort_by(.file, .line)[]
-  | "\(.file):\(.line)  \(.model)  \(.severity)  \(.title)"' /tmp/review-codex.json /tmp/review-gemini.json
+jq -s -r --arg sha "$(git rev-parse HEAD)" '
+  if all(.[]; .sha == $sha) then . else error("report from another commit") end
+  | [.[] | .model as $m | .findings[] | . + {model: $m}] | sort_by(.file, .line)[]
+  | "\(.file):\(.line)  \(.model)  \(.severity)  \(.status)  \(.title)"' "$D/codex.json" "$D/gemini.json"
 ```
 
 Add the reviewer's findings by hand. Merge findings that describe the same
