@@ -42,6 +42,8 @@ bash "$R" gemini --intent "$D/intent.md" --base main > "$D/gemini.json"
 - The reviewer runs in a bwrap jail: it sees the checkout and its own
   sign-in, nothing else in the home directory. Inside it may run commands and
   tests and edit files to prove an exploit. Nothing is pushed back.
+  Its writable trees are size-capped tmpfs (checkout 2 GiB), so a runaway test
+  cannot fill the sandbox disk.
 - Codex runs `codex exec`, Gemini runs `agy` with `gemini-4-neon-high`. Add
   `--effort xhigh` to either for the riskiest changes.
 - Both return one JSON object that follows `scripts/finding.schema.json`:
