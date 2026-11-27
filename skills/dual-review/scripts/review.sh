@@ -35,8 +35,9 @@ branch=$(git branch --show-current)
 [[ -n $branch ]] || die "detached HEAD; check out the branch under review"
 sha=$(git rev-parse HEAD)
 [[ -z $(git status --porcelain --untracked-files=no) ]] || die "uncommitted changes; the sandbox reviews only pushed commits"
-remote_sha=$(git ls-remote --exit-code origin "refs/heads/$branch" | cut -f1) \
-  || die "branch $branch is not on origin; push it first"
+# ls-remote matches by suffix, so keep only the exact ref.
+remote_sha=$(git ls-remote origin "refs/heads/$branch" | awk -v r="refs/heads/$branch" '$2 == r {print $1}')
+[[ -n $remote_sha ]] || die "branch $branch is not on origin; push it first"
 [[ $remote_sha == "$sha" ]] || die "origin has $branch at ${remote_sha:0:7}, HEAD is ${sha:0:7}; push first"
 
 # ssh joins its arguments into one string for the remote shell, so every
