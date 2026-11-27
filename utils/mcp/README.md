@@ -35,7 +35,6 @@ JSON-RPC channel. Tool logs must go to stderr.
 Only active agent-facing domains are exposed:
 
 - `gmaps`
-- `md2slide`
 - `pdf`
 - `utils` (`utils_capabilities` only, always registered)
 
@@ -45,7 +44,7 @@ the MCP surface.
 ## Naming Rules
 
 - Tool names are `domain_verb_object`, e.g. `pdf_info`,
-  `pdf_extract_text`, `md2slide_build`.
+  `pdf_extract_text`, `gmaps_get_list`.
 - One MCP tool should represent one agent intent. Do not expose generic
   `action` or `mode` multiplexers when the actions have different required
   inputs.
@@ -92,10 +91,9 @@ make macOS tools work anywhere else.
 
 ## Current Tool Surface
 
-13 tools total:
+11 tools total:
 
 - `gmaps_get_list`
-- `md2slide_init`, `md2slide_build`
 - `pdf_info`, `pdf_extract_text`, `pdf_extract_comments`, `pdf_compress`,
   `pdf_decrypt`, `pdf_merge`, `pdf_split`, `pdf_rotate`, `pdf_render`
 - `utils_capabilities`

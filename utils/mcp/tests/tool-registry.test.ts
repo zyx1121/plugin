@@ -18,8 +18,8 @@ describe("native tool registry", () => {
   test("exposes only the selected agent-toolbox domains", () => {
     const domains = new Set(allTools.map((tool) => tool.name.split("_")[0]));
 
-    expect([...domains].sort()).toEqual(["gmaps", "md2slide", "pdf", "utils"]);
-    expect(allTools).toHaveLength(13);
+    expect([...domains].sort()).toEqual(["gmaps", "pdf", "utils"]);
+    expect(allTools).toHaveLength(11);
   });
 
   test("tool names are unique and prefixed by their domain", () => {
@@ -27,7 +27,7 @@ describe("native tool registry", () => {
     expect(new Set(names).size).toBe(names.length);
 
     for (const name of names) {
-      expect(name).toMatch(/^(gmaps|md2slide|pdf|utils)_/);
+      expect(name).toMatch(/^(gmaps|pdf|utils)_/);
     }
   });
 });

@@ -15,7 +15,7 @@ The server lives in `mcp/` and uses `@modelcontextprotocol/sdk` directly. It
 exposes only active agent-facing domains:
 
 ```text
-gmaps md2slide pdf
+gmaps pdf
 ```
 
 Registration is host-aware: each domain declares what the machine must provide,
@@ -48,7 +48,9 @@ its private token migration before updating zyx; this toolbox had 45 tools at th
 macOS automation and Uber Eats moved to
 [`macos@zyx1121`](https://github.com/zyx1121/macos) and
 [`ubereats@zyx1121`](https://github.com/zyx1121/ubereats) in zyx 0.27.0.
-Install both before updating zyx. This toolbox now has 13 tools.
+Install both before updating zyx. This toolbox had 13 tools at that release.
+
+`md2slide` retired in zyx 0.59.0 (ADR-0026). This toolbox now has 11 tools.
 
 ## Tool contracts
 
