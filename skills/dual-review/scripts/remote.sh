@@ -10,6 +10,13 @@ main() {
   umask 077 # review dirs and copied sign-ins stay private to this user
   export PATH="$HOME/.local/bin:$PATH"
   die() { echo "remote.sh: $*" >&2; exit 2; }
+  # Codex reports a refused or failed turn on stdout as JSON, not on stderr.
+  codex_failed() {
+    local why
+    why=$(jq -r 'select(.type == "turn.failed" or .type == "error") | .error.message // .message // empty' \
+      "$state/events.jsonl" 2>/dev/null | tail -n 1 || true)
+    die "codex failed: ${why:-$(tail -c 2000 "$state/err")}"
+  }
   d() { printf '%s' "$1" | base64 -d; }
 
   [[ $# -eq 13 ]] || die "expected 13 arguments, got $#"
@@ -206,12 +213,12 @@ For each finding from your previous review, set status \"fixed\" or \"still_open
         --json --skip-git-repo-check)
       if [[ $round == 1 ]]; then
         jail "$HOME/.local/bin/codex" exec -C "$src" -s danger-full-access "${common[@]}" "$prompt" \
-          > "$state/events.jsonl" 2> "$state/err" || die "codex failed: $(tail -c 2000 "$state/err")"
+          > "$state/events.jsonl" 2> "$state/err" || codex_failed
       else
         local id; id=$(cat "$state/id" 2>/dev/null || true)
         [[ -n $id ]] || die "no round 1 session to resume"
         jail "$HOME/.local/bin/codex" exec resume -c sandbox_mode=danger-full-access "${common[@]}" "$id" "$prompt" \
-          > "$state/events.jsonl" 2> "$state/err" || die "codex failed: $(tail -c 2000 "$state/err")"
+          > "$state/events.jsonl" 2> "$state/err" || codex_failed
       fi
       # The report is the last agent message on stdout; nothing is read back
       # from a path the reviewer could write.
