@@ -49,7 +49,7 @@ Codex 只拿得到 skill：從 [zyx1121/marketplace](https://github.com/zyx1121/
 
 | 部分 | 內容 |
 |------|------|
-| [skills/](skills/) | `academic-sentence`、`alint`、`article`、`create-verify`、`dev-workflow`、`dual-review`、`human-voice`、`nextjs-dev`、`paper-revise`、`photo-realism`、`project-docs`、`simple-first`、`task-web`、`video`、`xiao-lin-shuo` |
+| [skills/](skills/) | `academic-sentence`、`alint`、`apple-app`、`article`、`create-verify`、`dev-workflow`、`dual-review`、`human-voice`、`nextjs-dev`、`paper-revise`、`photo-realism`、`project-docs`、`simple-first`、`task-web`、`video`、`xiao-lin-shuo` |
 | [agents/](agents/) | `planner`、`surveyor`、`reviewer`、`gemini`、`alint`、`utils-promoter` |
 | [utils/](utils/) | MCP 工具：`pdf_*`(9 個)、`gmaps_get_list`、`utils_capabilities` |
 | [decisions/](decisions/) | 每次合併、拆出與退役的 ADR |
