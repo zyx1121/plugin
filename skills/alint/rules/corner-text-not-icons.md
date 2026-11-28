@@ -12,12 +12,17 @@ right holds task actions as text links (Light, Dark), the bottom left holds
 Privacy and Terms, the bottom right holds the copyright. Flag a changed
 corner link that renders an icon (an `svg`, an icon component such as
 `Sun`, `Moon` or `Github`, or an icon-only button) instead of, or beside,
-its text. Icons in the centered content are fine.
+its text. Icons in the centered content are fine. The site mark at the top
+left (`ZyxMark`, the zyx.tw logo that links home) is the one allowed icon:
+it is the brand, not a link label, so never flag it.
 
 ## Bad
 
 `<a href="/privacy"><ShieldIcon /></a>` in the bottom-left corner
 
 ## Good
+
+`<a href="/" aria-label="Home"><ZyxMark /></a>` at the top left: the site
+mark
 
 `<a href="/privacy">Privacy</a>` in the bottom-left corner
